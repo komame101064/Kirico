@@ -893,6 +893,60 @@ details.formula ul{font-size:13px;color:var(--muted)}
 .toast{border-radius:12px;font-size:13.5px;background:var(--ink);color:var(--bg)}
 .toast button{color:var(--accent)}
 .foot{font-size:11.5px}
+/* ===== v4：文字と配置の微調整 ===== */
+:root{font-feature-settings:"tnum" 1,"cv11" 1,"ss01" 1}
+body{line-height:1.45}
+/* 小見出し：アイコンなし・控えめなラベル */
+.h{font-size:12px;font-weight:600;color:var(--faint);letter-spacing:.02em;margin:0 0 10px;gap:0}
+.h svg{display:none}
+.dcap{font-size:12px;font-weight:600;color:var(--faint);letter-spacing:.02em;gap:0;margin:0 0 6px}
+.dcap svg{display:none}
+details.formula summary>svg{font-size:15px}
+.phead span{font-size:12px;font-weight:600;color:var(--faint);letter-spacing:.02em}
+/* 記号：本文と同じ書体のグレー */
+.sym,.dro-k i,table.detail th .sym{font-family:var(--f-num);font-style:normal;font-size:11.5px;font-weight:500;color:var(--faint);letter-spacing:0;background:none;border:0;padding:0}
+/* 入力：数値と単位を横並び */
+.field{min-height:50px;padding:6px 0}
+.lab{gap:6px}
+.lab b{font-size:14px;font-weight:500;color:var(--ink)}
+.ctl{grid-template-columns:34px 116px 34px;height:38px;align-items:stretch}
+.ctl button{height:auto;width:34px}
+.ctl .mid{flex-direction:row;align-items:baseline;justify-content:center;gap:3px;line-height:1;padding-top:9px}
+.ctl input{width:60px;flex:none;text-align:right;font-size:16.5px;font-weight:600;padding:0}
+.ctl .u{font-size:11px;font-weight:500;color:var(--faint);text-align:left;min-width:0;max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:clip}
+@media (max-width:400px){.ctl{grid-template-columns:30px 112px 30px}.ctl input{width:56px;font-size:16px}}
+/* 結果：主役の数字を強く、補足は控えめに */
+.dro-cell{padding:13px 16px 14px}
+.dro-k{font-size:12px;font-weight:500;color:var(--muted);gap:5px;justify-content:flex-start}
+.dro-cell.lead .dro-k{color:var(--ink);font-weight:600}
+.dro-v{font-size:24px;font-weight:600;letter-spacing:-.025em;margin-top:6px;line-height:1}
+.dro-cell.lead .dro-v{font-size:34px;letter-spacing:-.035em}
+.dro-v small{font-size:12px;margin-left:4px;font-weight:500}
+.dro-s{font-size:11.5px;margin-top:7px}
+@media (max-width:700px){
+  .dro{padding:0 2px}
+  .dro-cell{padding:10px 14px;align-items:center}
+  .dro-v,.dro.c4 .dro-v{font-size:21px;line-height:1.1}
+  .dro-cell.lead .dro-v{font-size:28px}
+  .dro-s{margin-top:2px}
+}
+/* 表 */
+table.detail th{font-size:13.5px;color:var(--ink)}
+table.detail th small{margin-top:1px}
+table.detail td{font-size:16px}
+/* ゲージ */
+.gauge-head{margin-bottom:0}
+.gauge-sub{font-size:12px;margin:2px 0 16px}
+.gnote{font-size:13px}
+.gnote b{font-weight:600}
+/* 見出し（パソコン） */
+.vtitle h2{font-size:22px;font-weight:650;letter-spacing:-.025em}
+.vsub{font-size:13px}
+/* チップと上部 */
+.subnav button{font-size:13px;letter-spacing:-.005em}
+/* 結果バー */
+.dock-in span{font-size:10.5px;letter-spacing:0}
+.dock-in b{letter-spacing:-.025em}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1411,6 +1465,7 @@ function gaugeHTML(g){
   const pos=x=>Math.min(100,Math.max(0,x/g.max*100));
   if(!(g.v>0)){ g=Object.assign({},g,{st:"none",label:"未入力",v:0}); }
   const icon=g.st==="ok"?ICON.check:g.st==="none"?ICON.info:ICON.alert;
+  if(g.st==="none") return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill none">${icon}${g.label}</span></div><p class="gauge-sub" style="margin-bottom:0">${esc(g.sub)}</p>`;
   return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill ${g.st}">${icon}${g.label}</span></div>
     <p class="gauge-sub">${esc(g.sub)}</p>
     <div class="bar" role="img" aria-label="目安 ${g.lo}〜${g.hi} ${g.unit}、現在 ${fmt(g.v,1)} ${g.unit}">
