@@ -1,0 +1,18 @@
+{
+  "id": "./?app=kirico",
+  "name": "Kirico 加工計算と現場ノート",
+  "short_name": "Kirico",
+  "description": "加工条件・図面寸法・単位変換の計算と現場ノート",
+  "lang": "ja",
+  "start_url": "./?app=kirico",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f5f7",
+  "theme_color": "#f5f5f7",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
