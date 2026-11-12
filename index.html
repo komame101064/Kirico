@@ -287,8 +287,13 @@ details.formula li{overflow-wrap:anywhere}
 @media (max-width:959px){body.has-dock .dock{display:block}}
 
 /* ===== 電卓（iOS 電卓風） ===== */
-.cgrid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:20px;align-items:start}
-@media (max-width:1060px){.cgrid{grid-template-columns:minmax(0,1fr)}}
+.cgrid{display:flex;flex-direction:column;align-items:center;gap:28px}
+.cgrid>.calcbody{width:min(100%,420px)}
+.cgrid>.stack{width:100%;max-width:900px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+@media (max-width:760px){.cgrid>.stack{grid-template-columns:minmax(0,1fr)}}
+#view-calc .calcbody{display:flex;flex-direction:column;justify-content:flex-end;min-height:min(680px,calc(100vh - 120px))}
+#view-calc .screen{flex:1}
+@media (max-width:959px){#view-calc .calcbody{min-height:calc(100vh - var(--navh) - 150px - env(safe-area-inset-bottom,0px))}#view-calc{padding-top:2px}}
 .calcbody{background:var(--calc-dark);border-radius:28px;padding:18px 16px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
 .calcbody .hint{color:#8e8e93}
 .screen{color:#fff;padding:12px 10px 16px;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;gap:2px}
@@ -1145,7 +1150,6 @@ $("dock").addEventListener("click",e=>{ const b=e.target.closest("[data-save]");
 function calcView(){
   return `<section id="view-calc" hidden>
     ${subnav("calc")}
-    ${viewHead("calc","電卓","普通の計算に加えて、√・π・2乗、インチ換算、角度の度分秒換算ができます")}
     <div class="cgrid">
       <div class="calcbody">
         <div class="screen" aria-live="polite"><div class="expr" id="c-expr"></div><div class="res" id="c-res">0</div></div>
@@ -1156,10 +1160,9 @@ function calcView(){
           <button class="fn" data-k="π">π</button><button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="+">+</button>
           <button class="fn" data-k="%">%</button><button class="fn" data-k="NEG" aria-label="符号を反転">±</button><button data-k="0">0</button><button data-k=".">.</button><button class="eq" data-k="=">=</button>
         </div>
-        <p class="hint">キーボードでも入力できます（Enterで計算、Escで消去）。「2π」のように数字の後に π や括弧を続けると掛け算になります。</p>
       </div>
       <div class="stack">
-        <div class="card">${H2("history","計算履歴")}<ul class="hist" id="hist"></ul><p class="hint">結果を押すと呼び出し、${ICON.save.replace('class="i"','class="i" style="vertical-align:-3px"')} を押すと記録ノートに残せます。</p></div>
+        <div class="card">${H2("history","計算履歴")}<ul class="hist" id="hist"></ul></div>
         <div class="card">${H2("swap","インチ ⇄ ミリ")}
           <div class="conv"><div class="inbox"><input id="cv-in" type="number" inputmode="decimal" step="any" aria-label="インチ"><span class="u">inch</span></div>${ICON.swap}<div class="inbox"><input id="cv-mm" type="number" inputmode="decimal" step="any" aria-label="ミリ"><span class="u">mm</span></div></div>
         </div>
@@ -1174,7 +1177,7 @@ function calcView(){
             <tr data-ins="25.4" tabindex="0"><td class="jp">1 inch</td><td>25.4</td></tr>
             <tr data-ins="√2" tabindex="0"><td class="jp">√2（対角の係数）</td><td>1.41421356</td></tr>
             <tr data-ins="√3" tabindex="0"><td class="jp">√3（六角の対角係数）</td><td>1.73205081</td></tr>
-          </tbody></table></div><p class="hint">押すと電卓の式に入ります。</p>
+          </tbody></table></div>
         </div>
       </div>
     </div></section>`;
