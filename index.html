@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f5f5f7">
+<meta name="theme-color" content="#f8fafd">
 <meta name="description" content="加工条件（旋削・フライス・ドリル・タップ・研削）、図面寸法、単位変換の計算と現場ノートをまとめた製造現場向けツール">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,7 +15,7 @@
 <title>Kirico</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap">
 <style>
 /* Layout: Apple/Google 系のアプリ構成。淡いグレーの面に白いカード、細い区切り線、太い大見出し、単色アクセント（青）。
    左はサイドバー（iPadOS 風）、スマホは下部タブバー。電卓は iOS 電卓風の丸いキー。 */
@@ -542,6 +542,173 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 :root[data-theme="dark"] .navgroup button:hover{background:#ffffff12}
 :root[data-theme="dark"] .bnav{border-top-color:#ffffff1f}
 :root[data-theme="dark"] .dock{border-top-color:#ffffff1f}
+/* ===== 仕上げ：Google（Material）寄せのタイポグラフィと部品 ===== */
+:root{
+  --f-body:"Google Sans","Roboto","Noto Sans JP",system-ui,sans-serif;
+  --f-num:"Google Sans","Roboto","Noto Sans JP",system-ui,sans-serif;
+  --bg:#f8fafd; --surface:#ffffff; --sunken:#f0f4f9; --track:#e1e3e1; --fill:#e9eef6;
+  --ink:#1f1f1f; --muted:#444746; --faint:#747775; --line:#e1e3e1; --line-2:#c4c7c5;
+  --accent:#0b57d0; --accent-ink:#0b57d0; --accent-soft:#d3e3fd; --on-accent:#ffffff; --on-soft:#041e49; --hover:#1f1f1f0f;
+  --ok:#146c2e; --ok-soft:#c4eed0; --warn:#8c4a00; --warn-soft:#ffe0c2; --danger:#b3261e; --danger-soft:#f9dedc;
+  --shadow:none; --glass-side:#f8fafd; --glass-nav:#f0f4f9; --glass-dock:#ffffff; --r-card:16px;
+}
+:root[data-theme="dark"]{
+  --bg:#131314; --surface:#1e1f20; --sunken:#282a2c; --track:#444746; --fill:#333537;
+  --ink:#e3e3e3; --muted:#c4c7c5; --faint:#8e918f; --line:#333537; --line-2:#444746;
+  --accent:#a8c7fa; --accent-ink:#a8c7fa; --accent-soft:#004a77; --on-accent:#062e6f; --on-soft:#d3e3fd; --hover:#e3e3e314;
+  --ok:#6dd58c; --ok-soft:#0f5223; --warn:#ffb870; --warn-soft:#5a3200; --danger:#f2b8b5; --danger-soft:#601410;
+  --glass-side:#131314; --glass-nav:#1e1f20; --glass-dock:#1e1f20;
+}
+body{font-size:15px;letter-spacing:0;line-height:1.5}
+.main{padding-block:24px 48px}
+/* 見出し */
+.vhead{margin-bottom:20px;align-items:center;gap:12px}
+.vtitle{gap:12px}
+.key.xl{width:40px;height:40px;font-size:22px;border-radius:12px}
+.crumb{font-size:12px;font-weight:500;color:var(--faint);letter-spacing:.01em}
+.vtitle h2{font-size:24px;font-weight:500;letter-spacing:0;line-height:1.3}
+.vtitle p{font-size:13.5px;margin-top:2px;color:var(--muted)}
+.h{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:12px;letter-spacing:0}
+.h svg{font-size:18px}
+.hint{font-size:12.5px}
+/* ボタン（Material 3） */
+.btn{min-height:40px;padding:8px 20px;font-size:14px;font-weight:500;letter-spacing:.01em;border-radius:20px;background:var(--accent-soft);color:var(--on-soft)}
+.btn:hover{background:var(--accent-soft);filter:brightness(.97)}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{background:var(--accent);filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--accent-ink);filter:none}
+.btn.ghost:hover{background:var(--hover)}
+.btn.small{min-height:32px;padding:4px 14px;font-size:13px}
+.btn.danger{color:var(--danger)}
+.btn svg{font-size:18px}
+.iconbtn{color:var(--muted)}
+.iconbtn:hover{background:var(--hover)}
+/* カード */
+.card,.dro,.diagram,.entry,.gcard{box-shadow:none;border-radius:16px}
+.card{padding:18px}
+/* 入力 */
+label.sel,.flabel{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.01em}
+select{font-size:14px;min-height:40px;border-radius:8px;background:var(--surface);border:1px solid var(--line-2)}
+.tin,textarea{border-radius:8px;background:var(--surface);border:1px solid var(--line-2);font-size:14.5px}
+.tin:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.seg{background:transparent;border:1px solid var(--line-2);border-radius:20px;padding:0;gap:0;overflow:hidden;margin:16px 0 4px}
+.seg button{border-radius:0;min-height:36px;font-size:13.5px;font-weight:500;color:var(--ink)}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--on-soft);box-shadow:none;font-weight:500}
+.guide{font-size:13px;border-radius:12px}
+.field{padding:9px 0;border-bottom:1px solid var(--line)}
+.lab b{font-size:14px;font-weight:500}
+.sym{font-size:12px}
+.auto{font-size:11px;font-weight:500;color:var(--accent-ink)}
+.ctl{grid-template-columns:34px 94px 34px;border-radius:10px;background:var(--sunken);padding:2px}
+.ctl:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.ctl button{width:34px;height:36px;font-size:16px;color:var(--accent-ink);border-radius:8px}
+.ctl button:hover{background:var(--hover)}
+.ctl input{font-size:17px;font-weight:500;letter-spacing:0}
+.ctl .u{font-size:10.5px}
+.field.computed .ctl{background:var(--accent-soft)}
+.field.computed .ctl input{color:var(--on-soft)}
+/* 結果 */
+.dro-cell{padding:14px 16px 16px}
+.dro-k{font-size:12.5px;font-weight:500;color:var(--muted)}
+.dro-k i{font-size:13px}
+.dro-v{font-size:28px;font-weight:500;letter-spacing:-.01em;margin-top:6px}
+.dro-cell.lead .dro-v{font-size:36px;letter-spacing:-.015em}
+.dro-cell.lead .dro-k{color:var(--muted);font-weight:500}
+.dro-cell.calc .dro-v{color:var(--accent-ink)}
+.dro-v small{font-size:12.5px;font-weight:400}
+.dro-s{font-size:12px}
+.dro.c4 .dro-v,.dro.c4 .dro-cell.lead .dro-v{font-size:24px}
+@media (max-width:700px){.dro-v,.dro.c4 .dro-v{font-size:22px}.dro-cell.lead .dro-v{font-size:28px}.dro-cell{padding:11px 12px}}
+/* ゲージ */
+.gauge-sub{font-size:13px;margin-bottom:20px}
+.pill{font-size:12px;font-weight:500;padding:3px 10px}
+.bar{height:4px;margin-top:34px}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.bar .knob{width:20px;height:20px;margin:-10px 0 0 -10px}
+.bar .tag{font-size:12px;font-weight:500;bottom:16px}
+.gnote{font-size:13.5px}
+.gnote b{font-weight:500}
+/* 図・表 */
+.dcap{font-size:15px;font-weight:500}
+.diagram text{font-size:13.5px;font-weight:500}
+table.detail th{font-size:14px}
+table.detail th small{font-size:12px}
+table.detail td{font-size:17px;font-weight:500}
+table.detail td small{font-size:12px}
+table.ref{font-size:14px}
+details.formula ul{font-size:14px}
+/* 電卓 */
+.keys button{font-size:24px;font-weight:400}
+.keys .fn{font-size:18px;font-weight:500}
+.screen .res{font-weight:300}
+.hist .hb{font-size:14px}
+/* サイドメニュー（ナビゲーションドロワー） */
+.side{border-right:0;padding:16px 12px;gap:4px}
+.navgroup{gap:0}
+.navgroup h3{font-size:12.5px;font-weight:500;color:var(--muted);padding:14px 16px 6px;margin:0;letter-spacing:.01em}
+.navgroup button{min-height:44px;padding:0 16px;border-radius:22px;font-size:14px;font-weight:500;color:var(--muted);gap:12px}
+.navgroup button svg{font-size:20px}
+.navgroup button:hover{background:var(--hover)}
+.navgroup button[aria-current="page"]{background:var(--accent-soft);color:var(--on-soft);font-weight:600}
+.navgroup button[aria-current="page"]::before{display:none}
+.navgroup button[aria-current="page"] .badge{color:var(--on-soft)}
+.side-foot{font-size:11.5px}
+/* チップ（Material 3 フィルタチップ） */
+.subnav button,.gchips button,.tagbtn{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);box-shadow:none;background:transparent;color:var(--ink);font-size:13.5px;font-weight:500;gap:6px}
+.subnav button svg{font-size:17px}
+.subnav button[aria-current="page"],.gchips button[aria-pressed="true"]{background:var(--accent-soft);border-color:transparent;color:var(--on-soft)}
+.gchips button[aria-pressed="true"] small{color:inherit}
+.tagbtn[aria-pressed="true"]{border-color:transparent;box-shadow:none}
+/* スマホ上部・下部 */
+@media (max-width:959px){
+  :root{--navh:68px}
+  .mtop .mgear{background:transparent;box-shadow:none;color:var(--muted);width:40px;height:40px}
+  .msub .mtitle{font-size:22px;font-weight:500;letter-spacing:0}
+  .bnav{background:var(--glass-nav);border-top:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .bnav button{font-size:12px;font-weight:500;color:var(--muted);gap:4px}
+  .bnav button svg{font-size:22px;position:relative;z-index:1}
+  .bnav button::before{content:"";position:absolute;top:10px;left:50%;width:56px;height:30px;margin-left:-28px;border-radius:15px;background:transparent;transition:background .2s}
+  .bnav button[aria-current="page"]{color:var(--ink);font-weight:600}
+  .bnav button[aria-current="page"]::before{background:var(--accent-soft)}
+  .bnav button[aria-current="page"] svg{color:var(--on-soft)}
+  .bnav .badge{top:6px;left:calc(50% + 10px)}
+  .dock{background:var(--glass-dock);border-top:1px solid var(--line);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .dock-in b{font-size:17px;font-weight:500}
+}
+.dock-save{background:var(--accent);color:var(--on-accent);border-radius:16px}
+/* 単位・設定・記録・幾何公差 */
+.cats button{border-radius:10px;background:transparent;border:1px solid var(--line-2)}
+.cats button b{font-size:14px;font-weight:500}
+.cats button[aria-pressed="true"]{background:var(--accent-soft);color:var(--on-soft);border-color:transparent}
+.cats button[aria-pressed="true"] span{color:var(--on-soft)}
+.dro-mini b{font-size:32px;font-weight:500;color:var(--on-soft)}
+.inbox{border-radius:8px}
+.inbox.big input{font-size:28px;font-weight:500}
+.srow b{font-size:14.5px}
+.glabel{font-size:12.5px}
+.switch input:checked+i{background:var(--accent)}
+.switch input:checked+i::after{background:var(--on-accent)}
+.e-part{font-size:15.5px;font-weight:500}
+.e-cells b{font-size:16px;font-weight:500}
+.dayh{font-size:16px;font-weight:500;color:var(--muted)}
+.estate b{font-size:16px;font-weight:500}
+.hsec{font-size:18px;font-weight:500;margin:26px 0 10px}
+.gname b{font-size:16px;font-weight:500}
+.gname span{font-size:13px}
+.gwhat{font-size:14px}
+.gdl{font-size:13px}
+.gbox{width:46px;height:46px;font-size:28px;border-width:1.5px}
+.mbox{border-width:1.5px;font-size:17px}
+.flegend li::before,.fcf .fnum circle{background:var(--accent)}
+.flegend li::before{color:var(--on-accent)}
+.fcf .fnum text{fill:var(--on-accent)}
+.toast{background:#313033;color:#f2f2f2;border-radius:8px;font-weight:400;font-size:14px;padding:12px 16px}
+.toast button{color:#a8c7fa;font-weight:500}
+.toast svg{color:#6dd58c}
+.sheet{border-radius:28px}
+.sheet-h h3{font-size:22px;font-weight:400}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -949,7 +1116,7 @@ const routeName=r=> r==="gdt"?"幾何公差": r==="settings"?"設定": r==="unit
 
 function buildNav(){
   const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo").concat(["gdt"])],["notes",["notes"]]];
-  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
+  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${routeIcon(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
   const bn=[["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
   $("bnav").innerHTML=bn.map(([g,l,ic])=>`<button data-gogroup="${g}">${routeIcon(ic)}<span>${l}</span>${g==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("");
   document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(b.dataset.go,true);});
@@ -957,7 +1124,7 @@ function buildNav(){
 }
 function subnav(group){
   const list=group==="calc"?["calc","units"]:Object.keys(TOOLS).filter(k=>TOOLS[k].group===group).concat(group==="geo"?["gdt"]:[]);
-  return `<nav class="subnav" aria-label="${GROUPS[group]}">${list.map(k=>`<button data-go="${k}">${KEY(k)}${routeName(k)}</button>`).join("")}</nav>`;
+  return `<nav class="subnav" aria-label="${GROUPS[group]}">${list.map(k=>`<button data-go="${k}">${routeIcon(k)}${routeName(k)}</button>`).join("")}</nav>`;
 }
 function go(route,push){
   if(!ROUTES.includes(route)) route="calc";
@@ -1650,7 +1817,7 @@ const mqDark=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
 function applyTheme(){
   const dark=PREF.theme==="dark"||(PREF.theme==="auto"&&mqDark&&mqDark.matches);
   document.documentElement.setAttribute("data-theme",dark?"dark":"light");
-  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content",dark?"#000000":"#f5f5f7");
+  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content",dark?"#131314":"#f8fafd");
 }
 if(mqDark&&mqDark.addEventListener) mqDark.addEventListener("change",()=>{ if(PREF.theme==="auto") applyTheme(); });
 applyTheme();
