@@ -291,9 +291,7 @@ details.formula li{overflow-wrap:anywhere}
 .cgrid>.calcbody{width:min(100%,420px)}
 .cgrid>.stack{width:100%;max-width:900px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
 @media (max-width:760px){.cgrid>.stack{grid-template-columns:minmax(0,1fr)}}
-#view-calc .calcbody{display:flex;flex-direction:column;justify-content:flex-end;min-height:min(680px,calc(100vh - 120px))}
-#view-calc .screen{flex:1}
-@media (max-width:959px){#view-calc .calcbody{min-height:calc(100vh - var(--navh) - 150px - env(safe-area-inset-bottom,0px))}#view-calc{padding-top:2px}}
+#view-calc .screen{min-height:110px;padding:6px 10px 14px}
 .calcbody{background:var(--calc-dark);border-radius:28px;padding:18px 16px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
 .calcbody .hint{color:#8e8e93}
 .screen{color:#fff;padding:12px 10px 16px;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;gap:2px}
