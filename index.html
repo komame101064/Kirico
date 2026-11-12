@@ -176,6 +176,7 @@ select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-
 .dro.err b{color:var(--danger)}
 .dro.blank{background:var(--surface);box-shadow:var(--shadow);color:var(--muted)}
 .dro.blank b{color:var(--ink)}
+.wheelpick .tagbtn{font-variant-numeric:tabular-nums;min-width:48px;justify-content:center}
 .pill.none{background:var(--fill);color:var(--muted)}
 .dot.none{background:#c7c7cc}
 @media (max-width:700px){
@@ -542,13 +543,13 @@ const MATS={
 };
 const PROCF={turn:{carb:1,hss:1},mill:{carb:.85,hss:.9},drill:{carb:.55,hss:.8}};
 const MSIZES=[[3,.5],[4,.7],[5,.8],[6,1],[8,1.25],[10,1.5],[12,1.75],[14,2],[16,2],[18,2.5],[20,2.5],[22,2.5],[24,3]];
-const WHEELS=[33,45,60,80];
+const WHEELS=[33,45,60,63,80,100,120];
 const TAGS=[["試し加工","tg-try"],["量産","tg-mass"],["要確認","tg-check"],["不具合","tg-bad"],["良好","tg-good"]];
 const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
 
 /* ================= 状態 ================= */
 const DEF={
-  route:"turn", mat:"s45c", tool:"carb", wheel:33, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
+  route:"turn", mat:"s45c", tool:"carb", wheel:0, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
   t:{
     turn:{mode:"n",D:0,vc:0,n:0,f:0,ap:0,L:0,r:0},
     mill:{mode:"n",D:0,z:0,vc:0,n:0,fz:0,ap:0,ae:0,L:0},
@@ -637,18 +638,18 @@ const TOOLS={
       ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dw","工作物径","Dw","mm",1],["Vw","工作物周速","Vw","m/min",1],["B","砥石幅","B","mm",5],["k","トラバース比","k","×B",.05],["a","切込み（1パス・半径）","a","mm",.005],["Z","取り代（直径）","Z","mm",.05],["L","研削長さ","L","mm",5]]
       : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","Sf","mm/往復",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン（片側）","ov","mm",5],["as","切込み（1パス）","a","mm",.005],["Zs","取り代","Z","mm",.05]],
     compute(s){
-      const Vs=PI*s.Ds*s.Ns/60000, R=S.wheel, nmax=R*60000/(PI*s.Ds);
-      const st=Vs>R?"danger":Vs<R*.6?"lo":"ok";
-      const gauge={title:"砥石周速度の確認",sub:"最高使用周速度 "+R+" m/s の砥石",v:Vs,lo:Math.round(R*.7),hi:R,max:Math.max(R*1.35,Vs*1.08),unit:"m/s",limit:R,st,
-        label:{ok:"使用範囲内",lo:"周速が低め",danger:"最高使用周速度を超えています"}[st],note:["この砥石径での上限回転数",fmt(nmax,0)+" min⁻¹"]};
+      const Vs=PI*s.Ds*s.Ns/60000, R=S.wheel, nmax=R>0?R*60000/(PI*s.Ds):NaN, lim=R>0?"上限 <b>"+R+"</b> m/s":"上限は未入力";
+      const st=!(R>0)?"none":Vs>R?"danger":Vs<R*.6?"lo":"ok";
+      const gauge={title:"砥石周速度の確認",sub:R>0?"最高使用周速度 "+R+" m/s の砥石":"砥石の最高使用周速度を入れると、周速を確認できます",v:Vs,lo:Math.round(R*.7),hi:R,max:Math.max(R*1.35,Vs*1.08),unit:"m/s",limit:R,st,
+        label:{none:"最高使用周速度が未入力",ok:"使用範囲内",lo:"周速が低め",danger:"最高使用周速度を超えています"}[st],note:["この砥石径での上限回転数",fmt(nmax,0)+" min⁻¹"]};
       if(s.variant==="cyl"){
         const nw=1000*s.Vw/(PI*s.Dw), fa=s.k*s.B, vf=fa*nw, q=Vs*60/s.Vw, passes=Math.ceil((s.Z/2)/s.a-1e-9), T=passes*s.L/vf, t=fmtTime(T);
-        return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:"上限 <b>"+R+"</b> m/s",lead:1},{k:"工作物回転数",sym:"nw",v:fmt(nw,0),u:"min⁻¹"},{k:"トラバース速度",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転あたり <b>"+fmt(fa,1)+"</b> mm"}],
+        return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:lim,lead:1},{k:"工作物回転数",sym:"nw",v:fmt(nw,0),u:"min⁻¹"},{k:"トラバース速度",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転あたり <b>"+fmt(fa,1)+"</b> mm"}],
           rows:[["パス数","—",isFinite(passes)?String(passes):"—","回","取り代の半分 ÷ 切込み"],["研削時間（スパークアウト除く）","T",t[0],t[1]],["速度比","q",fmt(q,0),"","Vs×60 ÷ Vw（円筒研削は60〜100が目安）"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
           gauge,labels:{Ds:"砥石 Ø"+fmt(s.Ds,0),Ns:"Ns "+fmt(s.Ns,0),Dw:"Ø"+fmt(s.Dw,1),Vw:"nw "+fmt(nw,0),vf:"Vf "+fmt(vf,0)+" mm/min",B:"B "+fmt(s.B,0)}};
       }
       const strokes=Math.ceil(s.W/s.cf-1e-9), tp=strokes*(s.Ls+2*s.ov)/(s.Vt*1000), passes=Math.ceil(s.Zs/s.as-1e-9), T=passes*tp, t=fmtTime(T), q=Vs*60/s.Vt;
-      return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:"上限 <b>"+R+"</b> m/s",lead:1},{k:"パス数",sym:"—",v:isFinite(passes)?String(passes):"—",u:"回",s:"取り代 ÷ 切込み"},{k:"研削時間",sym:"T",v:t[0],u:t[1],s:"スパークアウト除く"}],
+      return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:lim,lead:1},{k:"パス数",sym:"—",v:isFinite(passes)?String(passes):"—",u:"回",s:"取り代 ÷ 切込み"},{k:"研削時間",sym:"T",v:t[0],u:t[1],s:"スパークアウト除く"}],
         rows:[["1パスの時間","",...fmtTime(tp)],["1パスの往復数","",isFinite(strokes)?String(strokes):"—","往復","研削幅 ÷ クロス送り"],["速度比","q",fmt(q,0),"","Vs×60 ÷ テーブル速度"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
         gauge,labels:{Ds:"砥石 Ø"+fmt(s.Ds,0),Ns:"Ns "+fmt(s.Ns,0),Vt:"Vt "+fmt(s.Vt,0)+" m/min",cf:"クロス "+fmt(s.cf,1),W:"W "+fmt(s.W,0),as:"a "+fmt(s.as,3)}};
     },
@@ -890,7 +891,8 @@ function buildPanel(id){
   let sel="";
   if(T.selects==="matTool") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">工具材質${selbox(`<select data-role="tool"><option value="carb">超硬</option><option value="hss">ハイス（HSS）</option></select>`)}</label></div>`;
   if(T.selects==="matTap") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">ねじサイズ（並目）${selbox(`<select data-role="msize"><option value="">手入力</option>${MSIZES.map(([d,p])=>`<option value="${d}|${p}">M${d} × ${p}</option>`).join("")}</select>`)}</label></div>`;
-  if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度${selbox(`<select data-role="wheel">${WHEELS.map(w=>`<option value="${w}">${w} m/s</option>`).join("")}</select>`)}</label>`;
+  if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度（砥石のラベルに表示）<div class="inbox"><input data-role="wheel" type="number" inputmode="decimal" step="any" min="0" aria-label="砥石の最高使用周速度（m/s）"><span class="u">m/s</span></div></label>
+    <div class="tags wheelpick" style="margin-top:8px">${WHEELS.map(w=>`<button type="button" class="tagbtn tg-try" data-wheel="${w}" aria-pressed="false">${w}</button>`).join("")}</div>`;
   const segKey=T.segKey||"mode";
   const seg=T.seg?`<div class="seg" role="group" aria-label="計算の種類">${T.seg.map(([v,l,ic])=>`<button type="button" data-seg="${v}" aria-pressed="${s[segKey]===v}">${ICON[ic]}${l}</button>`).join("")}</div>`:"";
   const guide=T.guide?`<div class="guide">${ICON.info}<span>${T.guide}</span></div>`:"";
@@ -921,7 +923,8 @@ function syncPanel(id,auto){
   });
   const m=p.querySelector('[data-role="mat"]'); if(m) m.value=S.mat;
   const t=p.querySelector('[data-role="tool"]'); if(t) t.value=S.tool;
-  const w=p.querySelector('[data-role="wheel"]'); if(w) w.value=S.wheel;
+  const w=p.querySelector('[data-role="wheel"]'); if(w&&document.activeElement!==w) w.value=S.wheel;
+  p.querySelectorAll("[data-wheel]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.wheel===+S.wheel)));
   const ms=p.querySelector('[data-role="msize"]'); if(ms){ const v=s.D+"|"+s.P; ms.value=[...ms.options].some(o=>o.value===v)?v:""; }
 }
 function droHTML(r){
@@ -965,7 +968,9 @@ function renderAll(){ Object.keys(TOOLS).forEach(renderTool); }
 function bindTool(id){
   const v=$("view-"+id), T=TOOLS[id];
   v.addEventListener("input",e=>{
-    const t=e.target; if(t.tagName!=="INPUT"||!t.dataset.fid) return;
+    const t=e.target;
+    if(t.dataset.role==="wheel"){ const x=parseFloat(t.value); S.wheel=isFinite(x)&&x>0?x:0; renderTool("grind"); return; }
+    if(t.tagName!=="INPUT"||!t.dataset.fid) return;
     const fid=t.dataset.fid, def=fieldDef(id,fid), o=(def&&def[5])||{}; let x=parseFloat(t.value);
     if(!isFinite(x)) return; if(x<0&&!o.neg) return;
     if(o.int) x=Math.round(x);
@@ -975,11 +980,12 @@ function bindTool(id){
     const t=e.target, role=t.dataset.role;
     if(role==="mat"){ S.mat=t.value; ["turn","mill","drill","tap"].forEach(renderTool); }
     else if(role==="tool"){ S.tool=t.value; ["turn","mill","drill"].forEach(renderTool); }
-    else if(role==="wheel"){ S.wheel=+t.value; renderTool("grind"); }
+    else if(role==="wheel"){ renderTool("grind"); }
     else if(role==="msize"&&t.value){ const [d,p]=t.value.split("|").map(Number); S.t.tap.D=d; S.t.tap.P=p; renderTool("tap"); }
     else if(t.dataset.fid) renderTool(id);
   });
   v.addEventListener("click",e=>{
+    const wb=e.target.closest("button[data-wheel]"); if(wb){ S.wheel=+wb.dataset.wheel; renderTool("grind"); return; }
     const sb=e.target.closest("button[data-step]");
     if(sb){ const fid=sb.closest(".field").querySelector("input").dataset.fid, def=fieldDef(id,fid), o=def[5]||{}, st=parseFloat(sb.dataset.step);
       let x=+((+S.t[id][fid]||0)+st).toFixed(Math.max(dec(Math.abs(st)),4));
@@ -1196,7 +1202,7 @@ function recordFromTool(id){
   const plain=h=>String(h||"").replace(/<[^>]+>/g,"");
   const ctx={}; if(T.selects==="matTool"){ ctx.mat=S.mat; ctx.tool=S.tool; } if(T.selects==="matTap") ctx.mat=S.mat; if(T.selects==="wheel") ctx.wheel=S.wheel;
   let title=T.name; const segv=T.seg?(T.seg.find(x=>x[0]===s[T.segKey||"mode"])||[])[1]:""; if(id==="grind") title=segv;
-  const cond=[]; if(ctx.mat) cond.push(MATS[ctx.mat].name); if(ctx.tool) cond.push(ctx.tool==="carb"?"超硬":"ハイス"); if(ctx.wheel) cond.push("砥石 "+ctx.wheel+" m/s");
+  const cond=[]; if(ctx.mat) cond.push(MATS[ctx.mat].name); if(ctx.tool) cond.push(ctx.tool==="carb"?"超硬":"ハイス"); if(T.selects==="wheel") cond.push(ctx.wheel>0?"砥石 最高 "+ctx.wheel+" m/s":"砥石 最高周速 未入力");
   const fieldsText=T.fields(s).map(([fid,lab,sym,u])=>[lab,fmt(+s[fid],Math.abs(s[fid])>=100?1:3).replace(/\.?0+$/,""),u]);
   return {kind:id,title,cond:cond.join("・"),
     cells:r.err?[["エラー",r.err,""]]:r.cells.map(c=>[c.k,plain(c.v),c.u||""]),
