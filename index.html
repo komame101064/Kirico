@@ -15,7 +15,7 @@
 <title>Kirico</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
 <style>
 /* Layout: Apple/Google 系のアプリ構成。淡いグレーの面に白いカード、細い区切り線、太い大見出し、単色アクセント（青）。
    左はサイドバー（iPadOS 風）、スマホは下部タブバー。電卓は iOS 電卓風の丸いキー。 */
@@ -709,6 +709,190 @@ details.formula ul{font-size:14px}
 .toast svg{color:#6dd58c}
 .sheet{border-radius:28px}
 .sheet-h h3{font-size:22px;font-weight:400}
+/* ===== v3：無駄のない最小構成（モノクロ＋1色） ===== */
+:root{
+  --f-body:"Inter","Noto Sans JP",system-ui,-apple-system,sans-serif;
+  --f-num:"Inter","Noto Sans JP",system-ui,-apple-system,sans-serif;
+  --bg:#f6f6f7; --surface:#ffffff; --sunken:#f1f1f3; --track:#e6e6e9; --fill:#ececef;
+  --ink:#0b0b0c; --muted:#5d5d66; --faint:#8b8b94; --line:#ececef; --line-2:#dcdce1;
+  --accent:#2563eb; --accent-ink:#1d4ed8; --accent-soft:#eef3ff; --on-accent:#ffffff; --on-soft:#1d4ed8; --hover:#0b0b0c0a;
+  --ok:#15803d; --ok-soft:#e8f7ee; --warn:#b45309; --warn-soft:#fdf1e2; --danger:#dc2626; --danger-soft:#fdecec;
+  --glass-side:#f6f6f7; --glass-nav:#ffffffe6; --glass-dock:#0b0b0c; --r-card:14px;
+}
+:root[data-theme="dark"]{
+  --bg:#0b0b0c; --surface:#161618; --sunken:#1f1f22; --track:#2a2a2e; --fill:#222226;
+  --ink:#f4f4f5; --muted:#a1a1aa; --faint:#71717a; --line:#232327; --line-2:#2f2f35;
+  --accent:#60a5fa; --accent-ink:#93c5fd; --accent-soft:#16233f; --on-accent:#0b0b0c; --on-soft:#bfdbfe; --hover:#ffffff0d;
+  --ok:#4ade80; --ok-soft:#0f2a1a; --warn:#fbbf24; --warn-soft:#2d2109; --danger:#f87171; --danger-soft:#2c1212;
+  --glass-side:#0b0b0c; --glass-nav:#161618e6; --glass-dock:#f4f4f5;
+}
+body{font-size:14.5px;letter-spacing:-.005em;font-feature-settings:"cv11","ss01"}
+.main{padding-block:20px 48px}
+.main-in{max-width:1080px}
+/* 見出し：1行・小さく */
+.vhead{margin:0 0 14px;align-items:center;gap:10px;flex-wrap:nowrap}
+.vtitle{gap:8px;align-items:baseline}
+.vtitle h2{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.vsub{font-size:13px;color:var(--faint);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vhead .actions{flex:none;gap:6px}
+@media (max-width:959px){.vhead.tool{display:none}}
+/* ボタン */
+.btn{min-height:36px;padding:6px 14px;font-size:13.5px;font-weight:600;border-radius:10px;background:var(--fill);color:var(--ink);letter-spacing:-.005em}
+.btn:hover{background:var(--track);filter:none}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.primary:hover{background:var(--ink);opacity:.88}
+.btn.ghost{background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--hover);color:var(--ink)}
+.btn.small{min-height:30px;padding:3px 11px;font-size:12.5px;border-radius:8px}
+.btn.danger{color:var(--danger)}
+.btn svg{font-size:16px}
+.iconbtn{width:34px;height:34px;font-size:18px;border-radius:9px;color:var(--muted)}
+.iconbtn:hover{background:var(--hover);color:var(--ink)}
+/* カード */
+.card,.dro,.diagram,.entry,.gcard{border-radius:var(--r-card);box-shadow:none;border:1px solid var(--line)}
+.card{padding:14px 16px}
+.stack{gap:12px}
+.tgrid{gap:12px;grid-template-columns:minmax(0,360px) minmax(0,1fr)}
+@media (max-width:1060px){.tgrid{grid-template-columns:minmax(0,1fr)}}
+.h{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:10px;letter-spacing:0}
+.h svg{font-size:15px;color:var(--faint)}
+/* 入力パネル */
+.phead{display:flex;justify-content:space-between;align-items:center;margin:-4px -6px 8px 0}
+.phead span{font-size:13px;font-weight:600;color:var(--muted)}
+.row2{gap:8px}
+label.sel{font-size:11.5px;font-weight:500;color:var(--faint);gap:4px}
+select{min-height:36px;font-size:13.5px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);padding:7px 30px 7px 10px}
+.seg{background:var(--fill);border:0;border-radius:9px;padding:2px;gap:2px;margin:12px 0 4px}
+.seg button{border-radius:7px;min-height:30px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.seg button+button{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.04)}
+.guide{font-size:12.5px;padding:9px 11px;margin:10px 0 2px;background:var(--fill);color:var(--muted)}
+.guide svg{color:var(--muted)}
+.field{grid-template-columns:minmax(0,1fr) auto;padding:5px 0;border-bottom:1px solid var(--line);gap:10px;min-height:48px}
+.lab{flex-direction:row;align-items:baseline;gap:6px;flex-wrap:wrap}
+.lab b{font-size:13.5px;font-weight:500}
+.lab>span{gap:5px}
+.sym{font-size:11.5px;color:var(--faint)}
+.auto{font-size:10.5px;font-weight:600;color:var(--accent-ink);background:none;padding:0}
+.ctl{grid-template-columns:32px 88px 32px;border-radius:9px;background:var(--sunken);padding:1px}
+.ctl button{width:32px;height:34px;font-size:15px;color:var(--muted);border-radius:8px}
+.ctl button:hover{background:var(--hover);color:var(--ink)}
+.ctl input{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.ctl .u{font-size:10px;color:var(--faint)}
+.ctl:focus-within{box-shadow:0 0 0 1.5px var(--ink)}
+.field.computed .ctl{background:var(--accent-soft)}
+.field.computed .ctl input{color:var(--accent-ink)}
+/* 結果 */
+.dro{padding:2px}
+.dro-cell{padding:12px 14px 13px}
+.dro-cell+.dro-cell::before{top:14px;bottom:14px;background:var(--line)}
+.dro-k{font-size:11.5px;font-weight:500;color:var(--faint)}
+.dro-k i{font-size:12px;color:var(--faint)}
+.dro-v{font-size:24px;font-weight:600;letter-spacing:-.025em;margin-top:4px}
+.dro-cell.lead .dro-v{font-size:32px;letter-spacing:-.03em}
+.dro-cell.lead .dro-k{color:var(--faint)}
+.dro-v small{font-size:11.5px;font-weight:500;color:var(--faint);letter-spacing:0}
+.dro-s{font-size:11.5px;color:var(--faint);margin-top:3px}
+.dro-s b{font-weight:600;color:var(--muted)}
+.dro.c4 .dro-v,.dro.c4 .dro-cell.lead .dro-v{font-size:21px}
+.dro.err.blank{background:var(--surface);font-size:13px;padding:16px}
+@media (max-width:700px){.dro-cell{padding:10px 12px}.dro-v,.dro.c4 .dro-v{font-size:20px}.dro-cell.lead .dro-v{font-size:26px}.dro-cell+.dro-cell::before{left:12px;right:12px}}
+/* ゲージ */
+.gauge-head .h{margin:0}
+.gauge-sub{font-size:12px;color:var(--faint);margin:2px 0 18px}
+.pill{font-size:11.5px;font-weight:600;padding:2px 9px}
+.bar{height:4px;margin:30px 10px 0}
+.bar .band{opacity:.9}
+.bar .knob{width:16px;height:16px;margin:-8px 0 0 -8px;box-shadow:0 0 0 .5px rgba(0,0,0,.1),0 2px 6px rgba(0,0,0,.18)}
+.bar .tag{font-size:11.5px;font-weight:600;bottom:14px;border-radius:6px;padding:1px 6px}
+.scale{font-size:11px}
+.gnote{font-size:12.5px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.gnote span{color:var(--faint)}
+/* 図・表 */
+.diagram{padding:12px 14px}
+.dcap{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.dcap svg{color:var(--faint);font-size:15px}
+.diagram>svg{max-width:460px}
+.diagram text{font-size:13px;font-weight:500}
+table.detail th,table.detail td{padding:9px 0;border-bottom:1px solid var(--line)}
+table.detail th{font-size:13.5px;font-weight:400}
+table.detail th small{font-size:11.5px;color:var(--faint)}
+table.detail td{font-size:16px;font-weight:600;letter-spacing:-.015em}
+table.detail td small{font-size:11px;color:var(--faint)}
+table.ref{font-size:13.5px}
+table.ref th,table.ref td{padding:8px;border-bottom:1px solid var(--line)}
+details.formula ul{font-size:13px;color:var(--muted)}
+.hint{font-size:12px;color:var(--faint)}
+/* サイドメニュー */
+.side{padding:18px 10px;background:var(--bg);border-right:1px solid var(--line)}
+.navgroup h3{font-size:11px;font-weight:600;color:var(--faint);padding:14px 12px 4px;letter-spacing:.04em}
+.navgroup button{min-height:34px;padding:0 12px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--muted);gap:10px}
+.navgroup button svg{font-size:17px}
+.navgroup button:hover{background:var(--hover);color:var(--ink)}
+.navgroup button[aria-current="page"]{background:var(--fill);color:var(--ink);font-weight:600}
+.navgroup button[aria-current="page"] .badge{color:var(--muted)}
+/* チップ */
+.subnav button,.gchips button,.tagbtn{height:30px;padding:0 11px;border-radius:99px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);font-size:13px;font-weight:500;gap:5px}
+.subnav button svg{font-size:15px}
+.subnav button[aria-current="page"],.gchips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.tagbtn[aria-pressed="true"]{border-color:transparent}
+/* スマホ：上部・結果バー・タブ */
+@media (max-width:959px){
+  :root{--navh:58px}
+  .main{padding-bottom:calc(var(--navh) + 24px + env(safe-area-inset-bottom,0px))}
+  body.has-dock .main{padding-bottom:calc(var(--navh) + 92px + env(safe-area-inset-bottom,0px))}
+  .mtop{padding-block:10px 10px}
+  .mtop .mgear{width:34px;height:34px;font-size:19px;color:var(--muted)}
+  .msub .mtitle{font-size:20px;font-weight:600;letter-spacing:-.02em}
+  .bnav{background:var(--glass-nav);-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);border-top:1px solid var(--line)}
+  .bnav button{font-size:10.5px;font-weight:500;color:var(--faint);gap:3px}
+  .bnav button svg{font-size:21px}
+  .bnav button::before{top:7px;width:48px;height:28px;margin-left:-24px;border-radius:14px}
+  .bnav button[aria-current="page"]{color:var(--ink);font-weight:600}
+  .bnav button[aria-current="page"]::before{background:var(--fill)}
+  .bnav button[aria-current="page"] svg{color:var(--ink)}
+  .dock{left:10px;right:10px;bottom:calc(var(--navh) + 8px + env(safe-area-inset-bottom,0px));border-radius:16px;background:var(--glass-dock);color:var(--bg);border:0;padding:8px 8px 8px 14px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  .dock-in span{color:color-mix(in srgb,var(--bg) 60%,transparent);font-size:10.5px}
+  .dock-in b{font-size:17px;font-weight:600;letter-spacing:-.02em}
+  .dock-in b small{color:color-mix(in srgb,var(--bg) 55%,transparent);font-size:10px}
+  .dock-save{width:40px;height:40px;border-radius:11px;background:var(--bg);color:var(--ink);font-size:19px}
+}
+/* 電卓 */
+.calcbody{border-radius:24px;padding:14px 14px 14px;box-shadow:none}
+.keys{gap:9px}
+.keys button{font-size:23px;font-weight:400}
+.keys .fn{font-size:17px}
+.cgrid{gap:14px}
+.cgrid>.stack{gap:12px}
+/* そのほか */
+.cats button{border-radius:9px;border:1px solid var(--line-2);padding:7px 10px;background:var(--surface)}
+.cats button b{font-size:13px;font-weight:600}
+.cats button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.cats button[aria-pressed="true"] span{color:var(--bg);opacity:.7}
+.dro-mini{background:var(--sunken)}
+.dro-mini b{font-size:28px;font-weight:600;color:var(--accent-ink);letter-spacing:-.02em}
+.inbox.big input{font-size:24px;font-weight:600}
+.srow{min-height:48px;padding:10px 14px}
+.srow b{font-size:13.5px}
+.srow small{font-size:12px;color:var(--faint)}
+.switch input:checked+i{background:var(--ink)}
+.switch input:checked+i::after{background:var(--bg)}
+.entry{padding:12px 14px}
+.e-cells{background:var(--sunken);border-radius:10px;padding:8px 12px}
+.e-cells b{font-size:15px;font-weight:600}
+.e-memo{font-size:14px}
+.dayh{font-size:13px;font-weight:600;color:var(--faint)}
+.hsec{font-size:15px;font-weight:600;margin:22px 0 10px}
+.hsec small{font-size:12px}
+.gcard{padding:13px 14px}
+.gname b{font-size:15px;font-weight:600}
+.gname span{font-size:12px;color:var(--accent-ink)}
+.gwhat{font-size:13.5px}
+.gdl{font-size:12.5px;border-top:1px solid var(--line)}
+.gbox{width:42px;height:42px;font-size:26px}
+.toast{border-radius:12px;font-size:13.5px;background:var(--ink);color:var(--bg)}
+.toast button{color:var(--accent)}
+.foot{font-size:11.5px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1116,7 +1300,7 @@ const routeName=r=> r==="gdt"?"幾何公差": r==="settings"?"設定": r==="unit
 
 function buildNav(){
   const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo").concat(["gdt"])],["notes",["notes"]]];
-  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${routeIcon(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
+  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${routeIcon(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${ICON.gear}<span>設定</span></button></div>`;
   const bn=[["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
   $("bnav").innerHTML=bn.map(([g,l,ic])=>`<button data-gogroup="${g}">${routeIcon(ic)}<span>${l}</span>${g==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("");
   document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(b.dataset.go,true);});
@@ -1151,8 +1335,9 @@ const matOptions=()=>Object.entries(MATS).map(([k,m])=>`<option value="${k}">${e
 const H2=(icon,text)=>`<h2 class="h">${ICON[icon]}${text}</h2>`;
 const VSUB={turn:"外径",mill:"エンドミル・正面フライス",drill:"穴あけ",tap:"メートルねじ",grind:"円筒・平面",pcd:"ピッチ円上の穴位置"};
 function viewHead(r,title,desc){
-  return `<header class="vhead"><div class="vtitle">${KEY(r,"xl")}<div class="vtext"><div class="crumb">${GROUPS[groupOf(r)]}${VSUB[r]?` · ${VSUB[r]}`:""}</div><h2>${title}</h2><p>${desc}</p></div></div>
-    ${r!=="notes"&&r!=="calc"&&r!=="units"&&r!=="gdt"?`<div class="actions"><button class="btn ghost" data-reset="${r}">${ICON.reset}初期値に戻す</button><button class="btn primary" data-save="${r}">${ICON.save}この計算を記録</button></div>`:""}</header>`;
+  const tool=!!TOOLS[r];
+  return `<header class="vhead${tool?" tool":""}"><div class="vtitle"><h2>${title}</h2>${VSUB[r]?`<span class="vsub">${VSUB[r]}</span>`:""}</div>
+    ${tool?`<div class="actions"><button class="btn primary" data-save="${r}">${ICON.save}記録</button></div>`:""}</header>`;
 }
 function toolView(id){
   const T=TOOLS[id];
@@ -1193,7 +1378,8 @@ function buildPanel(id){
         <div class="mid"><input data-fid="${fid}" type="number" inputmode="decimal" step="any" aria-label="${lab}（${u}）"><span class="u">${u}</span></div>
         <button type="button" data-step="${st}" aria-label="${lab}を${st}増やす">${ICON.plus}</button>
       </div></div>`).join("");
-  $("panel-"+id).innerHTML=`${sel}${seg}${guide}<div>${fields}</div>`;
+  const phead=`<div class="phead"><span>条件</span><button type="button" class="iconbtn" data-reset="${id}" aria-label="初期値に戻す" title="初期値に戻す">${ICON.reset}</button></div>`;
+  $("panel-"+id).innerHTML=`${phead}${sel}${seg}${guide}<div>${fields}</div>`;
   if(DIAG[id]) $("dg-"+id).innerHTML=DIAG[id];
   if(id==="grind") $("dg-"+id).innerHTML=DIAG["grind_"+s.variant];
 }
