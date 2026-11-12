@@ -176,7 +176,6 @@ select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-
 .dro.err b{color:var(--danger)}
 .dro.blank{background:var(--surface);box-shadow:var(--shadow);color:var(--muted)}
 .dro.blank b{color:var(--ink)}
-.wheelpick .tagbtn{font-variant-numeric:tabular-nums;min-width:48px;justify-content:center}
 .pill.none{background:var(--fill);color:var(--muted)}
 .dot.none{background:#c7c7cc}
 @media (max-width:700px){
@@ -543,7 +542,6 @@ const MATS={
 };
 const PROCF={turn:{carb:1,hss:1},mill:{carb:.85,hss:.9},drill:{carb:.55,hss:.8}};
 const MSIZES=[[3,.5],[4,.7],[5,.8],[6,1],[8,1.25],[10,1.5],[12,1.75],[14,2],[16,2],[18,2.5],[20,2.5],[22,2.5],[24,3]];
-const WHEELS=[33,45,60,63,80,100,120];
 const TAGS=[["試し加工","tg-try"],["量産","tg-mass"],["要確認","tg-check"],["不具合","tg-bad"],["良好","tg-good"]];
 const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
 
@@ -891,8 +889,7 @@ function buildPanel(id){
   let sel="";
   if(T.selects==="matTool") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">工具材質${selbox(`<select data-role="tool"><option value="carb">超硬</option><option value="hss">ハイス（HSS）</option></select>`)}</label></div>`;
   if(T.selects==="matTap") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">ねじサイズ（並目）${selbox(`<select data-role="msize"><option value="">手入力</option>${MSIZES.map(([d,p])=>`<option value="${d}|${p}">M${d} × ${p}</option>`).join("")}</select>`)}</label></div>`;
-  if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度（砥石のラベルに表示）<div class="inbox"><input data-role="wheel" type="number" inputmode="decimal" step="any" min="0" aria-label="砥石の最高使用周速度（m/s）"><span class="u">m/s</span></div></label>
-    <div class="tags wheelpick" style="margin-top:8px">${WHEELS.map(w=>`<button type="button" class="tagbtn tg-try" data-wheel="${w}" aria-pressed="false">${w}</button>`).join("")}</div>`;
+  if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度（砥石のラベルに表示）<div class="inbox"><input data-role="wheel" type="number" inputmode="decimal" step="any" min="0" aria-label="砥石の最高使用周速度（m/s）"><span class="u">m/s</span></div></label>`;
   const segKey=T.segKey||"mode";
   const seg=T.seg?`<div class="seg" role="group" aria-label="計算の種類">${T.seg.map(([v,l,ic])=>`<button type="button" data-seg="${v}" aria-pressed="${s[segKey]===v}">${ICON[ic]}${l}</button>`).join("")}</div>`:"";
   const guide=T.guide?`<div class="guide">${ICON.info}<span>${T.guide}</span></div>`:"";
@@ -924,7 +921,6 @@ function syncPanel(id,auto){
   const m=p.querySelector('[data-role="mat"]'); if(m) m.value=S.mat;
   const t=p.querySelector('[data-role="tool"]'); if(t) t.value=S.tool;
   const w=p.querySelector('[data-role="wheel"]'); if(w&&document.activeElement!==w) w.value=S.wheel;
-  p.querySelectorAll("[data-wheel]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.wheel===+S.wheel)));
   const ms=p.querySelector('[data-role="msize"]'); if(ms){ const v=s.D+"|"+s.P; ms.value=[...ms.options].some(o=>o.value===v)?v:""; }
 }
 function droHTML(r){
@@ -985,7 +981,6 @@ function bindTool(id){
     else if(t.dataset.fid) renderTool(id);
   });
   v.addEventListener("click",e=>{
-    const wb=e.target.closest("button[data-wheel]"); if(wb){ S.wheel=+wb.dataset.wheel; renderTool("grind"); return; }
     const sb=e.target.closest("button[data-step]");
     if(sb){ const fid=sb.closest(".field").querySelector("input").dataset.fid, def=fieldDef(id,fid), o=def[5]||{}, st=parseFloat(sb.dataset.step);
       let x=+((+S.t[id][fid]||0)+st).toFixed(Math.max(dec(Math.abs(st)),4));
