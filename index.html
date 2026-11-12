@@ -543,13 +543,12 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 <body>
 <div class="app">
   <aside class="side" aria-label="メニュー">
-    <div class="brand"><div class="logo" id="logo1"></div><div><b>Kirico</b><small>加工計算と現場ノート</small></div></div>
     <nav id="sidenav" style="display:flex;flex-direction:column;gap:18px"></nav>
     <div class="side-foot" id="sidefoot"></div>
   </aside>
 
   <div class="main">
-    <div class="mtop"><div class="logo" id="logo2"></div><b>Kirico</b><span class="st" id="mstore"></span><button class="iconbtn mgear" data-go="settings" aria-label="設定"></button></div>
+    <div class="mtop"><span class="st" id="mstore"></span><button class="iconbtn mgear" data-go="settings" aria-label="設定"></button></div>
     <div class="main-in" id="views"></div>
   </div>
 </div>
@@ -617,8 +616,6 @@ const ICON={
   upload:I('<path d="M12 20V9M7 13.5l5-5 5 5M4.5 4h15"/>'),
   units:I('<rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6.5 6.5v3.5M10.5 6.5v5M14.5 6.5v3.5M18.5 6.5v5"/>')
 };
-document.getElementById("logo1").innerHTML=ICON.logo;
-document.getElementById("logo2").innerHTML=ICON.logo;
 document.querySelector(".mgear").innerHTML=ICON.gear;
 
 /* ================= 共通ユーティリティ ================= */
