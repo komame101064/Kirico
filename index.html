@@ -88,11 +88,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .side{display:none}
   .main{padding-block:0 calc(var(--navh) + 28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   body.has-dock .main{padding-bottom:calc(var(--navh) + 96px + env(safe-area-inset-bottom,0px))}
-  .mtop{display:flex;align-items:center;gap:9px;padding-block:14px 6px}
+  .mtop{display:flex;align-items:center;gap:6px;padding-block:12px 14px;position:sticky;top:0;z-index:20;background:var(--bg);margin:0 -16px;padding-left:16px;padding-right:10px}
+  .mtop{top:env(safe-area-inset-top,0px)}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+  .msub{flex:1;min-width:0}
+  .msub .subnav{display:flex;margin:0;padding:2px 0;gap:8px}
+  .msub .mtitle{font-size:26px;font-weight:700;letter-spacing:-.015em}
+  #view-notes>.vhead,#view-settings>.vhead{display:none}
+  .main-in .subnav{display:none}
   .mtop .logo{width:28px;height:28px;font-size:17px;border-radius:7px}
   .mtop b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
-  .mtop .st{margin-left:auto}
-  .mtop .mgear{color:var(--ink);font-size:21px;width:36px;height:36px}
+  .mtop .mgear{color:var(--ink);font-size:21px;width:38px;height:38px;flex:none;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
   .mtop .store{font-size:11.5px;padding:4px 9px;white-space:nowrap}
   .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass-nav);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid #0000002e;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   .bnav button{height:var(--navh);border:0;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;cursor:pointer;position:relative}
@@ -548,7 +554,7 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
   </aside>
 
   <div class="main">
-    <div class="mtop"><span class="st" id="mstore"></span><button class="iconbtn mgear" data-go="settings" aria-label="設定"></button></div>
+    <div class="mtop"><div class="msub" id="msub"></div><span id="mstore" hidden></span><button class="iconbtn mgear" data-go="settings" aria-label="設定"></button></div>
     <div class="main-in" id="views"></div>
   </div>
 </div>
@@ -956,7 +962,8 @@ function subnav(group){
 function go(route,push){
   if(!ROUTES.includes(route)) route="calc";
   if(TOOLS[route]||route==="calc"||route==="units"||route==="gdt"){ USAGE[route]=(USAGE[route]||0)+1; lsSet("kirico-usage",USAGE); }
-  S.route=route; document.body.dataset.route=route; const g=groupOf(route); if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
+  S.route=route; document.body.dataset.route=route; const g=groupOf(route);
+  $("msub").innerHTML=(g==="calc"||g==="mach"||g==="geo")?subnav(g):`<span class="mtitle">${routeName(route)}</span>`; if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
   ROUTES.forEach(r=>{ $("view-"+r).hidden=r!==route; });
   document.querySelectorAll("[data-go]").forEach(b=>{ if(b.dataset.go===route) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   document.querySelectorAll("[data-gogroup]").forEach(b=>{ if(b.dataset.gogroup===g) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -965,6 +972,7 @@ function go(route,push){
   if(route==="settings") renderSettings();
   if(route==="gdt") renderGdt();
   if(route==="calc") requestAnimationFrame(fitRes);
+  const cur=$("msub").querySelector('[aria-current="page"]'); if(cur) cur.scrollIntoView({block:"nearest",inline:"center"});
   if(push){ try{ history.replaceState(null,"","#"+route); }catch(e){} window.scrollTo(0,0); }
 }
 window.addEventListener("hashchange",()=>go(location.hash.slice(1)));
