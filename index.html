@@ -34,6 +34,16 @@
   --f-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
   --f-num:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
   --navh:0px; --r-card:20px;
+  --glass-side:#f5f5f7ee; --glass-nav:#f9f9fbe6; --glass-dock:#ffffffeb;
+}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#000000; --surface:#1c1c1e; --sunken:#2c2c2e; --track:#3a3a3c; --fill:#7676803d;
+  --ink:#f5f5f7; --muted:#98989d; --faint:#8d8d93; --line:#38383a; --line-2:#48484a;
+  --accent:#0a84ff; --accent-ink:#4aa3ff; --accent-soft:#0a84ff29;
+  --ok:#30d158; --ok-soft:#30d15824; --warn:#ff9f0a; --warn-soft:#ff9f0a24; --danger:#ff453a; --danger-soft:#ff453a24;
+  --blue:#0a84ff; --blue-soft:#0a84ff29; --steel:#5f7d99; --steel-2:#3e536a; --chip:#4a4a50; --paper:#1c1c1e; --grid:#2c2c2e;
+  --amber-ink:#ffb340; --amber-soft:#ff9f0a24; --shadow:none;
+  --glass-side:#1c1c1ecc; --glass-nav:#161618e6; --glass-dock:#1c1c1ee6;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -55,7 +65,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* ===== シェル ===== */
 .app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
-.side{position:sticky;top:0;height:100vh;overflow-y:auto;background:#f5f5f7ee;border-right:1px solid var(--line);padding:22px 12px 16px max(12px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:20px}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--glass-side);border-right:1px solid var(--line);padding:22px 12px 16px max(12px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:20px}
 .brand{display:flex;align-items:center;gap:10px;padding:0 8px}
 .brand b{display:block;font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
 .brand small{display:block;font-size:12px;color:var(--muted)}
@@ -83,7 +93,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .mtop b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
   .mtop .st{margin-left:auto}
   .mtop .store{font-size:11.5px;padding:4px 9px;white-space:nowrap}
-  .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:#f9f9fbe6;-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid #0000002e;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass-nav);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid #0000002e;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   .bnav button{height:var(--navh);border:0;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;cursor:pointer;position:relative}
   .bnav button svg{font-size:25px}
   .bnav button[aria-current="page"]{color:var(--accent)}
@@ -200,7 +210,7 @@ select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-
 .bar .band{position:absolute;top:0;bottom:0;border-radius:99px;background:#34c759}
 .bar .limit{position:absolute;top:0;bottom:0;right:0;border-radius:0 99px 99px 0;background:#ff3b30;opacity:.85}
 .bar .knob{position:absolute;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.04),0 3px 8px rgba(0,0,0,.15),0 3px 1px rgba(0,0,0,.06);transition:left .25s ease}
-.bar .tag{position:absolute;bottom:20px;transform:translateX(-50%);font-size:12.5px;font-weight:600;background:var(--ink);color:#fff;padding:2px 8px;border-radius:7px;white-space:nowrap;transition:left .25s ease;font-variant-numeric:tabular-nums}
+.bar .tag{position:absolute;bottom:20px;transform:translateX(-50%);font-size:12.5px;font-weight:600;background:var(--ink);color:var(--bg);padding:2px 8px;border-radius:7px;white-space:nowrap;transition:left .25s ease;font-variant-numeric:tabular-nums}
 .scale{position:relative;height:18px;margin:12px 12px 0;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
 .scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .scale .ok{color:var(--ok);font-weight:600}
@@ -217,11 +227,11 @@ select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-
 .diagram text{font-family:var(--f-num);font-size:14.5px;fill:var(--ink);font-weight:600}
 .diagram .w{fill:var(--steel)} .diagram .w3{fill:var(--steel-2)} .diagram .w2{fill:var(--chip)}
 .diagram .t{fill:var(--orange)}
-.diagram .ln{stroke:#1d1d1f;stroke-width:1.2;fill:none;opacity:.35}
+.diagram .ln{stroke:var(--ink);stroke-width:1.2;fill:none;opacity:.35}
 .diagram .dim{stroke:var(--faint);stroke-width:1;fill:none}
 .diagram .mv{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round}
 .diagram .mvt{fill:var(--accent)}
-.diagram .edge{stroke:#1d1d1f;stroke-width:.8;stroke-opacity:.25}
+.diagram .edge{stroke:var(--ink);stroke-width:.8;stroke-opacity:.25}
 .diagram .onw{fill:#ffffff}
 .diagram .shape{fill:var(--accent);fill-opacity:.08;stroke:var(--accent);stroke-width:2}
 .diagram .shape2{fill:none;stroke:var(--ink);stroke-width:1.5}
@@ -264,7 +274,7 @@ details.formula li{overflow-wrap:anywhere}
 .hint{font-size:13px;color:var(--muted);margin:12px 0 0}
 
 /* ===== スマホ結果バー ===== */
-.dock{position:fixed;left:0;right:0;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px));z-index:25;background:#ffffffeb;-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);color:var(--ink);padding-block:9px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:none;border-top:.5px solid #0000001f}
+.dock{position:fixed;left:0;right:0;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px));z-index:25;background:var(--glass-dock);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);color:var(--ink);padding-block:9px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:none;border-top:.5px solid #0000001f}
 .dock-in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:center;max-width:640px;margin:0 auto}
 .dock-in div{min-width:0}
 .dock-in span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden}
@@ -423,6 +433,71 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 .toast button{border:0;background:transparent;color:#64d2ff;font-weight:600;cursor:pointer;padding:0 0 0 6px}
 .foot{margin-top:28px;font-size:12.5px;color:var(--faint);display:flex;gap:8px;align-items:flex-start}
 .foot svg{font-size:15px;margin-top:2px}
+
+/* ===== ホーム ===== */
+.hhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:4px 0 16px}
+.htitle{font-size:40px;font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.05}
+.iconbtn.big{width:44px;height:44px;font-size:23px;background:var(--surface);box-shadow:var(--shadow);color:var(--ink)}
+.hsearch{position:relative}
+.hsearch>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:18px}
+.hsearch input{width:100%;font:inherit;font-size:16px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);padding:11px 14px 11px 42px;min-height:46px}
+.hsearch input:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
+.hsec{font-size:22px;font-weight:700;letter-spacing:-.015em;margin:28px 0 12px}
+.hsec-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hsec-row .hsec{margin-bottom:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+@media (max-width:640px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:1px;border:0;background:var(--surface);color:var(--ink);border-radius:18px;padding:14px 14px 16px;cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:transform .15s ease,box-shadow .15s ease;min-width:0}
+.tile:hover{box-shadow:0 2px 4px rgba(0,0,0,.04),0 10px 24px rgba(0,0,0,.08)}
+.tile:active{transform:scale(.97)}
+.key.tl{width:42px;height:42px;font-size:24px;border-radius:11px;margin-bottom:12px}
+.tn{font-size:16px;font-weight:600;letter-spacing:-.005em}
+.ts{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.card.list{padding:2px 0;overflow:hidden}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;border:0;border-bottom:.5px solid var(--line-2);background:transparent;color:var(--ink);padding:11px 16px;text-align:left;cursor:pointer}
+.card.list>:last-child,#st-wipe{border-bottom:0}
+.lrow:hover{background:var(--sunken)}
+.lt{flex:1;min-width:0;display:flex;flex-direction:column}
+.lt b{font-weight:600;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv{font-weight:600;font-variant-numeric:tabular-nums;font-size:17px;white-space:nowrap;letter-spacing:-.01em}
+.lv small{font-size:12px;color:var(--muted);margin-left:3px;font-weight:400}
+.estate.small{padding:28px 16px}
+/* ===== 設定 ===== */
+.sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+@media (max-width:900px){.sgrid{grid-template-columns:minmax(0,1fr)}}
+.glabel{font-size:13px;font-weight:500;color:var(--muted);margin:0 0 7px 16px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;border:0;border-bottom:.5px solid var(--line-2);width:100%;background:transparent;text-align:left;font:inherit;color:var(--ink);min-height:52px}
+.srow>span:first-child{display:flex;flex-direction:column;min-width:0}
+.srow b{font-weight:500;font-size:15.5px}
+.srow small{font-size:12.5px;color:var(--muted);line-height:1.45}
+.srow.act{cursor:pointer}
+.srow.act:hover{background:var(--sunken)}
+.srow.act>svg{color:var(--accent);font-size:20px}
+.srow.act b{color:var(--accent-ink)}
+.srow.danger b,.srow.danger>svg{color:var(--danger)}
+.switch{position:relative;width:51px;height:31px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
+.switch i{position:absolute;inset:0;border-radius:99px;background:var(--track);transition:background .2s}
+.switch i::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.switch input:checked+i{background:#34c759}
+.switch input:checked+i::after{transform:translateX(20px)}
+.switch input:focus-visible+i{outline:3px solid #0071e366;outline-offset:2px}
+.k-settings,.k-home{--kc:#8e8e93}
+@media (max-width:959px){body[data-route="home"] .mtop{display:none}body[data-route="home"] .hhead{padding-top:16px}}
+/* ===== 動き・仕上げ ===== */
+.main-in>section:not([hidden]){animation:vin .26s cubic-bezier(.2,.7,.2,1)}
+@keyframes vin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.dro-v{cursor:copy;border-radius:8px;transition:background .15s}
+.dro-v:active{background:var(--accent-soft)}
+:root[data-theme="dark"] .calcbody{box-shadow:0 0 0 1px #2c2c2e}
+:root[data-theme="dark"] .tg-try[aria-pressed="true"],:root[data-theme="dark"] .chip.tg-try{background:#0a84ff29;color:#64b5ff}
+:root[data-theme="dark"] .tg-mass[aria-pressed="true"],:root[data-theme="dark"] .chip.tg-mass,:root[data-theme="dark"] .tg-good[aria-pressed="true"],:root[data-theme="dark"] .chip.tg-good{background:#30d15824;color:#4ade80}
+:root[data-theme="dark"] .tg-check[aria-pressed="true"],:root[data-theme="dark"] .chip.tg-check{background:#ff9f0a24;color:#ffb340}
+:root[data-theme="dark"] .tg-bad[aria-pressed="true"],:root[data-theme="dark"] .chip.tg-bad{background:#ff453a24;color:#ff6961}
+:root[data-theme="dark"] .navgroup button:hover{background:#ffffff12}
+:root[data-theme="dark"] .bnav{border-top-color:#ffffff1f}
+:root[data-theme="dark"] .dock{border-top-color:#ffffff1f}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -497,6 +572,8 @@ const ICON={
   info:I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>'),
   backspace:I('<path d="M9 5h11a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 20 19H9l-6-7z"/><path d="m12 9.5 5 5M17 9.5l-5 5"/>'),
   minus:I('<path d="M6 12h12"/>'),
+  home:I('<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>'),
+  gear:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   plus:I('<path d="M12 6v12M6 12h12"/>'),
   upload:I('<path d="M12 20V9M7 13.5l5-5 5 5M4.5 4h15"/>'),
   units:I('<rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6.5 6.5v3.5M10.5 6.5v5M14.5 6.5v3.5M18.5 6.5v5"/>')
@@ -547,7 +624,7 @@ const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
 
 /* ================= 状態 ================= */
 const DEF={
-  route:"turn", mat:"s45c", tool:"carb", wheel:0, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
+  route:"home", mat:"s45c", tool:"carb", wheel:0, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
   t:{
     turn:{mode:"n",D:0,vc:0,n:0,f:0,ap:0,L:0,r:0},
     mill:{mode:"n",D:0,z:0,vc:0,n:0,fz:0,ap:0,ae:0,L:0},
@@ -581,7 +658,7 @@ function cutGauge(key,s){
     note:["この径での推奨回転数",isFinite(nlo)?fmt(nlo,0)+" 〜 "+fmt(nhi,0)+" min⁻¹":"—"]};
 }
 
-const GROUPS={calc:"電卓・単位",mach:"加工条件",geo:"図面・寸法",notes:"記録"};
+const GROUPS={home:"ホーム",settings:"設定",calc:"電卓・単位",mach:"加工条件",geo:"図面・寸法",notes:"記録"};
 const TOOLS={
   turn:{group:"mach",name:"旋削",title:"旋削（外径）",desc:"回転数・送り速度・加工時間・仕上げ面粗さを求めます",
     selects:"matTool",seg:NV,
@@ -821,32 +898,35 @@ const DIAG={
 };
 
 /* ================= ルーティング ================= */
-const ROUTES=["calc","units",...Object.keys(TOOLS),"notes"];
-const groupOf=r=> r==="calc"||r==="units"?"calc": r==="notes"?"notes": TOOLS[r].group;
-const routeIcon=r=>ICON[r==="calc"?"calc":r==="notes"?"notes":r==="memo"?"memo":r==="units"?"units":r];
+const ROUTES=["home","calc","units",...Object.keys(TOOLS),"notes","settings"];
+const groupOf=r=> r==="home"||r==="settings"?"home": r==="calc"||r==="units"?"calc": r==="notes"?"notes": TOOLS[r].group;
+const routeIcon=r=>r==="settings"?ICON.gear:ICON[r==="calc"?"calc":r==="notes"?"notes":r==="memo"?"memo":r==="units"?"units":r];
 const KEY=(r,cls)=>`<span class="key k-${r}${["calc","sine","notes","memo"].includes(r)?" dk":""}${cls?" "+cls:""}" aria-hidden="true">${routeIcon(r)}</span>`;
-const routeName=r=> r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
+const routeName=r=> r==="home"?"ホーム": r==="settings"?"設定": r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
 
 function buildNav(){
   const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo")],["notes",["notes"]]];
-  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("");
-  const bn=[["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
+  $("sidenav").innerHTML=`<div class="navgroup"><button data-go="home">${KEY("home")}<span>ホーム</span></button></div>`+groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
+  const bn=[["home","ホーム","home"],["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
   $("bnav").innerHTML=bn.map(([g,l,ic])=>`<button data-gogroup="${g}">${routeIcon(ic)}<span>${l}</span>${g==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("");
   document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(b.dataset.go,true);});
-  $("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-gogroup]"); if(!b) return; const g=b.dataset.gogroup; go(g==="notes"?"notes":S.last[g]||(g==="calc"?"calc":g),true);});
+  $("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-gogroup]"); if(!b) return; const g=b.dataset.gogroup; go(g==="home"?"home":g==="notes"?"notes":S.last[g]||(g==="calc"?"calc":g),true);});
 }
 function subnav(group){
   const list=group==="calc"?["calc","units"]:Object.keys(TOOLS).filter(k=>TOOLS[k].group===group);
   return `<nav class="subnav" aria-label="${GROUPS[group]}">${list.map(k=>`<button data-go="${k}">${KEY(k)}${routeName(k)}</button>`).join("")}</nav>`;
 }
 function go(route,push){
-  if(!ROUTES.includes(route)) route="turn";
-  S.route=route; const g=groupOf(route); if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
+  if(!ROUTES.includes(route)) route="home";
+  if(TOOLS[route]||route==="calc"||route==="units"){ USAGE[route]=(USAGE[route]||0)+1; lsSet("kirico-usage",USAGE); }
+  S.route=route; document.body.dataset.route=route; const g=groupOf(route); if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
   ROUTES.forEach(r=>{ $("view-"+r).hidden=r!==route; });
   document.querySelectorAll("[data-go]").forEach(b=>{ if(b.dataset.go===route) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   document.querySelectorAll("[data-gogroup]").forEach(b=>{ if(b.dataset.gogroup===g) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   renderDock();
   if(route==="notes") renderNotes();
+  if(route==="home") renderHome();
+  if(route==="settings") renderSettings();
   if(route==="calc") requestAnimationFrame(fitRes);
   if(push){ try{ history.replaceState(null,"","#"+route); }catch(e){} window.scrollTo(0,0); }
 }
@@ -982,6 +1062,7 @@ function bindTool(id){
   });
   v.addEventListener("click",e=>{
     const sb=e.target.closest("button[data-step]");
+    if(sb&&sb.dataset.rep==="1"){ sb.dataset.rep=""; return; }
     if(sb){ const fid=sb.closest(".field").querySelector("input").dataset.fid, def=fieldDef(id,fid), o=def[5]||{}, st=parseFloat(sb.dataset.step);
       let x=+((+S.t[id][fid]||0)+st).toFixed(Math.max(dec(Math.abs(st)),4));
       if(!o.neg) x=Math.max(0,x); if(o.int) x=Math.max(o.min||1,Math.round(x)); if(o.max) x=Math.min(o.max,x);
@@ -1518,12 +1599,148 @@ function bindUnits(){
   $("u-to").addEventListener("change",e=>{ S.units.to=e.target.value; renderUnits(); });
 }
 
+/* ================= 設定・テーマ ================= */
+const PREF=Object.assign({theme:"light",haptic:true},lsGet("kirico-pref",{}));
+const savePref=()=>lsSet("kirico-pref",PREF);
+const mqDark=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
+function applyTheme(){
+  const dark=PREF.theme==="dark"||(PREF.theme==="auto"&&mqDark&&mqDark.matches);
+  document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content",dark?"#000000":"#f5f5f7");
+}
+if(mqDark&&mqDark.addEventListener) mqDark.addEventListener("change",()=>{ if(PREF.theme==="auto") applyTheme(); });
+applyTheme();
+function haptic(ms){ if(PREF.haptic&&navigator.vibrate){ try{ navigator.vibrate(ms||8); }catch(e){} } }
+
+/* ================= ホーム ================= */
+const USAGE=lsGet("kirico-usage",{});
+const KW={calc:"電卓 計算 ルート 平方根 π",units:"単位 換算 変換 inch mm psi MPa kgf トルク 温度 圧力",turn:"旋盤 旋削 回転数 周速 送り 粗さ",mill:"フライス エンドミル マシニング 1刃送り テーブル送り",drill:"ドリル 穴あけ 下穴",tap:"タップ ねじ 下穴 ピッチ",grind:"研削 砥石 周速 円筒 平面 トラバース",tri:"三角 三角関数 斜辺 角度 sin cos tan",taper:"テーパー 角度 勾配 刃物台",pcd:"PCD ピッチ円 穴位置 座標",sine:"サインバー ブロックゲージ 角度",arc:"円弧 弦 R 半径 弧長",notes:"記録 メモ ノート"};
+const SHORT={calc:"√・π・履歴",units:"18種類の単位",turn:"回転数・送り・粗さ",mill:"テーブル送り・動力",drill:"送り・加工時間",tap:"同期送り・下穴径",grind:"砥石周速・研削時間",tri:"2つの値から残りを",taper:"角度・刃物台旋回角",pcd:"穴の X・Y 座標",sine:"ブロック高さ",arc:"弦・弧・R",notes:"計算とメモ"};
+const HOMEGROUPS=[["電卓・単位",["calc","units"]],["加工条件",["turn","mill","drill","tap","grind"]],["図面・寸法",["tri","taper","pcd","sine","arc"]]];
+let homeQ="";
+function homeView(){
+  return `<section id="view-home" hidden>
+    <header class="hhead">
+      <div><div class="crumb" id="h-date"></div><h2 class="htitle">Kirico</h2></div>
+      <button class="iconbtn big" data-go="settings" aria-label="設定">${ICON.gear}</button>
+    </header>
+    <div class="hsearch">${ICON.search}<input id="h-q" type="search" placeholder="ツールを探す（例：回転数、テーパー、psi）" aria-label="ツールを探す"></div>
+    <div id="h-body"></div>
+  </section>`;
+}
+function tile(r){ return `<button class="tile" data-go="${r}">${KEY(r,"tl")}<span class="tn">${routeName(r)}</span><span class="ts">${SHORT[r]||""}</span></button>`; }
+function renderHome(){
+  const d=new Date();
+  $("h-date").textContent=`${d.getMonth()+1}月${d.getDate()}日 ${"日月火水木金土"[d.getDay()]}曜日`;
+  const q=homeQ.trim().toLowerCase();
+  let html="";
+  if(q){
+    const all=HOMEGROUPS.flatMap(g=>g[1]).concat(["notes"]);
+    const hit=all.filter(r=>(routeName(r)+" "+(KW[r]||"")+" "+(SHORT[r]||"")).toLowerCase().includes(q));
+    html=hit.length?`<div class="tiles">${hit.map(tile).join("")}</div>`:`<div class="card estate">${ICON.search}<b>見つかりませんでした</b>別のことばで探してください。</div>`;
+  }else{
+    const use=USAGE, top=Object.keys(use).filter(r=>ROUTES.includes(r)&&r!=="home"&&r!=="settings"&&r!=="notes").sort((a,b)=>use[b]-use[a]).slice(0,4);
+    if(top.length) html+=`<h3 class="hsec">よく使う</h3><div class="tiles fav">${top.map(tile).join("")}</div>`;
+    html+=HOMEGROUPS.map(([t,list])=>`<h3 class="hsec">${t}</h3><div class="tiles">${list.map(tile).join("")}</div>`).join("");
+    const rec=Store.items.slice().sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,3);
+    html+=`<div class="hsec-row"><h3 class="hsec">最近の記録</h3><button class="btn small ghost" data-go="notes">すべて見る</button></div>`;
+    html+=rec.length?`<div class="card list">${rec.map(x=>{ const k=x.kind==="calc"||x.kind==="memo"||x.kind==="units"||TOOLS[x.kind]?x.kind:"memo";
+        const name=x.kind==="memo"?"メモ":x.kind==="calc"?"電卓":x.kind==="units"?"単位変換":(TOOLS[x.kind]?TOOLS[x.kind].name:"記録");
+        const main=(x.cells&&x.cells[0])?`${esc(x.cells[0][1])}<small>${esc(x.cells[0][2])}</small>`:"";
+        return `<button class="lrow" data-go="notes">${KEY(k)}<span class="lt"><b>${esc(x.part||name)}</b><small>${esc(x.part?name:"")}${x.part?" · ":""}${dayLabel(x.at).split(" · ")[0]} ${hhmm(x.at)}${x.memo?" · "+esc(x.memo.slice(0,28)):""}</small></span><span class="lv">${main}</span></button>`; }).join("")}</div>`
+      :`<div class="card estate small">${ICON.notes}<b>まだ記録がありません</b>計算画面の「この計算を記録」から残せます。</div>`;
+  }
+  $("h-body").innerHTML=html;
+}
+function bindHome(){ $("h-q").addEventListener("input",e=>{ homeQ=e.target.value; renderHome(); }); }
+
+/* ================= 設定 ================= */
+function settingsView(){
+  return `<section id="view-settings" hidden>
+    <header class="vhead"><div class="vtitle">${KEY("settings","xl")}<div><div class="crumb">Kirico</div><h2>設定</h2><p>表示・操作・データの管理</p></div></div></header>
+    <div class="sgrid">
+      <div class="stack">
+        <div><h3 class="glabel">外観</h3><div class="card">
+          <div class="seg" id="st-theme" role="group" aria-label="外観" style="margin:0"><button type="button" data-theme="light">ライト</button><button type="button" data-theme="dark">ダーク</button><button type="button" data-theme="auto">端末に合わせる</button></div>
+        </div></div>
+        <div><h3 class="glabel">操作</h3><div class="card list">
+          <label class="srow"><span><b>触覚フィードバック</b><small>ボタンを押したときに軽く振動します（対応端末のみ）</small></span><span class="switch"><input type="checkbox" id="st-haptic"><i></i></span></label>
+          <div class="srow"><span><b>長押しで連続入力</b><small>入力欄の − ＋ を押し続けると、値が連続で変わります</small></span><span class="chip">常にオン</span></div>
+          <div class="srow"><span><b>結果をタップでコピー</b><small>大きく表示された結果の数字を押すと、コピーできます</small></span><span class="chip">常にオン</span></div>
+        </div></div>
+      </div>
+      <div class="stack">
+        <div><h3 class="glabel">データ</h3><div class="card list">
+          <div class="srow"><span><b>保存されている記録</b><small id="st-where"></small></span><span class="count" id="st-count">0</span></div>
+          <button class="srow act" id="st-backup"><span><b>バックアップを書き出す</b><small>記録・入力値・電卓の履歴を1つのファイルに保存</small></span>${ICON.download}</button>
+          <label class="srow act"><span><b>バックアップから復元</b><small>書き出したファイルを読み込みます（今の記録は残ります）</small></span>${ICON.upload}<input type="file" id="st-restore" accept=".json,application/json" hidden></label>
+          <button class="srow act danger" id="st-wipe"><span><b>すべてのデータを削除</b><small>この端末の記録と入力値を消します</small></span>${ICON.trash}</button>
+          <div id="st-wipe-confirm"></div>
+        </div></div>
+        <div><h3 class="glabel">このアプリについて</h3><div class="card list">
+          <div class="srow"><span><b>Kirico</b><small>加工計算と現場ノート</small></span><span class="chip">バージョン 1.1</span></div>
+          <div class="srow"><span><small>推奨切削速度・速度比などは一般的な目安です。実際の条件は工具・砥石メーカーのカタログ値と、機械の剛性・クーラント条件に合わせて調整してください。砥石は表示された最高使用周速度を超えて使わないでください。</small></span></div>
+        </div></div>
+      </div>
+    </div>
+  </section>`;
+}
+function renderSettings(){
+  document.querySelectorAll("#st-theme [data-theme]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===PREF.theme)));
+  $("st-haptic").checked=!!PREF.haptic;
+  $("st-count").textContent=Store.items.length+" 件";
+  $("st-where").textContent=Store.mode==="cloud"?"アカウントに保存":"この端末のブラウザに保存";
+}
+function downloadFile(name,text,type){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function bindSettings(){
+  const v=$("view-settings");
+  v.addEventListener("click",e=>{
+    const t=e.target.closest("[data-theme]"); if(t){ PREF.theme=t.dataset.theme; savePref(); applyTheme(); renderSettings(); haptic(); return; }
+    if(e.target.closest("#st-backup")){
+      const d=new Date(), data={app:"kirico",version:1,exportedAt:d.toISOString(),records:Store.items,state:S,hist,pref:PREF};
+      downloadFile(`Kirico_バックアップ_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`,JSON.stringify(data,null,1),"application/json");
+      toast("バックアップを書き出しました"); return; }
+    if(e.target.closest("#st-wipe")){ $("st-wipe-confirm").innerHTML=`<div class="confirm" style="margin:8px 16px 14px">${ICON.alert}本当に削除しますか？元に戻せません。<button class="btn small danger" id="st-wipe-ok">削除する</button><button class="btn small ghost" id="st-wipe-no">やめる</button></div>`; return; }
+    if(e.target.closest("#st-wipe-no")){ $("st-wipe-confirm").innerHTML=""; return; }
+    if(e.target.closest("#st-wipe-ok")){ ["cutcalc-v3","cutcalc-notes","cutcalc-hist","cutcalc-meta"].forEach(k=>{ try{ localStorage.removeItem(k); }catch(x){} }); toast("削除しました。再読み込みします"); setTimeout(()=>location.reload(),700); return; }
+  });
+  $("st-haptic").addEventListener("change",e=>{ PREF.haptic=e.target.checked; savePref(); haptic(12); });
+  $("st-restore").addEventListener("change",async e=>{
+    const f=e.target.files&&e.target.files[0]; if(!f) return;
+    try{
+      const data=JSON.parse(await f.text());
+      if(!data||data.app!=="kirico"||!Array.isArray(data.records)) throw 0;
+      const have=new Set(Store.items.map(x=>x.id)); let n=0;
+      for(const r of data.records){ if(r&&typeof r==="object"&&r.at&&!have.has(r.id)){ await storeAdd(Object.assign({},r)); n++; } }
+      if(Array.isArray(data.hist)&&!hist.length){ hist=data.hist.slice(0,50); lsSet("cutcalc-hist",hist); renderHist(); }
+      toast(n+"件の記録を復元しました"); renderSettings();
+    }catch(x){ toast("このファイルは読み込めません。Kirico のバックアップを選んでください"); }
+    e.target.value="";
+  });
+}
+
+/* ================= 長押し連続入力・タップでコピー ================= */
+let repT=null, repI=null;
+document.addEventListener("pointerdown",e=>{
+  const b=e.target.closest(".ctl button[data-step]"); if(!b) return;
+  clearTimeout(repT); clearInterval(repI);
+  repT=setTimeout(()=>{ b.dataset.rep="1"; repI=setInterval(()=>{ b.dataset.rep="0"; b.click(); b.dataset.rep="1"; },70); },420);
+});
+["pointerup","pointercancel"].forEach(ev=>document.addEventListener(ev,()=>{ clearTimeout(repT); clearInterval(repI); },true));
+document.addEventListener("click",e=>{
+  if(e.target.closest("button")) haptic(6);
+  const v=e.target.closest(".dro-v"); if(v&&!e.target.closest(".dro.err")){ copyText(v.textContent.replace(/,/g,"").replace(/\s+/g," ").trim(),"「"+v.textContent.trim()+"」をコピーしました"); }
+},true);
+
 /* ================= 起動 ================= */
-$("views").innerHTML=calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+notesView()+
+$("views").innerHTML=homeView()+calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+notesView()+settingsView()+
   `<p class="foot">${ICON.info}<span>推奨切削速度・速度比などは一般的な目安です。実際の条件は工具・砥石メーカーのカタログ値と、機械の剛性・クーラント条件に合わせて調整してください。砥石は表示された最高使用周速度を超えて使わないでください。</span></p>`;
 buildNav();
 Object.keys(TOOLS).forEach(id=>{ buildPanel(id); bindTool(id); });
-bindCalc(); bindNotes(); bindUnits(); renderUnits();
+bindCalc(); bindNotes(); bindUnits(); renderUnits(); bindHome(); bindSettings();
+Store.listeners.push(()=>{ if(S.route==="home") renderHome(); if(S.route==="settings") renderSettings(); });
 expr=""; showCalc(); renderHist();
 renderAll(); refreshChrome();
 go(ROUTES.includes(location.hash.slice(1))?location.hash.slice(1):S.route);
