@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="description" content="加工条件（旋削・フライス・ドリル・タップ・研削）、図面寸法、単位変換の計算と現場ノートをまとめた製造現場向けツール">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff9f0a'/%3E%3Crect x='19' y='11' width='26' height='42' rx='5' fill='none' stroke='white' stroke-width='3.5'/%3E%3Crect x='24' y='16' width='16' height='7' rx='1.5' fill='white'/%3E%3Cg fill='white'%3E%3Ccircle cx='26' cy='31' r='2'/%3E%3Ccircle cx='32' cy='31' r='2'/%3E%3Ccircle cx='38' cy='31' r='2'/%3E%3Ccircle cx='26' cy='39' r='2'/%3E%3Ccircle cx='32' cy='39' r='2'/%3E%3Ccircle cx='38' cy='39' r='2'/%3E%3Ccircle cx='26' cy='47' r='2'/%3E%3Ccircle cx='32' cy='47' r='2'/%3E%3Ccircle cx='38' cy='47' r='2'/%3E%3C/g%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}</style>
+<title>Kirico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* Layout: Apple/Google 系のアプリ構成。淡いグレーの面に白いカード、細い区切り線、太い大見出し、単色アクセント（青）。
+   左はサイドバー（iPadOS 風）、スマホは下部タブバー。電卓は iOS 電卓風の丸いキー。 */
+:root{
+  color-scheme:light;
+  --bg:#f5f5f7; --surface:#ffffff; --sunken:#f2f2f7; --track:#e8e8ed; --fill:#7676801f;
+  --ink:#1d1d1f; --muted:#6e6e73; --faint:#8e8e93; --line:#e5e5ea; --line-2:#d2d2d7;
+  --accent:#0071e3; --accent-ink:#0066cc; --accent-soft:#e8f1fc;
+  --orange:#ff9f0a; --calc-dark:#1c1c1e; --calc-key:#333336; --calc-fn:#a5a5aa;
+  --ok:#1f9d55; --ok-soft:#e3f6ea; --warn:#c75300; --warn-soft:#fff1e0; --danger:#e0281b; --danger-soft:#ffe9e7;
+  --blue:#0071e3; --blue-soft:#e8f1fc;
+  --steel:#7d93ab; --steel-2:#b7c5d4; --chip:#d7dde4; --paper:#fbfbfd; --grid:#eef0f3;
+  --amber:#ff9f0a; --amber-ink:#b35c00; --amber-soft:#fff3e0;
+  --navy:#1d1d1f; --navy-2:#2c2c2e; --navy-ink:#fff; --navy-muted:#a1a1a6; --navy-line:rgba(255,255,255,.12);
+  --shadow:0 1px 1px rgba(0,0,0,.02),0 4px 14px rgba(0,0,0,.04);
+  --f-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+  --f-num:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --navh:0px; --r-card:20px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:.005em}
+svg.i{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #0071e366;outline-offset:2px}
+.num,.dro-v,.ctl input,table.detail td,table.ref td{font-variant-numeric:tabular-nums}
+
+/* ===== アプリアイコン（iOS 設定風のフラットなタイル） ===== */
+.key{--kc:#8e8e93;display:inline-grid;place-items:center;flex:none;width:28px;height:28px;font-size:17px;border-radius:7px;color:#fff;background:var(--kc)}
+.key svg.i{stroke-width:2}
+.key.xl{width:52px;height:52px;font-size:29px;border-radius:13px}
+.k-calc{--kc:#ff9f0a}.k-units{--kc:#5e5ce6}.k-turn{--kc:#007aff}.k-mill{--kc:#00a7a0}.k-drill{--kc:#af52de}.k-tap{--kc:#ff2d55}.k-grind{--kc:#ff6b00}
+.k-tri{--kc:#34c759}.k-taper{--kc:#32ade6}.k-pcd{--kc:#5856d6}.k-sine{--kc:#a2845e}.k-arc{--kc:#ff3b30}.k-notes,.k-memo{--kc:#ffb800}
+.logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(180deg,#ffb340,#ff9500);color:#fff;display:grid;place-items:center;flex:none;font-size:22px}
+.logo svg.i{stroke-width:2}
+
+/* ===== シェル ===== */
+.app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;background:#f5f5f7ee;border-right:1px solid var(--line);padding:22px 12px 16px max(12px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px}
+.brand b{display:block;font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.brand small{display:block;font-size:12px;color:var(--muted)}
+.navgroup{display:flex;flex-direction:column;gap:1px}
+.navgroup h3{margin:0 0 4px;padding:0 10px;font-size:12px;font-weight:600;color:var(--faint)}
+.navgroup button{display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--ink);padding:6px 10px;border-radius:9px;cursor:pointer;font-size:15px;text-align:left;position:relative;min-height:40px}
+.navgroup button:hover{background:#0000000a}
+.navgroup button[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.badge{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);line-height:1.6;font-variant-numeric:tabular-nums}
+.navgroup button[aria-current="page"] .badge{color:#fff}
+.side-foot{margin-top:auto;font-size:12px;color:var(--muted);padding:12px 10px 0;display:flex;gap:8px;align-items:flex-start}
+.side-foot svg{font-size:15px;margin-top:2px}
+.main{min-width:0;padding-block:28px 56px;padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}
+.main-in{max-width:1140px;margin:0 auto}
+.mtop,.bnav,.subnav{display:none}
+
+@media (max-width:959px){
+  :root{--navh:58px}
+  .app{display:block}
+  .side{display:none}
+  .main{padding-block:0 calc(var(--navh) + 28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  body.has-dock .main{padding-bottom:calc(var(--navh) + 96px + env(safe-area-inset-bottom,0px))}
+  .mtop{display:flex;align-items:center;gap:9px;padding-block:14px 6px}
+  .mtop .logo{width:28px;height:28px;font-size:17px;border-radius:7px}
+  .mtop b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+  .mtop .st{margin-left:auto}
+  .mtop .store{font-size:11.5px;padding:4px 9px;white-space:nowrap}
+  .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:#f9f9fbe6;-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid #0000002e;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .bnav button{height:var(--navh);border:0;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;cursor:pointer;position:relative}
+  .bnav button svg{font-size:25px}
+  .bnav button[aria-current="page"]{color:var(--accent)}
+  .bnav .badge{position:absolute;top:5px;left:calc(50% + 8px);font-size:10px;color:#fff;background:#ff3b30;border-radius:99px;padding:0 5px;line-height:1.5;min-width:17px;text-align:center}
+  .subnav{display:flex;gap:8px;overflow-x:auto;margin:6px -16px 14px;padding:2px 16px 4px;scrollbar-width:none}
+  .subnav::-webkit-scrollbar{display:none}
+  .subnav button{flex:none;display:flex;align-items:center;gap:7px;border:0;background:var(--surface);color:var(--ink);padding:6px 14px 6px 7px;border-radius:99px;font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+  .subnav .key{width:22px;height:22px;font-size:14px;border-radius:6px}
+  .subnav button[aria-current="page"]{background:var(--ink);color:#fff;box-shadow:none}
+}
+
+/* ===== 見出し ===== */
+.vhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.vtitle{display:flex;align-items:center;gap:16px;min-width:0}
+.crumb{font-size:13px;font-weight:600;color:var(--faint)}
+.vtitle h2{margin:0;font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.015em;text-wrap:balance}
+.vtitle p{margin:4px 0 0;font-size:15px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;background:var(--fill);color:var(--accent-ink);padding:9px 18px;border-radius:99px;cursor:pointer;font-size:15px;font-weight:600;min-height:42px;white-space:nowrap;transition:background .15s,transform .1s}
+.btn svg{font-size:17px}
+.btn:hover{background:#76768033}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.primary:hover{background:#0077ed}
+.btn.ghost{background:transparent;color:var(--accent-ink)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn.small{min-height:34px;padding:6px 13px;font-size:14px}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:var(--danger-soft)}
+.btn:disabled{opacity:.45;cursor:default}
+@media (max-width:640px){.key.xl{width:44px;height:44px;font-size:24px;border-radius:11px}.vtitle h2{font-size:28px}.vtitle p{font-size:14px}.vhead{margin-bottom:16px}.vhead .actions{width:100%}.vhead .actions .btn{flex:1}}
+
+/* ===== カード・入力（iOS のグループ化リスト風） ===== */
+.tgrid{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1060px){.tgrid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border-radius:var(--r-card);padding:20px;min-width:0;box-shadow:var(--shadow)}
+.h{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-.005em;margin:0 0 14px}
+.h svg{font-size:19px;color:var(--accent)}
+.stack{display:flex;flex-direction:column;gap:20px;min-width:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.sel{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:var(--muted)}
+.selbox{position:relative}
+.selbox>svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--faint);pointer-events:none}
+select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-weight:500;padding:10px 32px 10px 13px;border:0;border-radius:11px;background:var(--sunken);color:var(--ink);width:100%;min-height:44px;cursor:pointer}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin:16px 0 6px}
+.seg button{font-size:14px;font-weight:500;border:0;background:transparent;color:var(--ink);padding:7px 6px;border-radius:8px;cursor:pointer;min-height:36px;display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button svg{display:none}
+.seg button[aria-pressed="true"]{background:var(--surface);font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.12),0 1px 1px rgba(0,0,0,.04)}
+.guide{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);color:var(--ink);border-radius:13px;padding:11px 13px;font-size:14px;margin:12px 0 6px}
+.guide svg{font-size:18px;color:var(--accent);margin-top:2px}
+.field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--line-2)}
+.field:last-child{border-bottom:0;padding-bottom:0}
+.lab{min-width:0;line-height:1.3;display:flex;flex-direction:column;gap:3px}
+.lab b{font-size:15.5px;font-weight:500}
+.lab>span{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sym{font-size:12.5px;font-weight:500;color:var(--faint);font-style:italic;font-family:"Times New Roman",Georgia,serif;letter-spacing:.02em}
+.auto{display:none;font-size:11.5px;font-weight:600;color:var(--accent);font-style:normal}
+.ctl{display:grid;grid-template-columns:36px 100px 36px;align-items:center;background:var(--sunken);border-radius:12px;padding:2px;transition:box-shadow .15s}
+.ctl:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.ctl button{width:36px;height:38px;border:0;border-radius:10px;background:transparent;color:var(--accent);cursor:pointer;display:grid;place-items:center;font-size:17px;touch-action:manipulation}
+.ctl button:hover{background:#0071e314}
+.ctl button:active{transform:scale(.9)}
+.ctl .mid{display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.ctl input{font-family:var(--f-num);font-size:20px;font-weight:600;width:100%;min-width:0;border:0;background:transparent;color:var(--ink);padding:0 2px;text-align:center;letter-spacing:-.01em}
+.ctl input:focus{outline:none}
+.ctl .u{font-size:11px;color:var(--faint)}
+.field.computed .ctl{background:var(--accent-soft)}
+.field.computed.locked .ctl button{visibility:hidden}
+.field.computed .ctl input{color:var(--accent-ink)}
+.field.computed .auto{display:inline-block}
+@media (max-width:400px){.ctl{grid-template-columns:32px 92px 32px}.ctl button{width:32px}.ctl input{font-size:18px}}
+
+/* ===== 結果（大きな数字の読取カード） ===== */
+.dro{background:var(--surface);color:var(--ink);border-radius:var(--r-card);padding:6px;display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));box-shadow:var(--shadow)}
+.dro-cell{padding:16px 18px 18px;min-width:0;position:relative}
+.dro-cell+.dro-cell::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:.5px;background:var(--line-2)}
+.dro-k{display:flex;align-items:baseline;gap:6px;font-size:13.5px;font-weight:500;color:var(--muted)}
+.dro-k i{font-style:italic;font-family:"Times New Roman",Georgia,serif;font-size:14px;color:var(--faint)}
+.dro-v{font-family:var(--f-num);font-size:36px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin-top:8px;overflow-wrap:anywhere}
+.dro-cell.lead .dro-v{font-size:48px;letter-spacing:-.03em}
+.dro-cell.lead .dro-k{color:var(--ink);font-weight:600}
+.dro-cell.calc .dro-v{color:var(--accent)}
+.dro-cell.given .dro-v{color:var(--faint)}
+.dro.c4 .dro-v,.dro.c4 .dro-cell.lead .dro-v{font-size:30px}
+@media (min-width:701px){.dro:not(.c4):not(.err){grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)}}
+.dro-v small{white-space:nowrap;display:inline-block;font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted);margin-left:5px;letter-spacing:0}
+.dro-s{font-size:13px;color:var(--muted);margin-top:6px}
+.dro-s b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.dro.err{display:block;padding:20px 22px;font-size:15px;background:var(--danger-soft);box-shadow:none}
+.dro.err b{color:var(--danger)}
+@media (max-width:700px){
+  .dro{grid-template-columns:minmax(0,1fr);padding:2px 4px}
+  .dro-cell{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:2px 10px;padding:13px 14px}
+  .dro-cell+.dro-cell::before{left:14px;right:0;top:0;bottom:auto;width:auto;height:.5px}
+  .dro-v,.dro-cell.lead .dro-v,.dro.c4 .dro-v{font-size:26px;margin:0;text-align:right}
+  .dro-cell.lead .dro-v{font-size:36px}
+  .dro-s{grid-column:1/-1;margin-top:0}
+}
+
+/* ===== ゲージ ===== */
+.gauge-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px}
+.gauge-head .h{margin:0}
+.gauge-sub{font-size:14px;color:var(--muted);margin:0 0 22px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:99px;white-space:nowrap}
+.pill svg{font-size:14px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.lo,.pill.hi{background:var(--warn-soft);color:var(--warn)}
+.pill.danger{background:var(--danger-soft);color:var(--danger)}
+.bar{position:relative;height:6px;border-radius:99px;background:var(--track);margin:28px 12px 0}
+.bar .band{position:absolute;top:0;bottom:0;border-radius:99px;background:#34c759}
+.bar .limit{position:absolute;top:0;bottom:0;right:0;border-radius:0 99px 99px 0;background:#ff3b30;opacity:.85}
+.bar .knob{position:absolute;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.04),0 3px 8px rgba(0,0,0,.15),0 3px 1px rgba(0,0,0,.06);transition:left .25s ease}
+.bar .tag{position:absolute;bottom:20px;transform:translateX(-50%);font-size:12.5px;font-weight:600;background:var(--ink);color:#fff;padding:2px 8px;border-radius:7px;white-space:nowrap;transition:left .25s ease;font-variant-numeric:tabular-nums}
+.scale{position:relative;height:18px;margin:12px 12px 0;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.scale .ok{color:var(--ok);font-weight:600}
+.scale .dg{color:var(--danger);font-weight:600}
+.gnote{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:15px;margin:18px 0 0;padding-top:14px;border-top:.5px solid var(--line-2)}
+.gnote span{color:var(--muted)}
+.gnote b{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ===== 図 ===== */
+.diagram{border-radius:var(--r-card);padding:16px;overflow-x:auto;background:var(--surface);box-shadow:var(--shadow);position:relative}
+.dcap{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;margin:0 0 8px}
+.dcap svg{font-size:19px;color:var(--accent)}
+.diagram>svg{display:block;width:100%;max-width:540px;margin:0 auto;height:auto;background-image:radial-gradient(var(--line) 1px,transparent 1.2px);background-size:18px 18px;border-radius:12px}
+.diagram text{font-family:var(--f-num);font-size:14.5px;fill:var(--ink);font-weight:600}
+.diagram .w{fill:var(--steel)} .diagram .w3{fill:var(--steel-2)} .diagram .w2{fill:var(--chip)}
+.diagram .t{fill:var(--orange)}
+.diagram .ln{stroke:#1d1d1f;stroke-width:1.2;fill:none;opacity:.35}
+.diagram .dim{stroke:var(--faint);stroke-width:1;fill:none}
+.diagram .mv{stroke:var(--accent);stroke-width:2.2;fill:none;stroke-linecap:round}
+.diagram .mvt{fill:var(--accent)}
+.diagram .edge{stroke:#1d1d1f;stroke-width:.8;stroke-opacity:.25}
+.diagram .onw{fill:#ffffff}
+.diagram .shape{fill:var(--accent);fill-opacity:.08;stroke:var(--accent);stroke-width:2}
+.diagram .shape2{fill:none;stroke:var(--ink);stroke-width:1.5}
+.diagram .hl{fill:var(--accent)}
+.diagram .hls{stroke:var(--orange);stroke-width:3;fill:none;stroke-linecap:round}
+.diagram .axis{stroke:var(--faint);stroke-width:1;stroke-dasharray:4 4}
+.diagram .hole{fill:var(--surface);stroke:var(--ink);stroke-width:1.5}
+.diagram .hole.first{fill:var(--orange);stroke:#c77700}
+.diagram .small{font-size:12px;fill:var(--muted);font-weight:500}
+
+/* ===== 表 ===== */
+table.detail{width:100%;border-collapse:collapse}
+table.detail th,table.detail td{padding:12px 0;border-bottom:.5px solid var(--line-2);vertical-align:middle}
+table.detail tr:first-child th,table.detail tr:first-child td{padding-top:0}
+table.detail tr:last-child th,table.detail tr:last-child td{border-bottom:0;padding-bottom:0}
+table.detail th{text-align:left;font-weight:400;font-size:15.5px}
+table.detail th .sym{margin-left:6px}
+table.detail th small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:2px}
+table.detail td{text-align:right;font-family:var(--f-num);font-size:20px;font-weight:600;white-space:nowrap;letter-spacing:-.01em;padding-left:12px}
+table.detail td small{font-family:var(--f-body);font-size:13px;color:var(--muted);font-weight:400;margin-left:4px;letter-spacing:0}
+table.ref{width:100%;border-collapse:collapse;font-size:15px}
+table.ref th,table.ref td{padding:10px 8px;border-bottom:.5px solid var(--line-2);text-align:right;white-space:nowrap}
+table.ref tr:last-child td{border-bottom:0}
+table.ref th:first-child,table.ref td:first-child{text-align:left}
+table.ref th{font-weight:500;color:var(--muted);font-size:12.5px}
+table.ref td{font-weight:500}
+table.ref td.jp{font-weight:400}
+table.ref tr.on td{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+table.ref tr.on td:first-child{border-radius:9px 0 0 9px} table.ref tr.on td:last-child{border-radius:0 9px 9px 0}
+table.ref.pick tbody tr{cursor:pointer}
+table.ref.pick tbody tr:hover td{background:var(--sunken)}
+.tablewrap{overflow-x:auto}
+details.formula summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.formula summary .h{margin:0}
+details.formula summary::-webkit-details-marker{display:none}
+details.formula summary>svg{font-size:18px;color:var(--faint);transition:transform .2s}
+details.formula[open] summary>svg{transform:rotate(180deg)}
+details.formula ul{font-size:15px;display:grid;gap:8px;margin:14px 0 0;padding:14px 0 0;list-style:none;border-top:.5px solid var(--line-2);color:var(--ink)}
+details.formula li{overflow-wrap:anywhere}
+.hint{font-size:13px;color:var(--muted);margin:12px 0 0}
+
+/* ===== スマホ結果バー ===== */
+.dock{position:fixed;left:0;right:0;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px));z-index:25;background:#ffffffeb;-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);color:var(--ink);padding-block:9px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:none;border-top:.5px solid #0000001f}
+.dock-in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:center;max-width:640px;margin:0 auto}
+.dock-in div{min-width:0}
+.dock-in span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.dock-in b{display:block;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:19px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock-in b small{font-family:var(--f-body);font-size:10.5px;font-weight:500;color:var(--muted);margin-left:2px;letter-spacing:0}
+.dock-save{width:44px;height:44px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:20px;cursor:pointer}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.dot.ok{background:#34c759}.dot.lo,.dot.hi{background:#ff9500}.dot.danger{background:#ff3b30}
+@media (max-width:959px){body.has-dock .dock{display:block}}
+
+/* ===== 電卓（iOS 電卓風） ===== */
+.cgrid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1060px){.cgrid{grid-template-columns:minmax(0,1fr)}}
+.calcbody{background:var(--calc-dark);border-radius:28px;padding:18px 16px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.calcbody .hint{color:#8e8e93}
+.screen{color:#fff;padding:12px 10px 16px;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;gap:2px}
+.screen .expr{font-family:var(--f-num);font-size:18px;color:#8e8e93;overflow-wrap:anywhere;text-align:right;min-height:1.4em}
+.screen .res{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:58px;font-weight:300;letter-spacing:-.02em;overflow-wrap:anywhere;text-align:right;line-height:1.05}
+.screen .res.err{font-family:var(--f-body);font-size:17px;font-weight:500;color:var(--orange)}
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.keys button{font-family:var(--f-num);font-size:26px;font-weight:400;aspect-ratio:1;max-width:100%;border-radius:50%;border:0;background:var(--calc-key);color:#fff;cursor:pointer;touch-action:manipulation;display:grid;place-items:center;transition:filter .1s}
+.keys button:hover{filter:brightness(1.15)}
+.keys button:active{filter:brightness(1.4)}
+.keys .op,.keys .eq{background:var(--orange);color:#fff;font-size:30px}
+.keys .fn{background:var(--calc-fn);color:#000;font-size:20px;font-weight:500}
+.keys .fn svg{font-size:24px}
+.keys .clr{color:#000}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;max-height:340px;overflow:auto}
+.hist li{display:flex;align-items:center;gap:6px;border-bottom:.5px solid var(--line-2)}
+.hist li:last-child{border-bottom:0}
+.hist .hb{all:unset;box-sizing:border-box;flex:1;min-width:0;display:flex;justify-content:space-between;gap:10px;padding:11px 6px;font-size:15px;cursor:pointer;border-radius:8px;font-variant-numeric:tabular-nums}
+.hist .hb:hover{background:var(--sunken)}
+.hist .hb:focus-visible{outline:2px solid var(--accent)}
+.hist .e{color:var(--muted);overflow-wrap:anywhere;min-width:0}
+.hist .r{font-weight:600;white-space:nowrap}
+.iconbtn{width:36px;height:36px;flex:none;border:0;border-radius:50%;background:transparent;color:var(--accent);display:grid;place-items:center;font-size:19px;cursor:pointer}
+.iconbtn:hover{background:var(--accent-soft)}
+.iconbtn.on{color:#ff9f0a}
+.iconbtn.on svg{fill:#ff9f0a}
+.empty{font-size:14px;color:var(--muted);padding:6px 0}
+.conv{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center}
+.conv>svg{font-size:20px;color:var(--faint)}
+.inbox{display:flex;align-items:center;border-radius:12px;background:var(--sunken);overflow:hidden;min-width:0;transition:box-shadow .15s}
+.inbox:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.inbox input{font-family:var(--f-num);font-size:20px;font-weight:600;width:100%;min-width:0;border:0;background:transparent;color:var(--ink);padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums}
+.inbox input:focus{outline:none}
+.inbox .u{font-size:13px;color:var(--muted);padding:0 12px 0 2px;white-space:nowrap}
+.dms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+
+/* ===== 単位変換 ===== */
+.ugrid{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1060px){.ugrid{grid-template-columns:minmax(0,1fr)}}
+.cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.cats button{display:flex;flex-direction:column;align-items:flex-start;gap:0;border:0;background:var(--sunken);border-radius:12px;padding:9px 12px;cursor:pointer;text-align:left}
+.cats button b{font-size:15px;font-weight:600}
+.cats button span{font-size:12px;color:var(--muted)}
+.cats button:hover{background:var(--track)}
+.cats button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.cats button[aria-pressed="true"] span{color:#ffffffcc}
+@media (max-width:1060px){.cats{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+@media (max-width:640px){.cats{grid-template-columns:repeat(3,minmax(0,1fr))}.cats button{padding:8px 10px}.cats button span{display:none}}
+.uhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.urow,.ures{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px;align-items:end}
+@media (max-width:520px){.urow,.ures{grid-template-columns:minmax(0,1fr)}}
+.inbox.big input{font-size:32px;padding:8px 14px;text-align:left;letter-spacing:-.02em}
+.uswap{display:flex;justify-content:center;margin:10px 0}
+.uswap .iconbtn{width:42px;height:42px;font-size:20px;background:var(--sunken)}
+.dro-mini{background:var(--accent-soft);color:var(--ink);border-radius:14px;padding:10px 16px 12px;min-width:0}
+.dro-mini span{display:block;font-size:13px;color:var(--muted)}
+.dro-mini b{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:36px;font-weight:600;letter-spacing:-.02em;line-height:1.15;overflow-wrap:anywhere;color:var(--accent-ink)}
+.dro-mini small{font-size:15px;color:var(--muted);margin-left:6px}
+.ufoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:.5px solid var(--line-2);font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+#u-all th:nth-child(2),#u-all td:nth-child(2){text-align:left}
+
+/* ===== 記録ノート ===== */
+.ngrid{display:grid;grid-template-columns:minmax(0,350px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1060px){.ngrid{grid-template-columns:minmax(0,1fr)}}
+.ngrid>.stack:first-child{position:sticky;top:24px}
+@media (max-width:1060px){.ngrid>.stack:first-child{position:static}}
+.store{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;padding:4px 10px;border-radius:99px;background:var(--fill);color:var(--muted)}
+.store svg{font-size:14px}
+.store.cloud{background:var(--ok-soft);color:var(--ok)}
+.store.wait{background:var(--amber-soft);color:var(--amber-ink)}
+.ta{position:relative}
+textarea{font:inherit;font-size:16px;line-height:1.6;width:100%;min-height:112px;resize:vertical;border:0;border-radius:13px;background:var(--sunken);color:var(--ink);padding:12px 50px 12px 14px}
+textarea:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
+.mic{position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:50%;border:0;background:var(--surface);color:var(--accent);display:grid;place-items:center;font-size:19px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mic.live{background:#ff3b30;color:#fff;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px #ff3b3033}}
+.tin{font:inherit;font-size:15px;width:100%;border:0;border-radius:11px;background:var(--sunken);color:var(--ink);padding:10px 13px;min-height:44px}
+.tin:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
+.flabel{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tagbtn{display:inline-flex;align-items:center;gap:5px;border:0;background:var(--sunken);color:var(--ink);border-radius:99px;padding:6px 13px;font-size:13.5px;font-weight:500;cursor:pointer}
+.tagbtn:hover{background:var(--track)}
+.tg-try[aria-pressed="true"],.chip.tg-try{background:#e8f1fc;color:#0066cc}
+.tg-mass[aria-pressed="true"],.chip.tg-mass{background:#e3f6ea;color:#1f8a4c}
+.tg-check[aria-pressed="true"],.chip.tg-check{background:#fff3e0;color:#b35c00}
+.tg-bad[aria-pressed="true"],.chip.tg-bad{background:#ffe9e7;color:#d70015}
+.tg-good[aria-pressed="true"],.chip.tg-good{background:#e3f6ea;color:#1f8a4c}
+.tg-x[aria-pressed="true"],.chip.tg-x{background:var(--track);color:var(--ink)}
+.tagbtn[aria-pressed="true"]{font-weight:600;box-shadow:inset 0 0 0 1.5px currentColor}
+.chip{display:inline-flex;align-items:center;font-size:12px;font-weight:600;border-radius:99px;padding:2px 9px;background:var(--track);color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search{flex:1 1 220px;position:relative;min-width:0}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--faint)}
+.search input{padding-left:36px}
+.toolbar .selbox{flex:0 1 170px}
+.daygroup{display:flex;flex-direction:column;gap:10px}
+.dayh{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-top:8px;display:flex;align-items:baseline;gap:8px}
+.dayh small{font-size:13px;font-weight:500;color:var(--faint)}
+.entry{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 14px;background:var(--surface);border-radius:var(--r-card);box-shadow:var(--shadow);padding:16px 18px}
+.entry.pinned{box-shadow:var(--shadow),inset 0 0 0 1.5px #ff9f0a}
+.e-time{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.e-time .key{width:34px;height:34px;font-size:20px;border-radius:9px}
+.e-body{min-width:0;display:flex;flex-direction:column;gap:8px}
+.e-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.e-kind{font-size:13px;font-weight:500;color:var(--muted)}
+.e-part{font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.e-mach{font-size:14px;color:var(--muted)}
+.e-head .iconbtn{margin-left:auto}
+.e-cells{display:flex;flex-wrap:wrap;gap:6px 22px;background:var(--sunken);color:var(--ink);border-radius:13px;padding:10px 14px}
+.e-cells div{display:flex;flex-direction:column;min-width:0}
+.e-cells span{font-size:12px;color:var(--muted)}
+.e-cells b{font-family:var(--f-num);font-size:19px;font-weight:600;white-space:nowrap;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.e-cells b small{font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:400;margin-left:3px;letter-spacing:0}
+.e-memo{margin:0;font-size:15.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.e-actions{display:flex;gap:2px;flex-wrap:wrap;margin:2px -10px 0}
+.e-more{font-size:13.5px;color:var(--muted)}
+.e-more summary{cursor:pointer;color:var(--accent-ink)}
+.e-more ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:2px;font-variant-numeric:tabular-nums}
+.confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--danger-soft);border-radius:12px;padding:8px 12px;font-size:14px;color:var(--danger);font-weight:600}
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border-radius:16px;padding:12px 16px;font-size:14.5px}
+.banner svg{font-size:20px;color:var(--accent)}
+.estate{text-align:center;padding:44px 16px;color:var(--muted)}
+.estate svg{font-size:48px;color:var(--line-2);margin-bottom:10px}
+.estate b{display:block;color:var(--ink);font-size:18px;font-weight:600;margin-bottom:4px}
+.count{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ===== シート・トースト ===== */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.32);display:flex;align-items:flex-end;justify-content:center;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}
+@media (min-width:700px){.overlay{align-items:center}}
+.sheet{background:var(--bg);border-radius:24px;width:min(560px,100%);max-height:calc(100vh - 40px);overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.28);display:flex;flex-direction:column}
+.sheet-h{display:flex;align-items:center;gap:12px;padding:18px 20px 12px;position:sticky;top:0;background:var(--bg);z-index:1}
+.sheet-h .key.xl{width:40px;height:40px;font-size:22px;border-radius:10px}
+.sheet-h h3{margin:0;font-size:19px;font-weight:700}
+.sheet-h p{margin:0;font-size:13px;color:var(--muted)}
+.sheet-h .iconbtn{margin-left:auto;background:var(--fill);color:var(--muted);width:30px;height:30px;font-size:15px}
+.sheet-b{padding:4px 20px 8px;display:flex;flex-direction:column;gap:14px}
+.sheet-b .tin,.sheet-b textarea,.sheet-b .tagbtn{background:var(--surface)}
+.sheet-f{display:flex;gap:8px;justify-content:flex-end;padding:14px 20px 18px;position:sticky;bottom:0;background:var(--bg)}
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:70;background:#1d1d1fee;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);color:#fff;padding:11px 18px;border-radius:99px;font-size:14.5px;font-weight:500;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
+body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom,0px))}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast svg{font-size:18px;color:#30d158}
+.toast button{border:0;background:transparent;color:#64d2ff;font-weight:600;cursor:pointer;padding:0 0 0 6px}
+.foot{margin-top:28px;font-size:12.5px;color:var(--faint);display:flex;gap:8px;align-items:flex-start}
+.foot svg{font-size:15px;margin-top:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="メニュー">
+    <div class="brand"><div class="logo" id="logo1"></div><div><b>Kirico</b><small>加工計算と現場ノート</small></div></div>
+    <nav id="sidenav" style="display:flex;flex-direction:column;gap:18px"></nav>
+    <div class="side-foot" id="sidefoot"></div>
+  </aside>
+
+  <div class="main">
+    <div class="mtop"><div class="logo" id="logo2"></div><b>Kirico</b><span class="st" id="mstore"></span></div>
+    <div class="main-in" id="views"></div>
+  </div>
+</div>
+
+<nav class="bnav" id="bnav" aria-label="メニュー"></nav>
+<div class="dock" id="dock" aria-live="polite"><div class="dock-in" id="dock-in"></div></div>
+<div class="overlay" id="overlay" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= アイコン（24グリッド・線幅1.7・角丸で統一） ================= */
+const I=(d)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const dotc=(x,y)=>`<circle cx="${x}" cy="${y}" r=".95" fill="currentColor" stroke="none"/>`;
+const ICON={
+  logo:I('<rect x="5" y="2.5" width="14" height="19" rx="3"/><rect x="8" y="5.5" width="8" height="3.5" rx=".8"/>'+'<circle cx="9" cy="12.8" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12.8" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12.8" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="16.8" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="16.8" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="16.8" r="1" fill="currentColor" stroke="none"/>'),
+  calc:I('<rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="4" rx="1"/>'+dotc(8.6,13.2)+dotc(12,13.2)+dotc(15.4,13.2)+dotc(8.6,17.2)+dotc(12,17.2)+'<path d="M15.4 16.2v2"/>'),
+  turn:I('<rect x="2.5" y="6" width="4" height="12" rx="1.2"/><path d="M6.5 9.5h10.5v5H6.5"/><path d="M17 9.5c1.8.4 3 1.4 3 2.5s-1.2 2.1-3 2.5"/><path d="M12.5 3.5h4l-2 5.2z"/>'),
+  mill:I('<rect x="9.5" y="2.5" width="5" height="5" rx="1"/><path d="M9.5 7.5h5V15l-2.5 1.6L9.5 15z"/><path d="M9.5 10l5 2M9.5 12.8l5 2"/><path d="M3 17.5h5.5M15.5 17.5H21M3 21h18"/><path d="M5.2 6.2a7.5 7.5 0 0 1 2.6-2.4"/>'),
+  drill:I('<rect x="10" y="2.5" width="4" height="4" rx="1"/><path d="M10.2 6.5h3.6v9.5L12 19l-1.8-3z"/><path d="M10.2 9.3l3.6 1.6M10.2 12.4l3.6 1.6"/><path d="M3 14h4.5M16.5 14H21M7.5 14v7M16.5 14v7"/>'),
+  tap:I('<rect x="10" y="2.5" width="4" height="4.5" rx="1"/><path d="M10 7h4v10.5l-1 2h-2l-1-2z"/><path d="M10 9.5l4 1.3M10 12.3l4 1.3M10 15.1l4 1.3"/><path d="M5.5 6.5a7 7 0 0 1 2.3-3"/><path d="M5.2 4.2l.3 2.4 2.3-.4"/>'),
+  grind:I('<circle cx="9.5" cy="9.5" r="6.5"/><circle cx="9.5" cy="9.5" r="1.8"/><path d="M2.5 19.5h19"/><path d="M14.5 16.5l2.6 1.6M16.3 14.6l3 .6M13 17.6l1 1.4"/>'),
+  tri:I('<path d="M3.5 19.5h17V5z"/><path d="M17.5 19.5v-3h3"/><path d="M9 19.5a5.5 5.5 0 0 0-1.1-3.3"/>'),
+  taper:I('<path d="M3 6.5 21 9.5v5L3 17.5z"/><path d="M2 12h20" stroke-dasharray="1.5 2.5"/>'),
+  pcd:I('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.6"/><circle cx="20.5" cy="12" r="1.6"/><circle cx="12" cy="20.5" r="1.6"/><circle cx="3.5" cy="12" r="1.6"/><path d="M10 12h4M12 10v4"/>'),
+  sine:I('<path d="M2.5 20.5h19"/><path d="M4 15.8 18 8l1 1.8-14 7.8z"/><circle cx="5.6" cy="17.6" r="1.6"/><circle cx="18.6" cy="10.4" r="1.6"/><rect x="16" y="12.5" width="5" height="8" rx=".8"/>'),
+  arc:I('<path d="M3.5 17a10 10 0 0 1 17 0"/><path d="M3.5 17h17"/><path d="M12 17V9" stroke-dasharray="1.5 2.5"/>'),
+  notes:I('<path d="M6 3h11.5A1.5 1.5 0 0 1 19 4.5v15a1.5 1.5 0 0 1-1.5 1.5H6z"/><path d="M6 3H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h1"/><path d="M9.5 8h6M9.5 12h6M9.5 16h3.5"/>'),
+  save:I('<path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/><path d="M12 7.5v5M9.5 10h5"/>'),
+  mic:I('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>'),
+  search:I('<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>'),
+  trash:I('<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/>'),
+  edit:I('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>'),
+  star:I('<path d="M12 3.5 14.5 9l6 .6-4.5 4 1.3 5.9L12 16.5l-5.3 3 1.3-5.9-4.5-4 6-.6z"/>'),
+  copy:I('<rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2"/><path d="M15.5 8.5v-3A1.5 1.5 0 0 0 14 4H5.5A1.5 1.5 0 0 0 4 5.5V14a1.5 1.5 0 0 0 1.5 1.5h3"/>'),
+  download:I('<path d="M12 4v11M7 10.5l5 5 5-5M4.5 20h15"/>'),
+  reset:I('<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4v4h4"/>'),
+  cloud:I('<path d="M7 18.5h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.6 4.5 4.5 0 0 0 7 18.5z"/>'),
+  device:I('<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/>'),
+  restore:I('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
+  close:I('<path d="M6 6l12 12M18 6 6 18"/>'),
+  angle:I('<path d="M4 19h16M4 19 15 6"/><path d="M10 19a6 6 0 0 0-1.6-4.1"/>'),
+  memo:I('<path d="M5 4.5h14v10l-5 5H5z"/><path d="M14 19.5v-5h5M8.5 9h7M8.5 12.5h4"/>'),
+  chevron:I('<path d="m6 9 6 6 6-6"/>'),
+  gauge:I('<path d="M4 16a8 8 0 1 1 16 0"/><path d="m12 16 3.5-4.5"/><circle cx="12" cy="16" r="1.2"/>'),
+  ruler:I('<path d="M3 16 16 3l5 5L8 21z"/><path d="m7 12 2 2M10 9l2 2M13 6l2 2"/>'),
+  list:I('<path d="M8 6h12M8 12h12M8 18h12"/>'+dotc(4,6)+dotc(4,12)+dotc(4,18)),
+  formula:I('<path d="M17 4H8l5 8-5 8h9"/>'),
+  table:I('<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M9 9.5V20"/>'),
+  history:I('<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4h4"/><path d="M12 8v4.5l3 2"/>'),
+  swap:I('<path d="M4 8h15l-3.5-3.5M20 16H5l3.5 3.5"/>'),
+  rpm:I('<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4h-4"/>'),
+  speed:I('<path d="M5 12h11M12 6l6 6-6 6"/>'),
+  check:I('<path d="m5 12.5 4.5 4.5L19 7.5"/>'),
+  alert:I('<path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17v.2"/>'),
+  info:I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>'),
+  backspace:I('<path d="M9 5h11a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 20 19H9l-6-7z"/><path d="m12 9.5 5 5M17 9.5l-5 5"/>'),
+  minus:I('<path d="M6 12h12"/>'),
+  plus:I('<path d="M12 6v12M6 12h12"/>'),
+  upload:I('<path d="M12 20V9M7 13.5l5-5 5 5M4.5 4h15"/>'),
+  units:I('<rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6.5 6.5v3.5M10.5 6.5v5M14.5 6.5v3.5M18.5 6.5v5"/>')
+};
+document.getElementById("logo1").innerHTML=ICON.logo;
+document.getElementById("logo2").innerHTML=ICON.logo;
+
+/* ================= 共通ユーティリティ ================= */
+const PI=Math.PI, rad=d=>d*PI/180, deg=r=>r*180/PI;
+function fmt(v,d){ if(!isFinite(v)) return "—"; return v.toLocaleString("ja-JP",{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtTime(min){
+  if(!isFinite(min)||min<=0) return ["—",""];
+  const s=Math.round(min*60);
+  if(s<60) return [String(s),"秒"];
+  const m=Math.floor(s/60), r=s%60;
+  if(m<60) return [m+"分"+String(r).padStart(2,"0"),"秒"];
+  return [Math.floor(m/60)+"時間"+String(m%60).padStart(2,"0"),"分"];
+}
+function dms(d){
+  if(!isFinite(d)) return "—";
+  const sg=d<0?"−":""; d=Math.abs(d);
+  let D=Math.floor(d), M=Math.floor((d-D)*60), S=Math.round(((d-D)*60-M)*60);
+  if(S===60){S=0;M++;} if(M===60){M=0;D++;}
+  return `${sg}${D}°${String(M).padStart(2,"0")}′${String(S).padStart(2,"0")}″`;
+}
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dec=st=>(String(st).split(".")[1]||"").length;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const $=id=>document.getElementById(id);
+function lsGet(k,def){ try{ const v=localStorage.getItem(k); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+/* ================= データ（一般的な目安） ================= */
+const MATS={
+  s45c:{name:"炭素鋼 S45C",       carb:[150,250],hss:[20,35], tap:[8,15], kc:2000},
+  scm: {name:"合金鋼 SCM440",     carb:[120,220],hss:[15,30], tap:[6,12], kc:2200},
+  ss:  {name:"一般構造用鋼 SS400",carb:[180,280],hss:[25,40], tap:[10,18],kc:1800},
+  sus: {name:"ステンレス SUS304", carb:[100,180],hss:[10,20], tap:[4,8],  kc:2500},
+  fc:  {name:"鋳鉄 FC250",        carb:[150,250],hss:[20,35], tap:[10,20],kc:1200},
+  al:  {name:"アルミ A5052",      carb:[300,800],hss:[60,150],tap:[15,30],kc:700},
+  bs:  {name:"真鍮 C3604",        carb:[200,400],hss:[40,80], tap:[15,25],kc:800},
+  ti:  {name:"チタン合金",        carb:[40,80],  hss:[8,15],  tap:[3,6],  kc:1600}
+};
+const PROCF={turn:{carb:1,hss:1},mill:{carb:.85,hss:.9},drill:{carb:.55,hss:.8}};
+const MSIZES=[[3,.5],[4,.7],[5,.8],[6,1],[8,1.25],[10,1.5],[12,1.75],[14,2],[16,2],[18,2.5],[20,2.5],[22,2.5],[24,3]];
+const WHEELS=[33,45,60,80];
+const TAGS=[["試し加工","tg-try"],["量産","tg-mass"],["要確認","tg-check"],["不具合","tg-bad"],["良好","tg-good"]];
+const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
+
+/* ================= 状態 ================= */
+const DEF={
+  route:"turn", mat:"s45c", tool:"carb", wheel:33, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:1},
+  t:{
+    turn:{mode:"n",D:50,vc:180,n:1146,f:.2,ap:2,L:100,r:.8},
+    mill:{mode:"n",D:10,z:4,vc:120,n:3820,fz:.05,ap:5,ae:3,L:200},
+    drill:{mode:"n",D:8.5,vc:70,n:2622,f:.15,L:25},
+    tap:{mode:"n",D:10,P:1.5,vc:10,n:318,L:20},
+    grind:{variant:"cyl",Ds:405,Ns:1500,Dw:50,Vw:20,B:40,k:.5,a:.01,Z:.2,L:100,Vt:15,cf:5,W:100,Ls:200,ov:20,as:.01,Zs:.1},
+    tri:{known:["a","A"],a:100,b:57.735,c:115.47,A:30},
+    taper:{mode:"angle",D:30,d:20,L:50,ang:11.42},
+    pcd:{P:100,N:6,s0:0,x0:0,y0:0},
+    sine:{mode:"H",L:100,ang:15,H:25.882},
+    arc:{mode:"ra",R:50,th:60,c:50,h:6.7}
+  }
+};
+function merge(a,b){ if(Array.isArray(a)) return Array.isArray(b)?b:a; const o={}; for(const k in a){ o[k]=(a[k]&&typeof a[k]==="object")?merge(a[k],(b&&b[k])||{}):(b&&b[k]!==undefined?b[k]:a[k]); } return o; }
+let S=merge(DEF,lsGet("cutcalc-v2",null)||{});
+let saveT; function save(){ clearTimeout(saveT); saveT=setTimeout(()=>lsSet("cutcalc-v2",S),250); }
+
+/* ================= ツール定義 ================= */
+const NV=[["n","回転数を求める","rpm"],["vc","切削速度を求める","speed"]];
+const mainNV=(s)=> s.mode==="n"
+  ? {k:"主軸回転数",sym:"n",v:fmt(s.n,0),u:"min⁻¹",s:"切削速度 <b>"+fmt(s.vc,1)+"</b> m/min",lead:1}
+  : {k:"切削速度",sym:"Vc",v:fmt(s.vc,1),u:"m/min",s:"回転数 <b>"+fmt(s.n,0)+"</b> min⁻¹",lead:1};
+function nvCompute(s){ if(s.mode==="n") s.n=s.D>0?1000*s.vc/(PI*s.D):0; else s.vc=PI*s.D*s.n/1000; return [s.mode]; }
+function cutGauge(key,s){
+  const m=MATS[S.mat]; let lo,hi;
+  if(key==="tap"){ [lo,hi]=m.tap; } else { const f=PROCF[key][S.tool], r=m[S.tool]; lo=Math.round(r[0]*f/5)*5||1; hi=Math.round(r[1]*f/5)*5||2; }
+  const v=s.vc, st=v<lo?"lo":v>hi?"hi":"ok";
+  const nlo=1000*lo/(PI*s.D), nhi=1000*hi/(PI*s.D);
+  return {title:"切削速度の目安",sub:m.name+" ・ "+(key==="tap"?"ハイスタップ":S.tool==="carb"?"超硬工具":"ハイス工具"),
+    v,lo,hi,max:Math.max(hi*1.6,v*1.1),unit:"m/min",st,label:{ok:"推奨範囲内",lo:"推奨より低い",hi:"推奨より高い"}[st],
+    note:["この径での推奨回転数",isFinite(nlo)?fmt(nlo,0)+" 〜 "+fmt(nhi,0)+" min⁻¹":"—"]};
+}
+
+const GROUPS={calc:"電卓・単位",mach:"加工条件",geo:"図面・寸法",notes:"記録"};
+const TOOLS={
+  turn:{group:"mach",name:"旋削",title:"旋削（外径）",desc:"回転数・送り速度・加工時間・仕上げ面粗さを求めます",
+    selects:"matTool",seg:NV,
+    fields:()=>[["D","加工径","D","mm",1],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["f","送り","f","mm/rev",.01],["ap","切込み深さ","ap","mm",.1],["L","加工長さ","L","mm",5],["r","ノーズ半径","rε","mm",.4]],
+    compute(s){
+      const auto=nvCompute(s), m=MATS[S.mat];
+      const vf=s.f*s.n, T=s.L/vf, Q=s.vc*s.ap*s.f, Pc=s.vc*s.ap*s.f*m.kc/60000, Rz=s.f*s.f/(8*s.r)*1000, t=fmtTime(T);
+      return {auto,cells:[mainNV(s),{k:"送り速度",sym:"Vf",v:fmt(vf,0),u:"mm/min"},{k:"加工時間",sym:"T",v:t[0],u:t[1],s:"1パスあたり"}],
+        rows:[["理論仕上げ面粗さ","Rz",fmt(Rz,2),"μm","Ra ≒ "+fmt(Rz/4,2)+" μm"],["切りくず排出量","Q",fmt(Q,1),"cm³/min"],["正味切削動力","Pc",fmt(Pc,2),"kW","機械効率80%なら "+fmt(Pc/.8,2)+" kW 必要"]],
+        gauge:cutGauge("turn",s),
+        labels:{f:"送り f "+fmt(s.f,2),n:"n "+fmt(s.n,0)+" min⁻¹",D:"Ø"+fmt(s.D,1),ap:"ap "+fmt(s.ap,1),L:"L "+fmt(s.L,0)+" mm",vc:"Vc "+fmt(s.vc,0)+" m/min"}};
+    },
+    formulas:["n = 1000 × Vc ÷ (π × D)","Vf = f × n","T = L ÷ Vf","Rz = f² ÷ (8 × rε) × 1000","Q = Vc × ap × f","Pc = Vc × ap × f × kc ÷ 60000"]},
+  mill:{group:"mach",name:"フライス",title:"フライス（エンドミル・正面フライス）",desc:"刃数と1刃送りからテーブル送りと加工時間を求めます",
+    selects:"matTool",seg:NV,
+    fields:()=>[["D","工具径","D","mm",1],["z","刃数","z","枚",1,{int:1}],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["fz","1刃送り","fz","mm/刃",.01],["ap","軸方向切込み","ap","mm",.5],["ae","径方向切込み","ae","mm",.5],["L","加工長さ","L","mm",10]],
+    compute(s){
+      const auto=nvCompute(s), m=MATS[S.mat];
+      const vf=s.fz*s.z*s.n, T=s.L/vf, Q=s.ap*s.ae*vf/1000, Pc=s.ap*s.ae*vf*m.kc/6e7, t=fmtTime(T);
+      return {auto,cells:[mainNV(s),{k:"テーブル送り",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転あたり <b>"+fmt(s.fz*s.z,3)+"</b> mm"},{k:"加工時間",sym:"T",v:t[0],u:t[1],s:"1パスあたり"}],
+        rows:[["径方向の噛み合い","ae/D",fmt(s.ae/s.D*100,0),"%"],["切りくず排出量","Q",fmt(Q,1),"cm³/min"],["正味切削動力","Pc",fmt(Pc,2),"kW","機械効率80%なら "+fmt(Pc/.8,2)+" kW 必要"]],
+        gauge:cutGauge("mill",s),
+        labels:{n:"n "+fmt(s.n,0),vf:"Vf "+fmt(vf,0)+" mm/min",D:"Ø"+fmt(s.D,1),ap:"ap "+fmt(s.ap,1),ae:"ae "+fmt(s.ae,1)+" mm",z:"刃数 "+s.z}};
+    },
+    formulas:["n = 1000 × Vc ÷ (π × D)","Vf = fz × z × n","T = L ÷ Vf","Q = ap × ae × Vf ÷ 1000","Pc = ap × ae × Vf × kc ÷ (60 × 10⁶)"]},
+  drill:{group:"mach",name:"ドリル",title:"ドリル穴あけ",desc:"穴径と深さから回転数・送り速度・加工時間を求めます",
+    selects:"matTool",seg:NV,
+    fields:()=>[["D","ドリル径","D","mm",.5],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["f","送り","f","mm/rev",.01],["L","穴深さ","L","mm",1]],
+    compute(s){
+      const auto=nvCompute(s), m=MATS[S.mat];
+      const vf=s.f*s.n, tip=.3*s.D, T=(s.L+tip)/vf, Q=PI*s.D*s.D/4*vf/1000, Pc=s.f*s.vc*s.D*m.kc/240000, ld=s.L/s.D, t=fmtTime(T);
+      return {auto,cells:[mainNV(s),{k:"送り速度",sym:"Vf",v:fmt(vf,0),u:"mm/min"},{k:"加工時間",sym:"T",v:t[0],u:t[1],s:"先端長 <b>"+fmt(tip,1)+"</b> mm を含む"}],
+        rows:[["穴深さ / 径","L/D",fmt(ld,1),"倍",ld>5?"深穴：ステップ送りを検討":"通常の穴"],["切りくず排出量","Q",fmt(Q,1),"cm³/min"],["正味切削動力","Pc",fmt(Pc,2),"kW"]],
+        gauge:cutGauge("drill",s),
+        labels:{n:"n "+fmt(s.n,0),f:"f "+fmt(s.f,2),D:"Ø"+fmt(s.D,1),L:"深さ "+fmt(s.L,1)+" mm"}};
+    },
+    formulas:["n = 1000 × Vc ÷ (π × D)","Vf = f × n","T = (L + 0.3D) ÷ Vf　※先端角118°","Q = π × D² ÷ 4 × Vf ÷ 1000","Pc = f × Vc × D × kc ÷ 240000"]},
+  tap:{group:"mach",name:"タップ",title:"タップ（メートルねじ）",desc:"ねじサイズから回転数・同期送り・下穴径を求めます",
+    selects:"matTap",seg:NV,
+    fields:()=>[["D","呼び径","D","mm",1],["P","ピッチ","P","mm",.25],["vc","切削速度","Vc","m/min",1],["n","主軸回転数","n","min⁻¹",10],["L","ねじ深さ","L","mm",1]],
+    compute(s){
+      const auto=nvCompute(s), vf=s.n*s.P, T=2*s.L/vf, t=fmtTime(T);
+      return {auto,cells:[mainNV(s),{k:"送り速度（同期）",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転で <b>"+fmt(s.P,2)+"</b> mm 進む"},{k:"下穴径",sym:"d",v:fmt(s.D-s.P,2),u:"mm",s:"切削タップ（D − P）"}],
+        rows:[["下穴径（転造タップ）","d",fmt(s.D-.45*s.P,2),"mm","D − 0.45P（目安）"],["加工時間（往復）","T",...fmtTime(T)]],
+        gauge:cutGauge("tap",s),
+        labels:{n:"n "+fmt(s.n,0),vf:"Vf "+fmt(vf,0),P:"P "+fmt(s.P,2),D:"M"+fmt(s.D,0)+"×"+fmt(s.P,2),d:"下穴 Ø"+fmt(s.D-s.P,2)}};
+    },
+    formulas:["n = 1000 × Vc ÷ (π × D)","Vf = n × P","下穴 = D − P（切削タップ）","T = 2 × L ÷ Vf（逆転戻りを含む）"]},
+  grind:{group:"mach",name:"研削",title:"研削（円筒・平面）",desc:"砥石周速・工作物回転数・トラバース送り・研削時間を求めます",
+    selects:"wheel",seg:[["cyl","円筒研削","grind"],["surf","平面研削","ruler"]],segKey:"variant",
+    fields:(s)=> s.variant==="cyl"
+      ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dw","工作物径","Dw","mm",1],["Vw","工作物周速","Vw","m/min",1],["B","砥石幅","B","mm",5],["k","トラバース比","k","×B",.05],["a","切込み（1パス・半径）","a","mm",.005],["Z","取り代（直径）","Z","mm",.05],["L","研削長さ","L","mm",5]]
+      : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","Sf","mm/往復",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン（片側）","ov","mm",5],["as","切込み（1パス）","a","mm",.005],["Zs","取り代","Z","mm",.05]],
+    compute(s){
+      const Vs=PI*s.Ds*s.Ns/60000, R=S.wheel, nmax=R*60000/(PI*s.Ds);
+      const st=Vs>R?"danger":Vs<R*.6?"lo":"ok";
+      const gauge={title:"砥石周速度の確認",sub:"最高使用周速度 "+R+" m/s の砥石",v:Vs,lo:Math.round(R*.7),hi:R,max:Math.max(R*1.35,Vs*1.08),unit:"m/s",limit:R,st,
+        label:{ok:"使用範囲内",lo:"周速が低め",danger:"最高使用周速度を超えています"}[st],note:["この砥石径での上限回転数",fmt(nmax,0)+" min⁻¹"]};
+      if(s.variant==="cyl"){
+        const nw=1000*s.Vw/(PI*s.Dw), fa=s.k*s.B, vf=fa*nw, q=Vs*60/s.Vw, passes=Math.ceil((s.Z/2)/s.a-1e-9), T=passes*s.L/vf, t=fmtTime(T);
+        return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:"上限 <b>"+R+"</b> m/s",lead:1},{k:"工作物回転数",sym:"nw",v:fmt(nw,0),u:"min⁻¹"},{k:"トラバース速度",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転あたり <b>"+fmt(fa,1)+"</b> mm"}],
+          rows:[["パス数","—",isFinite(passes)?String(passes):"—","回","取り代の半分 ÷ 切込み"],["研削時間（スパークアウト除く）","T",t[0],t[1]],["速度比","q",fmt(q,0),"","Vs×60 ÷ Vw（円筒研削は60〜100が目安）"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
+          gauge,labels:{Ds:"砥石 Ø"+fmt(s.Ds,0),Ns:"Ns "+fmt(s.Ns,0),Dw:"Ø"+fmt(s.Dw,1),Vw:"nw "+fmt(nw,0),vf:"Vf "+fmt(vf,0)+" mm/min",B:"B "+fmt(s.B,0)}};
+      }
+      const strokes=Math.ceil(s.W/s.cf-1e-9), tp=strokes*(s.Ls+2*s.ov)/(s.Vt*1000), passes=Math.ceil(s.Zs/s.as-1e-9), T=passes*tp, t=fmtTime(T), q=Vs*60/s.Vt;
+      return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:"上限 <b>"+R+"</b> m/s",lead:1},{k:"パス数",sym:"—",v:isFinite(passes)?String(passes):"—",u:"回",s:"取り代 ÷ 切込み"},{k:"研削時間",sym:"T",v:t[0],u:t[1],s:"スパークアウト除く"}],
+        rows:[["1パスの時間","",...fmtTime(tp)],["1パスの往復数","",isFinite(strokes)?String(strokes):"—","往復","研削幅 ÷ クロス送り"],["速度比","q",fmt(q,0),"","Vs×60 ÷ テーブル速度"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
+        gauge,labels:{Ds:"砥石 Ø"+fmt(s.Ds,0),Ns:"Ns "+fmt(s.Ns,0),Vt:"Vt "+fmt(s.Vt,0)+" m/min",cf:"クロス "+fmt(s.cf,1),W:"W "+fmt(s.W,0),as:"a "+fmt(s.as,3)}};
+    },
+    formulas:["Vs = π × Ds × Ns ÷ 60000（m/s）","nw = 1000 × Vw ÷ (π × Dw)","Vf = k × B × nw","パス数 = (Z ÷ 2) ÷ a（円筒）／ Z ÷ a（平面）","平面の1パス時間 = 往復数 × (L + 2ov) ÷ (Vt × 1000)","上限回転数 = 最高使用周速度 × 60000 ÷ (π × Ds)"]},
+
+  tri:{group:"geo",name:"直角三角形",title:"直角三角形",desc:"わかっている2つの値から、残りの辺と角度を求めます",
+    guide:"わかっている値を<b>2つ</b>入れてください。最後に入れた2つを基準に、残りを自動で計算します。",
+    editableAuto:true,
+    fields:()=>[["a","底辺","a","mm",1],["b","高さ","b","mm",1],["c","斜辺","c","mm",1],["A","角度（底辺と斜辺）","θ","°",.5]],
+    onInput(s,id){ if(!s.known.includes(id)) s.known=[s.known[s.known.length-1],id]; },
+    compute(s){
+      const k=s.known.slice().sort().join(""), A=rad(s.A); let err="";
+      const ok=x=>isFinite(x)&&x>0;
+      switch(k){
+        case "ab": s.c=Math.hypot(s.a,s.b); s.A=deg(Math.atan2(s.b,s.a)); break;
+        case "ac": if(s.c<=s.a) err="斜辺は底辺より長くしてください"; else { s.b=Math.sqrt(s.c*s.c-s.a*s.a); s.A=deg(Math.acos(s.a/s.c)); } break;
+        case "bc": if(s.c<=s.b) err="斜辺は高さより長くしてください"; else { s.a=Math.sqrt(s.c*s.c-s.b*s.b); s.A=deg(Math.asin(s.b/s.c)); } break;
+        case "Aa": if(!(s.A>0&&s.A<90)) err="角度は0°より大きく90°未満にしてください"; else { s.b=s.a*Math.tan(A); s.c=s.a/Math.cos(A); } break;
+        case "Ab": if(!(s.A>0&&s.A<90)) err="角度は0°より大きく90°未満にしてください"; else { s.a=s.b/Math.tan(A); s.c=s.b/Math.sin(A); } break;
+        case "Ac": if(!(s.A>0&&s.A<90)) err="角度は0°より大きく90°未満にしてください"; else { s.a=s.c*Math.cos(A); s.b=s.c*Math.sin(A); } break;
+      }
+      if(!err&&!(ok(s.a)&&ok(s.b)&&ok(s.c))) err="0より大きい値を入れてください";
+      const auto=["a","b","c","A"].filter(x=>!s.known.includes(x));
+      const cell=(id,k,sym,v,u,sub)=>({k,sym,v,u,s:sub,auto:auto.includes(id),given:!auto.includes(id)});
+      return {err,auto,cols:4,cells:[cell("a","底辺","a",fmt(s.a,3),"mm"),cell("b","高さ","b",fmt(s.b,3),"mm"),cell("c","斜辺","c",fmt(s.c,3),"mm"),cell("A","角度","θ",fmt(s.A,3),"°",dms(s.A))],
+        rows:[["角度（度分秒）","θ",dms(s.A),""],["反対側の角度","90°−θ",fmt(90-s.A,3),"°",dms(90-s.A)],["勾配（高さ ÷ 底辺）","tanθ",fmt(s.b/s.a,4),"","100mmあたり "+fmt(s.b/s.a*100,2)+" mm"],["面積","",fmt(s.a*s.b/2,2),"mm²"]]};
+    },
+    diagram(s,r){
+      if(r.err) return emptyDiagram();
+      const W=520,H=250, pad=50, sc=Math.min((W-2*pad-40)/s.a,(H-2*pad)/s.b);
+      const x0=pad+20, y0=H-pad+10, x1=x0+s.a*sc, y1=y0-s.b*sc;
+      const hl=id=>r.auto.includes(id)?' class="hl"':'';
+      const ar=Math.min(40,s.a*sc*.4);
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="直角三角形の図">
+        <path d="M${x0} ${y0} L${x1} ${y0} L${x1} ${y1} Z" class="shape"/>
+        <path d="M${x1-14} ${y0} v-14 h14" class="shape2"/>
+        <path d="M${x0+ar} ${y0} A${ar} ${ar} 0 0 0 ${x0+ar*Math.cos(rad(s.A))} ${y0-ar*Math.sin(rad(s.A))}" class="hls"/>
+        <text x="${(x0+x1)/2}" y="${y0+26}" text-anchor="middle"${hl("a")}>a = ${fmt(s.a,2)}</text>
+        <text x="${x1+10}" y="${(y0+y1)/2}" ${hl("b")}>b = ${fmt(s.b,2)}</text>
+        <text x="${(x0+x1)/2-14}" y="${(y0+y1)/2-12}" text-anchor="end"${hl("c")}>c = ${fmt(s.c,2)}</text>
+        <text x="${x0+ar+8}" y="${y0-8}"${hl("A")}>θ ${fmt(s.A,2)}°</text>
+      </svg>`;
+    },
+    formulas:["c = √(a² + b²)","a = c × cosθ　　b = c × sinθ","b = a × tanθ","θ = tan⁻¹(b ÷ a)"]},
+  taper:{group:"geo",name:"テーパー",title:"テーパー",desc:"大径・小径・長さからテーパー角度と刃物台の旋回角を求めます",
+    seg:[["angle","角度を求める","angle"],["d","小径を求める","ruler"]],
+    fields:(s)=> s.mode==="angle"
+      ? [["D","大径","D","mm",1],["d","小径","d","mm",1],["L","テーパー長さ","L","mm",1]]
+      : [["D","大径","D","mm",1],["L","テーパー長さ","L","mm",1],["ang","テーパー角（全角）","2α","°",.5]],
+    compute(s){
+      let err="";
+      if(s.mode==="angle"){ if(!(s.D>s.d)) err="大径は小径より大きくしてください"; s.ang=2*deg(Math.atan((s.D-s.d)/(2*s.L))); }
+      else { s.d=s.D-2*s.L*Math.tan(rad(s.ang/2)); if(!(s.ang>0&&s.ang<180)) err="角度は0°より大きく180°未満にしてください"; else if(s.d<0) err="この角度と長さでは小径がマイナスになります"; }
+      const a=s.ang/2, ratio=s.L/(s.D-s.d);
+      const c=s.mode==="angle"
+        ? [{k:"テーパー角（全角）",sym:"2α",v:fmt(s.ang,3),u:"°",s:dms(s.ang),lead:1,auto:1},{k:"刃物台の旋回角",sym:"α",v:fmt(a,3),u:"°",s:dms(a)},{k:"テーパー比",sym:"1:x",v:"1 : "+fmt(ratio,2),u:"",s:"直径差1mmあたりの長さ"}]
+        : [{k:"小径",sym:"d",v:fmt(s.d,3),u:"mm",lead:1,auto:1},{k:"刃物台の旋回角",sym:"α",v:fmt(a,3),u:"°",s:dms(a)},{k:"テーパー比",sym:"1:x",v:"1 : "+fmt(ratio,2),u:""}];
+      return {err,auto:[],cells:c,rows:[["片側の段差","(D−d)/2",fmt((s.D-s.d)/2,3),"mm"],["勾配（片側）","tanα",fmt(Math.tan(rad(a)),5),""],["長さ100mmあたりの直径差","",fmt((s.D-s.d)/s.L*100,3),"mm"]]};
+    },
+    diagram(s,r){
+      if(r.err) return emptyDiagram();
+      const W=520,H=230, cx=60, cy=112, len=380, maxD=Math.max(s.D,1), sc=Math.min(160/maxD,1e9);
+      const hD=s.D*sc/2, hd=Math.max(s.d,0)*sc/2;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="テーパーの図">
+        <line x1="${cx-20}" y1="${cy}" x2="${cx+len+20}" y2="${cy}" class="axis"/>
+        <path d="M${cx} ${cy-hD} L${cx+len} ${cy-hd} L${cx+len} ${cy+hd} L${cx} ${cy+hD} Z" class="shape"/>
+        <path d="M${cx} ${cy-hD} L${cx+len} ${cy-hD}" class="axis"/>
+        <path d="M${cx+len-70} ${cy-hD} A70 70 0 0 1 ${cx+len-70*Math.cos(Math.atan((hD-hd)/len))} ${cy-hD+70*Math.sin(Math.atan((hD-hd)/len))}" class="hls"/>
+        <text x="${cx-8}" y="${cy-hD-10}">D ${fmt(s.D,2)}</text>
+        <text x="${cx+len-20}" y="${cy-hd-12}" text-anchor="end"${s.mode==="d"?' class="hl"':''}>d ${fmt(s.d,2)}</text>
+        <text x="${cx+len/2}" y="${cy+hD+28}" text-anchor="middle">L ${fmt(s.L,1)}</text>
+        <text x="${cx+len-80}" y="${cy-hD-10}" text-anchor="end" class="hl">α ${fmt(s.ang/2,2)}°</text>
+      </svg>`;
+    },
+    formulas:["α = tan⁻¹((D − d) ÷ 2L)　（刃物台の旋回角）","テーパー角（全角）= 2α","d = D − 2L × tanα","テーパー比 = 1 : L ÷ (D − d)"]},
+  pcd:{group:"geo",name:"PCD穴位置",title:"PCD（ピッチ円）の穴位置",desc:"ピッチ円径と穴数から各穴の X・Y 座標を求めます",
+    fields:()=>[["P","ピッチ円径","PCD","mm",5],["N","穴数","N","個",1,{int:1,min:1,max:72}],["s0","1番穴の角度","θ₀","°",15],["x0","中心 X","X₀","mm",1,{neg:1}],["y0","中心 Y","Y₀","mm",1,{neg:1}]],
+    compute(s){
+      const N=Math.max(1,Math.min(72,Math.round(s.N))); s.N=N;
+      const R=s.P/2, pitch=360/N, chord=N>1?s.P*Math.sin(PI/N):0, pts=[];
+      for(let i=0;i<N;i++){ const a=s.s0+i*pitch; pts.push([i+1,a,s.x0+R*Math.cos(rad(a)),s.y0+R*Math.sin(rad(a))]); }
+      r_pts=pts;
+      return {auto:[],cells:[{k:"隣り合う穴の間隔",sym:"弦",v:fmt(chord,3),u:"mm",lead:1,auto:1},{k:"角度ピッチ",sym:"360/N",v:fmt(pitch,3),u:"°",s:dms(pitch)},{k:"半径",sym:"R",v:fmt(R,3),u:"mm"}],
+        rows:[],pts,extra:`<div class="card"><h2 class="h">${ICON.table}穴の座標（反時計回り・X軸から）</h2><div class="tablewrap"><table class="ref"><thead><tr><th>穴</th><th>角度</th><th>X</th><th>Y</th></tr></thead><tbody>${pts.map(p=>`<tr${p[0]===1?' class="on"':''}><td>No.${p[0]}</td><td>${fmt(p[1]%360,2)}°</td><td>${fmt(p[2],3)}</td><td>${fmt(p[3],3)}</td></tr>`).join("")}</tbody></table></div></div>`};
+    },
+    diagram(s,r){
+      const W=520,H=300,cx=260,cy=150,R=110;
+      const holes=r.pts.map(p=>{ const x=cx+R*Math.cos(rad(p[1])), y=cy-R*Math.sin(rad(p[1])); const lx=cx+(R+26)*Math.cos(rad(p[1])), ly=cy-(R+26)*Math.sin(rad(p[1]))+5;
+        return `<circle cx="${x}" cy="${y}" r="${r.pts.length>24?5:9}" class="hole${p[0]===1?" first":""}"/>${r.pts.length<=24?`<text x="${lx}" y="${ly}" text-anchor="middle" class="small">${p[0]}</text>`:""}`; }).join("");
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ピッチ円と穴位置の図">
+        <line x1="${cx-150}" y1="${cy}" x2="${cx+150}" y2="${cy}" class="axis"/><line x1="${cx}" y1="${cy-145}" x2="${cx}" y2="${cy+145}" class="axis"/>
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--steel)" stroke-width="2" stroke-dasharray="7 5"/>
+        ${holes}
+        <text x="${cx+158}" y="${cy+5}" class="small">X</text><text x="${cx-4}" y="${cy-150}" class="small">Y</text>
+        <text x="${cx}" y="${cy+R+48 > H-6 ? H-6 : cy+R+48}" text-anchor="middle">PCD ${fmt(s.P,1)} ・ ${s.N}穴</text>
+      </svg>`;
+    },
+    formulas:["X = X₀ + (PCD ÷ 2) × cos(θ₀ + i × 360/N)","Y = Y₀ + (PCD ÷ 2) × sin(θ₀ + i × 360/N)","穴の間隔（弦）= PCD × sin(180° ÷ N)"]},
+  sine:{group:"geo",name:"サインバー",title:"サインバー",desc:"角度からブロックゲージの高さ、または高さから角度を求めます",
+    seg:[["H","ブロック高さを求める","ruler"],["ang","角度を求める","angle"]],
+    fields:(s)=> s.mode==="H" ? [["L","サインバー長さ","L","mm",100],["ang","角度","θ","°",.5]] : [["L","サインバー長さ","L","mm",100],["H","ブロック高さ","H","mm",.1]],
+    compute(s){
+      let err="";
+      if(s.mode==="H"){ if(!(s.ang>0&&s.ang<90)) err="角度は0°より大きく90°未満にしてください"; s.H=s.L*Math.sin(rad(s.ang)); }
+      else { if(!(s.H>0&&s.H<s.L)) err="高さはサインバーの長さより小さくしてください"; s.ang=deg(Math.asin(s.H/s.L)); }
+      const c=s.mode==="H"
+        ? [{k:"ブロックゲージ高さ",sym:"H",v:fmt(s.H,4),u:"mm",lead:1,auto:1},{k:"角度",sym:"θ",v:fmt(s.ang,3),u:"°",s:dms(s.ang)},{k:"長さ",sym:"L",v:fmt(s.L,0),u:"mm"}]
+        : [{k:"角度",sym:"θ",v:fmt(s.ang,4),u:"°",s:dms(s.ang),lead:1,auto:1},{k:"ブロックゲージ高さ",sym:"H",v:fmt(s.H,4),u:"mm"},{k:"長さ",sym:"L",v:fmt(s.L,0),u:"mm"}];
+      return {err,auto:[],cells:c,rows:[["角度（度分秒）","θ",dms(s.ang),""],["高さ1µmあたりの角度変化","",fmt(deg(0.001/(s.L*Math.cos(rad(s.ang))))*3600,2),"秒"]]};
+    },
+    diagram(s,r){
+      if(r.err) return emptyDiagram();
+      const W=520,H=240, x0=90, y0=200, Lp=300, a=rad(Math.min(s.ang,60)), x1=x0+Lp*Math.cos(a), y1=y0-Lp*Math.sin(a), hb=y0-y1;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="サインバーの図">
+        <line x1="20" y1="${y0+14}" x2="${W-20}" y2="${y0+14}" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="${x1-18}" y="${y1+12}" width="36" height="${Math.max(hb,1)}" class="t edge"/>
+        <circle cx="${x0}" cy="${y0}" r="12" class="w2"/><circle cx="${x1}" cy="${y1}" r="12" class="w2"/>
+        <path d="M${x0} ${y0-12} L${x1} ${y1-12}" stroke="var(--steel)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M${x0+70} ${y0+14} A70 70 0 0 0 ${x0+70*Math.cos(a)} ${y0+14-70*Math.sin(a)}" class="hls"/>
+        <text x="${x0+80}" y="${y0+6}">θ ${fmt(s.ang,3)}°</text>
+        <text x="${x1+26}" y="${(y1+y0)/2+18}"${s.mode==="H"?' class="hl"':''}>H ${fmt(s.H,3)}</text>
+        <text x="${(x0+x1)/2-30}" y="${(y0+y1)/2-28}" text-anchor="middle">L ${fmt(s.L,0)}</text>
+      </svg>`;
+    },
+    formulas:["H = L × sinθ","θ = sin⁻¹(H ÷ L)"]},
+  arc:{group:"geo",name:"円弧・弦",title:"円弧・弦",desc:"半径と中心角から弦長・弧長・高さを、または弦と高さから半径を求めます",
+    seg:[["ra","Rと角度から","angle"],["ch","弦と高さからR","ruler"]],
+    fields:(s)=> s.mode==="ra" ? [["R","半径","R","mm",1],["th","中心角","θ","°",5]] : [["c","弦の長さ","c","mm",1],["h","弓形の高さ","h","mm",.5]],
+    compute(s){
+      let err="";
+      if(s.mode==="ra"){ if(!(s.th>0&&s.th<=360)) err="中心角は0°より大きく360°以下にしてください"; s.c=2*s.R*Math.sin(rad(s.th/2)); s.h=s.R*(1-Math.cos(rad(s.th/2))); }
+      else { if(!(s.h>0&&s.c>0)) err="0より大きい値を入れてください"; s.R=(s.c*s.c/4+s.h*s.h)/(2*s.h); s.th=2*deg(Math.asin(Math.min(1,s.c/(2*s.R)))); if(s.h>s.R) s.th=360-s.th; }
+      const arc=s.R*rad(s.th);
+      const c=s.mode==="ra"
+        ? [{k:"弦の長さ",sym:"c",v:fmt(s.c,3),u:"mm",lead:1,auto:1},{k:"弧の長さ",sym:"s",v:fmt(arc,3),u:"mm",auto:1},{k:"弓形の高さ",sym:"h",v:fmt(s.h,3),u:"mm",auto:1}]
+        : [{k:"半径",sym:"R",v:fmt(s.R,3),u:"mm",lead:1,auto:1},{k:"中心角",sym:"θ",v:fmt(s.th,3),u:"°",s:dms(s.th),auto:1},{k:"弧の長さ",sym:"s",v:fmt(arc,3),u:"mm",auto:1}];
+      return {err,auto:[],cells:c,rows:[["直径","2R",fmt(2*s.R,3),"mm"],["扇形の面積","",fmt(s.R*s.R*rad(s.th)/2,2),"mm²"]]};
+    },
+    diagram(s,r){
+      if(r.err) return emptyDiagram();
+      const W=520,H=250, th=Math.min(s.th,359), R=Math.min(150, 180/Math.max(1,Math.sin(rad(Math.min(th,180)/2))*2)*1);
+      const Rp=Math.min(140,R), cx=260, cy=60+Rp, a1=rad(90-th/2), a2=rad(90+th/2);
+      const p1=[cx+Rp*Math.cos(a1),cy-Rp*Math.sin(a1)], p2=[cx+Rp*Math.cos(a2),cy-Rp*Math.sin(a2)];
+      const top=cy-Rp, large=th>180?1:0;
+      return `<svg viewBox="0 0 ${W} ${Math.max(H,cy+30)}" role="img" aria-label="円弧と弦の図">
+        <path d="M${p2[0]} ${p2[1]} A${Rp} ${Rp} 0 ${large} 1 ${p1[0]} ${p1[1]}" class="hls"/>
+        <line x1="${p2[0]}" y1="${p2[1]}" x2="${p1[0]}" y2="${p1[1]}" class="shape2"/>
+        <line x1="${cx}" y1="${cy}" x2="${p1[0]}" y2="${p1[1]}" class="axis"/><line x1="${cx}" y1="${cy}" x2="${p2[0]}" y2="${p2[1]}" class="axis"/>
+        <line x1="${cx}" y1="${top}" x2="${cx}" y2="${(p1[1])}" stroke="var(--warn)" stroke-width="2"/>
+        <circle cx="${cx}" cy="${cy}" r="3" fill="var(--ink)"/>
+        <text x="${cx+8}" y="${(top+p1[1])/2+5}">h ${fmt(s.h,2)}</text>
+        <text x="${cx}" y="${p1[1]+22}" text-anchor="middle">c ${fmt(s.c,2)}</text>
+        <text x="${cx}" y="${top-10}" text-anchor="middle" class="small">弧 ${fmt(s.R*rad(s.th),2)}</text>
+        <text x="${cx+10}" y="${cy-6}" class="small">R ${fmt(s.R,2)} ・ θ ${fmt(s.th,1)}°</text>
+      </svg>`;
+    },
+    formulas:["c = 2R × sin(θ ÷ 2)","h = R × (1 − cos(θ ÷ 2))","弧の長さ = R × θ（ラジアン）","R = (c² ÷ 4 + h²) ÷ (2h)"]}
+};
+let r_pts=[];
+function emptyDiagram(){ return `<svg viewBox="0 0 520 120" role="img" aria-label="値を直すと図を表示します"><text x="260" y="66" text-anchor="middle" class="small">値を直すと図を表示します</text></svg>`; }
+
+/* 固定図（加工） */
+const ARROW='<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mvt"/></marker><marker id="dh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1L10 5L0 9z" fill="var(--faint)"/></marker></defs>';
+const DIAG={
+  turn:`<svg viewBox="0 0 520 230" role="img" aria-label="旋削の図">${ARROW}<rect x="20" y="58" width="40" height="124" rx="6" class="w2"/><rect x="60" y="70" width="300" height="100" rx="2" class="w"/><rect x="360" y="85" width="120" height="70" rx="2" class="w3"/><rect x="300" y="70" width="60" height="15" class="w2"/><path d="M330 30 L360 30 L360 70 L344 70 Z" class="t edge"/><path d="M300 40 L300 20 L250 20" class="mv" marker-end="url(#ah)"/><text x="140" y="25" data-k="f">f</text><path d="M500 90 C515 110 515 140 500 160" class="mv" marker-end="url(#ah)"/><text x="350" y="200" data-k="n">n</text><path d="M10 75 v90" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="16" y="48" data-k="D">D</text><path d="M372 70 v15" class="dim"/><text x="380" y="78" data-k="ap">ap</text><path d="M60 200 h300" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="150" y="223" data-k="L">L</text><text x="90" y="126" data-k="vc" class="onw">Vc</text></svg>`,
+  mill:`<svg viewBox="0 0 520 240" role="img" aria-label="フライスの図">${ARROW}<rect x="40" y="130" width="440" height="80" rx="2" class="w"/><rect x="300" y="130" width="60" height="40" class="w2"/><rect x="300" y="20" width="60" height="110" rx="3" class="t edge"/><path d="M300 50 L360 70 M300 80 L360 100 M300 110 L360 130" class="ln"/><path d="M315 14 C330 4 345 4 360 14" class="mv" marker-end="url(#ah)"/><text x="370" y="20" data-k="n">n</text><path d="M290 80 L230 80" class="mv" marker-end="url(#ah)"/><text x="70" y="85" data-k="vf">Vf</text><path d="M300 226 h60" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="372" y="232" data-k="D">D</text><path d="M380 130 v40" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="388" y="156" data-k="ap" class="onw">ap</text><text x="60" y="162" data-k="ae" class="onw">ae</text><text x="60" y="190" data-k="z" class="onw">z</text></svg>`,
+  drill:`<svg viewBox="0 0 520 250" role="img" aria-label="ドリルの図">${ARROW}<rect x="60" y="110" width="400" height="120" rx="2" class="w"/><path d="M225 110 V190 L260 210 L295 190 V110 Z" class="w2"/><path d="M230 20 H290 V180 L260 198 L230 180 Z" class="t edge"/><path d="M230 50 L290 80 M230 90 L290 120 M230 130 L290 160" class="ln"/><path d="M232 12 C250 2 270 2 288 12" class="mv" marker-end="url(#ah)"/><text x="298" y="18" data-k="n">n</text><path d="M320 40 V100" class="mv" marker-end="url(#ah)"/><text x="332" y="76" data-k="f">f</text><path d="M230 240 H290" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="304" y="246" data-k="D">D</text><path d="M205 110 V190" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="76" y="156" data-k="L" class="onw">L</text></svg>`,
+  tap:`<svg viewBox="0 0 520 250" role="img" aria-label="タップの図">${ARROW}<rect x="60" y="110" width="400" height="120" rx="2" class="w"/><rect x="228" y="110" width="64" height="100" class="w2"/><path d="M236 18 H284 V196 L274 206 H246 L236 196 Z" class="t edge"/><path d="M228 120 L292 132 M228 138 L292 150 M228 156 L292 168 M228 174 L292 186 M228 192 L292 204" class="ln"/><path d="M238 10 C252 0 268 0 282 10" class="mv" marker-end="url(#ah)"/><text x="292" y="16" data-k="n">n</text><path d="M320 40 V100" class="mv" marker-end="url(#ah)"/><text x="332" y="76" data-k="vf">Vf</text><path d="M302 120 V138" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="310" y="136" data-k="P" class="onw">P</text><path d="M228 240 H292" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="304" y="246" data-k="D">D</text><text x="76" y="156" data-k="d" class="onw">d</text></svg>`,
+  grind_cyl:`<svg viewBox="0 0 520 250" role="img" aria-label="円筒研削の図">${ARROW}<rect x="20" y="150" width="30" height="80" rx="5" class="w2"/><rect x="50" y="160" width="380" height="60" rx="2" class="w"/><circle cx="260" cy="80" r="70" class="t edge"/><circle cx="260" cy="80" r="16" class="w2"/><path d="M226 150 h68" stroke="var(--navy)" stroke-width="2" opacity=".4"/><path d="M180 30 C190 10 210 2 230 2" class="mv" marker-end="url(#ah)"/><text x="40" y="24" data-k="Ns">Ns</text><text x="345" y="44" data-k="Ds">Ds</text><path d="M450 170 C462 182 462 198 450 210" class="mv" marker-end="url(#ah)"/><text x="360" y="244" data-k="Vw">nw</text><path d="M340 120 H410" class="mv" marker-end="url(#ah)"/><text x="345" y="112" data-k="vf">Vf</text><text x="70" y="196" data-k="Dw" class="onw">Dw</text><text x="150" y="150" data-k="B" class="small">B</text></svg>`,
+  grind_surf:`<svg viewBox="0 0 520 250" role="img" aria-label="平面研削の図">${ARROW}<rect x="40" y="170" width="440" height="40" rx="2" class="w3"/><rect x="90" y="140" width="340" height="30" rx="2" class="w"/><circle cx="260" cy="70" r="66" class="t edge"/><circle cx="260" cy="70" r="15" class="w2"/><path d="M180 26 C190 8 210 2 228 2" class="mv" marker-end="url(#ah)"/><text x="30" y="24" data-k="Ns">Ns</text><text x="342" y="34" data-k="Ds">Ds</text><path d="M120 228 H240" class="mv" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="250" y="234" data-k="Vt">Vt</text><text x="100" y="161" data-k="W" class="onw">W</text><text x="340" y="161" data-k="as" class="onw">a</text><text x="345" y="112" data-k="cf">クロス</text></svg>`
+};
+
+/* ================= ルーティング ================= */
+const ROUTES=["calc","units",...Object.keys(TOOLS),"notes"];
+const groupOf=r=> r==="calc"||r==="units"?"calc": r==="notes"?"notes": TOOLS[r].group;
+const routeIcon=r=>ICON[r==="calc"?"calc":r==="notes"?"notes":r==="memo"?"memo":r==="units"?"units":r];
+const KEY=(r,cls)=>`<span class="key k-${r}${["calc","sine","notes","memo"].includes(r)?" dk":""}${cls?" "+cls:""}" aria-hidden="true">${routeIcon(r)}</span>`;
+const routeName=r=> r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
+
+function buildNav(){
+  const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo")],["notes",["notes"]]];
+  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("");
+  const bn=[["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
+  $("bnav").innerHTML=bn.map(([g,l,ic])=>`<button data-gogroup="${g}">${routeIcon(ic)}<span>${l}</span>${g==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("");
+  document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(b.dataset.go,true);});
+  $("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-gogroup]"); if(!b) return; const g=b.dataset.gogroup; go(g==="notes"?"notes":S.last[g]||(g==="calc"?"calc":g),true);});
+}
+function subnav(group){
+  const list=group==="calc"?["calc","units"]:Object.keys(TOOLS).filter(k=>TOOLS[k].group===group);
+  return `<nav class="subnav" aria-label="${GROUPS[group]}">${list.map(k=>`<button data-go="${k}">${KEY(k)}${routeName(k)}</button>`).join("")}</nav>`;
+}
+function go(route,push){
+  if(!ROUTES.includes(route)) route="turn";
+  S.route=route; const g=groupOf(route); if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
+  ROUTES.forEach(r=>{ $("view-"+r).hidden=r!==route; });
+  document.querySelectorAll("[data-go]").forEach(b=>{ if(b.dataset.go===route) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  document.querySelectorAll("[data-gogroup]").forEach(b=>{ if(b.dataset.gogroup===g) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  renderDock();
+  if(route==="notes") renderNotes();
+  if(push){ try{ history.replaceState(null,"","#"+route); }catch(e){} window.scrollTo(0,0); }
+}
+window.addEventListener("hashchange",()=>go(location.hash.slice(1)));
+
+/* ================= ツール画面 ================= */
+const selbox=inner=>`<div class="selbox">${inner}${ICON.chevron}</div>`;
+const matOptions=()=>Object.entries(MATS).map(([k,m])=>`<option value="${k}">${esc(m.name)}</option>`).join("");
+const H2=(icon,text)=>`<h2 class="h">${ICON[icon]}${text}</h2>`;
+function viewHead(r,title,desc){
+  return `<header class="vhead"><div class="vtitle">${KEY(r,"xl")}<div><div class="crumb">${GROUPS[groupOf(r)]}</div><h2>${title}</h2><p>${desc}</p></div></div>
+    ${r!=="notes"&&r!=="calc"&&r!=="units"?`<div class="actions"><button class="btn ghost" data-reset="${r}">${ICON.reset}初期値に戻す</button><button class="btn primary" data-save="${r}">${ICON.save}この計算を記録</button></div>`:""}</header>`;
+}
+function toolView(id){
+  const T=TOOLS[id];
+  return `<section id="view-${id}" hidden>
+    ${subnav(T.group)}
+    ${viewHead(id,T.title,T.desc)}
+    <div class="tgrid">
+      <div class="card" id="panel-${id}"></div>
+      <div class="stack">
+        <div class="dro" id="dro-${id}" aria-live="polite"></div>
+        ${T.group==="mach"?`<div class="card" id="gauge-${id}"></div>`:""}
+        <div class="diagram"><div class="dcap">${ICON.ruler}図</div><div id="dg-${id}" style="display:contents"></div></div>
+        <div class="card" id="rowsc-${id}">${H2("list","そのほかの値")}<table class="detail" id="rows-${id}"></table></div>
+        <div id="extra-${id}" style="display:contents"></div>
+        ${id==="tap"?tapTable():""}
+        <div class="card"><details class="formula"><summary>${H2("formula","計算式")}${ICON.chevron}</summary><ul>${T.formulas.map(f=>`<li>${f}</li>`).join("")}</ul></details></div>
+      </div>
+    </div></section>`;
+}
+function tapTable(){
+  return `<div class="card">${H2("table","並目ねじ 下穴早見表")}<div class="tablewrap"><table class="ref pick" id="tap-table">
+    <thead><tr><th>サイズ</th><th>ピッチ</th><th>切削タップ</th><th>転造タップ</th></tr></thead>
+    <tbody>${MSIZES.map(([d,p])=>`<tr data-d="${d}" data-p="${p}" tabindex="0"><td>M${d}</td><td>${fmt(p,2)}</td><td>Ø${fmt(d-p,2)}</td><td>Ø${fmt(d-.45*p,2)}</td></tr>`).join("")}</tbody></table></div><p class="hint">行を押すと入力欄に反映されます。</p></div>`;
+}
+function buildPanel(id){
+  const T=TOOLS[id], s=S.t[id];
+  let sel="";
+  if(T.selects==="matTool") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">工具材質${selbox(`<select data-role="tool"><option value="carb">超硬</option><option value="hss">ハイス（HSS）</option></select>`)}</label></div>`;
+  if(T.selects==="matTap") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">ねじサイズ（並目）${selbox(`<select data-role="msize"><option value="">手入力</option>${MSIZES.map(([d,p])=>`<option value="${d}|${p}">M${d} × ${p}</option>`).join("")}</select>`)}</label></div>`;
+  if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度${selbox(`<select data-role="wheel">${WHEELS.map(w=>`<option value="${w}">${w} m/s</option>`).join("")}</select>`)}</label>`;
+  const segKey=T.segKey||"mode";
+  const seg=T.seg?`<div class="seg" role="group" aria-label="計算の種類">${T.seg.map(([v,l,ic])=>`<button type="button" data-seg="${v}" aria-pressed="${s[segKey]===v}">${ICON[ic]}${l}</button>`).join("")}</div>`:"";
+  const guide=T.guide?`<div class="guide">${ICON.info}<span>${T.guide}</span></div>`:"";
+  const fields=T.fields(s).map(([fid,lab,sym,u,st])=>`<div class="field" data-f="${fid}">
+      <div class="lab"><b>${lab}</b><span><em class="sym">${sym}</em><em class="auto">自動計算</em></span></div>
+      <div class="ctl">
+        <button type="button" data-step="-${st}" aria-label="${lab}を${st}減らす">${ICON.minus}</button>
+        <div class="mid"><input data-fid="${fid}" type="number" inputmode="decimal" step="any" aria-label="${lab}（${u}）"><span class="u">${u}</span></div>
+        <button type="button" data-step="${st}" aria-label="${lab}を${st}増やす">${ICON.plus}</button>
+      </div></div>`).join("");
+  $("panel-"+id).innerHTML=`${sel}${seg}${guide}<div>${fields}</div>`;
+  if(DIAG[id]) $("dg-"+id).innerHTML=DIAG[id];
+  if(id==="grind") $("dg-"+id).innerHTML=DIAG["grind_"+s.variant];
+}
+const RES={};
+function fieldDef(id,fid){ return TOOLS[id].fields(S.t[id]).find(f=>f[0]===fid); }
+function syncPanel(id,auto){
+  const T=TOOLS[id], s=S.t[id], p=$("panel-"+id);
+  T.fields(s).forEach(([fid,,,,st,o])=>{
+    const el=p.querySelector(`input[data-fid="${fid}"]`); if(!el) return;
+    const d=(o&&o.int)?0:Math.max(dec(st),fid==="n"||fid==="Ns"?0:3);
+    const v=+(+s[fid]).toFixed(d);
+    if(document.activeElement!==el) el.value=isFinite(v)?v:"";
+    const comp=auto.includes(fid), f=el.closest(".field");
+    f.classList.toggle("computed",comp);
+    f.classList.toggle("locked",comp&&!T.editableAuto);
+    el.readOnly=comp&&!T.editableAuto;
+  });
+  const m=p.querySelector('[data-role="mat"]'); if(m) m.value=S.mat;
+  const t=p.querySelector('[data-role="tool"]'); if(t) t.value=S.tool;
+  const w=p.querySelector('[data-role="wheel"]'); if(w) w.value=S.wheel;
+  const ms=p.querySelector('[data-role="msize"]'); if(ms){ const v=s.D+"|"+s.P; ms.value=[...ms.options].some(o=>o.value===v)?v:""; }
+}
+function droHTML(r){
+  if(r.err) return {cls:"dro err",html:`<b>${ICON.alert} 計算できません</b><br>${esc(r.err)}`};
+  return {cls:"dro",html:r.cells.map(c=>`<div class="dro-cell${c.lead?" lead":""}${c.auto?" calc":""}${c.given?" given":""}"><div class="dro-k"><span>${c.k}</span>${c.sym&&c.sym!=="—"?`<i>${c.sym}</i>`:""}</div><div class="dro-v">${c.v}<small>${c.u||""}</small></div>${c.s?`<div class="dro-s">${c.s}</div>`:""}</div>`).join("")};
+}
+function gaugeHTML(g){
+  const pos=x=>Math.min(100,Math.max(0,x/g.max*100));
+  const icon=g.st==="ok"?ICON.check:ICON.alert;
+  return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill ${g.st}">${icon}${g.label}</span></div>
+    <p class="gauge-sub">${esc(g.sub)}</p>
+    <div class="bar" role="img" aria-label="目安 ${g.lo}〜${g.hi} ${g.unit}、現在 ${fmt(g.v,1)} ${g.unit}">
+      <div class="band" style="left:${pos(g.lo)}%;width:${pos(g.hi)-pos(g.lo)}%"></div>
+      ${g.limit?`<div class="limit" style="left:${pos(g.limit)}%"></div>`:""}
+      <div class="tag" style="left:${pos(g.v)}%">${fmt(g.v,g.unit==="m/s"?1:0)}</div>
+      <div class="knob" style="left:${pos(g.v)}%"></div>
+    </div>
+    <div class="scale"><span style="left:0;transform:none">0</span><span class="ok" style="left:${pos(g.lo)}%">${g.lo}</span><span class="${g.limit?"dg":"ok"}" style="left:${pos(g.hi)}%">${g.hi}</span><span style="left:auto;right:0;transform:none">${fmt(g.max,0)} ${g.unit}</span></div>
+    <div class="gnote"><span>${g.note[0]}</span><b>${g.note[1]}</b></div>`;
+}
+function renderTool(id){
+  const T=TOOLS[id], s=S.t[id];
+  const r=T.compute(s); RES[id]=r;
+  syncPanel(id,r.auto||[]);
+  const d=droHTML(r), dro=$("dro-"+id); dro.className=d.cls+((r.cols||r.cells.length)>=4?" c4":""); dro.innerHTML=d.html; dro.style.setProperty("--cols",r.cols||r.cells.length);
+  if(r.gauge) $("gauge-"+id).innerHTML=gaugeHTML(r.gauge);
+  $("rowsc-"+id).hidden=!r.rows.length||!!r.err;
+  $("rows-"+id).innerHTML=r.rows.map(([k,sym,v,u,sub])=>`<tr><th>${k}${sym?`<span class="sym">${sym}</span>`:""}${sub?`<small>${sub}</small>`:""}</th><td>${v}<small>${u||""}</small></td></tr>`).join("");
+  $("extra-"+id).innerHTML=r.extra||"";
+  if(T.diagram){ $("dg-"+id).innerHTML=T.diagram(s,r); }
+  else if(r.labels){ const svg=$("dg-"+id).querySelector("svg"); for(const k in r.labels){ const t=svg&&svg.querySelector(`[data-k="${k}"]`); if(t) t.textContent=r.labels[k]; } }
+  if(id==="tap") document.querySelectorAll("#tap-table tbody tr").forEach(tr=>tr.classList.toggle("on",+tr.dataset.d===+s.D&&+tr.dataset.p===+s.P));
+  if(S.route===id) renderDock();
+  save();
+}
+function renderAll(){ Object.keys(TOOLS).forEach(renderTool); }
+
+function bindTool(id){
+  const v=$("view-"+id), T=TOOLS[id];
+  v.addEventListener("input",e=>{
+    const t=e.target; if(t.tagName!=="INPUT"||!t.dataset.fid) return;
+    const fid=t.dataset.fid, def=fieldDef(id,fid), o=(def&&def[5])||{}; let x=parseFloat(t.value);
+    if(!isFinite(x)) return; if(x<0&&!o.neg) return;
+    if(o.int) x=Math.round(x);
+    S.t[id][fid]=x; T.onInput&&T.onInput(S.t[id],fid); renderTool(id);
+  });
+  v.addEventListener("change",e=>{
+    const t=e.target, role=t.dataset.role;
+    if(role==="mat"){ S.mat=t.value; ["turn","mill","drill","tap"].forEach(renderTool); }
+    else if(role==="tool"){ S.tool=t.value; ["turn","mill","drill"].forEach(renderTool); }
+    else if(role==="wheel"){ S.wheel=+t.value; renderTool("grind"); }
+    else if(role==="msize"&&t.value){ const [d,p]=t.value.split("|").map(Number); S.t.tap.D=d; S.t.tap.P=p; renderTool("tap"); }
+    else if(t.dataset.fid) renderTool(id);
+  });
+  v.addEventListener("click",e=>{
+    const sb=e.target.closest("button[data-step]");
+    if(sb){ const fid=sb.closest(".field").querySelector("input").dataset.fid, def=fieldDef(id,fid), o=def[5]||{}, st=parseFloat(sb.dataset.step);
+      let x=+((+S.t[id][fid]||0)+st).toFixed(Math.max(dec(Math.abs(st)),4));
+      if(!o.neg) x=Math.max(0,x); if(o.int) x=Math.max(o.min||1,Math.round(x)); if(o.max) x=Math.min(o.max,x);
+      S.t[id][fid]=x; T.onInput&&T.onInput(S.t[id],fid); renderTool(id); return; }
+    const sg=e.target.closest("button[data-seg]");
+    if(sg){ S.t[id][T.segKey||"mode"]=sg.dataset.seg; buildPanel(id); renderTool(id); return; }
+    const rs=e.target.closest("[data-reset]");
+    if(rs){ S.t[id]=clone(DEF.t[id]); buildPanel(id); renderTool(id); toast("初期値に戻しました"); return; }
+    const sv=e.target.closest("[data-save]"); if(sv){ openSave(recordFromTool(id)); return; }
+    const tr=e.target.closest("#tap-table tr[data-d]"); if(tr){ S.t.tap.D=+tr.dataset.d; S.t.tap.P=+tr.dataset.p; renderTool("tap"); }
+  });
+  v.addEventListener("keydown",e=>{ const tr=e.target.closest("#tap-table tr[data-d]"); if(tr&&(e.key==="Enter"||e.key===" ")){ e.preventDefault(); tr.click(); } });
+}
+
+/* ================= スマホ結果バー ================= */
+function renderDock(){
+  const r=RES[S.route], el=$("dock-in");
+  const on=!!(r&&TOOLS[S.route]);
+  document.body.classList.toggle("has-dock",on);
+  if(!on) return;
+  if(r.err){ el.innerHTML=`<div style="grid-column:1/4"><span>${ICON.alert}計算できません</span><b style="font-size:14px;white-space:normal">${esc(r.err)}</b></div><button class="dock-save" data-save="${S.route}" aria-label="この計算を記録">${ICON.save}</button>`; return; }
+  const c=r.cells.slice(0,3), st=r.gauge?r.gauge.st:null;
+  el.innerHTML=c.map((x,i)=>`<div><span>${i===0&&st?`<i class="dot ${st}"></i>`:""}${x.k}</span><b>${x.v}<small>${x.u||""}</small></b></div>`).join("")+`<button class="dock-save" data-save="${S.route}" aria-label="この計算を記録">${ICON.save}</button>`;
+}
+$("dock").addEventListener("click",e=>{ const b=e.target.closest("[data-save]"); if(b) openSave(recordFromTool(b.dataset.save)); });
+
+/* ================= 電卓 ================= */
+function calcView(){
+  return `<section id="view-calc" hidden>
+    ${subnav("calc")}
+    ${viewHead("calc","電卓","普通の計算に加えて、√・π・2乗、インチ換算、角度の度分秒換算ができます")}
+    <div class="cgrid">
+      <div class="calcbody">
+        <div class="screen" aria-live="polite"><div class="expr" id="c-expr"></div><div class="res" id="c-res">0</div></div>
+        <div class="keys" id="keys">
+          <button class="fn clr" data-k="C">AC</button><button class="fn" data-k="BS" aria-label="1文字消す">${ICON.backspace}</button><button class="fn" data-k="(">(</button><button class="fn" data-k=")">)</button><button class="op" data-k="÷">÷</button>
+          <button class="fn" data-k="√">√</button><button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="×">×</button>
+          <button class="fn" data-k="²">x²</button><button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="−">−</button>
+          <button class="fn" data-k="π">π</button><button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="+">+</button>
+          <button class="fn" data-k="%">%</button><button class="fn" data-k="NEG" aria-label="符号を反転">±</button><button data-k="0">0</button><button data-k=".">.</button><button class="eq" data-k="=">=</button>
+        </div>
+        <p class="hint">キーボードでも入力できます（Enterで計算、Escで消去）。「2π」のように数字の後に π や括弧を続けると掛け算になります。</p>
+      </div>
+      <div class="stack">
+        <div class="card">${H2("history","計算履歴")}<ul class="hist" id="hist"></ul><p class="hint">結果を押すと呼び出し、${ICON.save.replace('class="i"','class="i" style="vertical-align:-3px"')} を押すと記録ノートに残せます。</p></div>
+        <div class="card">${H2("swap","インチ ⇄ ミリ")}
+          <div class="conv"><div class="inbox"><input id="cv-in" type="number" inputmode="decimal" step="any" aria-label="インチ"><span class="u">inch</span></div>${ICON.swap}<div class="inbox"><input id="cv-mm" type="number" inputmode="decimal" step="any" aria-label="ミリ"><span class="u">mm</span></div></div>
+        </div>
+        <div class="card">${H2("angle","角度 度分秒 ⇄ 度")}
+          <div class="dms"><div class="inbox"><input id="dm-d" type="number" inputmode="decimal" step="any" aria-label="度"><span class="u">°</span></div><div class="inbox"><input id="dm-m" type="number" inputmode="decimal" step="any" aria-label="分"><span class="u">′</span></div><div class="inbox"><input id="dm-s" type="number" inputmode="decimal" step="any" aria-label="秒"><span class="u">″</span></div></div>
+          <div class="inbox"><input id="dm-dec" type="number" inputmode="decimal" step="any" aria-label="10進数の角度"><span class="u">度（10進）</span></div>
+        </div>
+        <div class="card">${H2("star","よく使う値")}
+          <div class="tablewrap"><table class="ref pick"><tbody>
+            <tr data-ins="π" tabindex="0"><td class="jp">円周率 π</td><td>3.14159265</td></tr>
+            <tr data-ins="1000÷π" tabindex="0"><td class="jp">1000 ÷ π（回転数の係数）</td><td>318.30989</td></tr>
+            <tr data-ins="25.4" tabindex="0"><td class="jp">1 inch</td><td>25.4</td></tr>
+            <tr data-ins="√2" tabindex="0"><td class="jp">√2（対角の係数）</td><td>1.41421356</td></tr>
+            <tr data-ins="√3" tabindex="0"><td class="jp">√3（六角の対角係数）</td><td>1.73205081</td></tr>
+          </tbody></table></div><p class="hint">押すと電卓の式に入ります。</p>
+        </div>
+      </div>
+    </div></section>`;
+}
+let expr="", hist=lsGet("cutcalc-hist",[]), justEval=false;
+if(!Array.isArray(hist)) hist=[];
+function tokenize(s){
+  const out=[]; let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(/[0-9.]/.test(c)){ let j=i; while(j<s.length&&/[0-9.e]/.test(s[j])&&!(s[j]==="e"&&!/[0-9]/.test(s[j+1]||""))) j++; const t=s.slice(i,j); if((t.match(/\./g)||[]).length>1) throw Error("小数点が多すぎます"); out.push({t:"n",v:parseFloat(t)}); i=j; continue; }
+    if("+-−×*÷/^()√π%²".includes(c)){ out.push({t:c==="*"?"×":c==="/"?"÷":c==="-"?"−":c}); i++; continue; }
+    throw Error("使えない文字があります");
+  }
+  return out;
+}
+function parse(tokens){
+  let p=0; const peek=()=>tokens[p], eat=()=>tokens[p++];
+  const sp=t=>t&&(t.t==="n"||t.t==="π"||t.t==="√"||t.t==="(");
+  function ex(){ let v=term(); while(peek()&&(peek().t==="+"||peek().t==="−")){ const o=eat().t, r=term(); v=o==="+"?v+r:v-r; } return v; }
+  function term(){ let v=un(); for(;;){ const t=peek(); if(t&&(t.t==="×"||t.t==="÷")){ eat(); const r=un(); if(t.t==="÷"&&r===0) throw Error("0では割れません"); v=t.t==="×"?v*r:v/r; } else if(sp(t)){ v*=un(); } else break; } return v; }
+  function un(){ if(peek()&&peek().t==="−"){eat();return -un();} if(peek()&&peek().t==="+"){eat();return un();} return pw(); }
+  function pw(){ const b=pf(); if(peek()&&peek().t==="^"){ eat(); return Math.pow(b,un()); } return b; }
+  function pf(){ let v=pr(); while(peek()&&(peek().t==="%"||peek().t==="²")){ v=eat().t==="%"?v/100:v*v; } return v; }
+  function pr(){ const t=eat(); if(!t) throw Error("式が途中で終わっています");
+    if(t.t==="n") return t.v; if(t.t==="π") return PI;
+    if(t.t==="√"){ const v=pf(); if(v<0) throw Error("負の数の平方根は求められません"); return Math.sqrt(v); }
+    if(t.t==="("){ const v=ex(); if(peek()&&peek().t===")") eat(); return v; }
+    throw Error("式の形が正しくありません"); }
+  const v=ex(); if(p<tokens.length) throw Error("式の形が正しくありません"); return v;
+}
+const evaluate=s=>{ const v=parse(tokenize(s)); if(!isFinite(v)) throw Error("計算できません"); return v; };
+const numStr=v=>(Math.abs(v)>=1e12||(Math.abs(v)<1e-6&&v!==0))?v.toExponential(6):String(+v.toPrecision(12));
+function fitRes(){ const el=$("c-res"), n=el.textContent.length; el.style.fontSize=el.classList.contains("err")?"":n>17?"28px":n>14?"34px":n>11?"42px":n>8?"50px":""; }
+const show=r=>/e/.test(r)?r:Number(r).toLocaleString("ja-JP",{maximumFractionDigits:10});
+function showCalc(){
+  $("c-expr").textContent=expr; const cr=$("c-res"); cr.classList.remove("err");
+  if(!expr){ cr.textContent="0"; fitRes(); return; }
+  try{ cr.textContent=show(numStr(evaluate(expr))); }catch(e){}
+  fitRes();
+}
+function renderHist(){
+  $("hist").innerHTML=hist.length?hist.map((h,i)=>`<li><button class="hb" data-i="${i}"><span class="e">${esc(h.e)}</span><span class="r">= ${esc(show(h.r))}</span></button><button class="iconbtn" data-hsave="${i}" aria-label="この計算を記録">${ICON.save}</button></li>`).join(""):`<li class="empty">「=」を押した計算がここに残ります。</li>`;
+}
+function press(k){
+  const isOp="+−×÷^".includes(k);
+  if(justEval&&!isOp&&!["=","BS","%","²","NEG"].includes(k)) expr="";
+  justEval=false;
+  if(k==="C") expr="";
+  else if(k==="BS") expr=expr.slice(0,-1);
+  else if(k==="NEG") expr=expr?(expr.startsWith("−(")&&expr.endsWith(")")?expr.slice(2,-1):"−("+expr+")"):"−";
+  else if(k==="="){
+    if(!expr) return;
+    try{ const r=numStr(evaluate(expr)); hist.unshift({e:expr,r,at:Date.now()}); hist=hist.slice(0,50); lsSet("cutcalc-hist",hist);
+      $("c-expr").textContent=expr+" ="; expr=r; $("c-res").classList.remove("err"); $("c-res").textContent=show(r); fitRes(); justEval=true; renderHist(); return;
+    }catch(e){ $("c-res").textContent=e.message; $("c-res").classList.add("err"); $("c-expr").textContent=expr; return; }
+  }
+  else expr+=k;
+  showCalc();
+}
+function bindCalc(){
+  $("keys").addEventListener("click",e=>{const b=e.target.closest("button"); if(b) press(b.dataset.k);});
+  $("hist").addEventListener("click",e=>{
+    const b=e.target.closest("[data-i]"); if(b){ expr=hist[+b.dataset.i].r; justEval=true; showCalc(); return; }
+    const sv=e.target.closest("[data-hsave]"); if(sv){ const h=hist[+sv.dataset.hsave]; openSave({kind:"calc",title:"電卓",cells:[["式",h.e,""],["答え",show(h.r),""]],rows:[],inputs:{e:h.e,r:h.r}}); }
+  });
+  document.querySelectorAll("#view-calc tr[data-ins]").forEach(tr=>{
+    const ins=()=>{ if(justEval){expr="";justEval=false;} expr+=tr.dataset.ins; showCalc(); };
+    tr.addEventListener("click",ins); tr.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); ins(); } });
+  });
+  document.addEventListener("keydown",e=>{
+    if(S.route!=="calc"||e.ctrlKey||e.metaKey||e.altKey||!$("overlay").hidden) return;
+    const tg=e.target.tagName; if(tg==="INPUT"||tg==="SELECT"||tg==="TEXTAREA"||tg==="TR") return;
+    const map={"*":"×","/":"÷","-":"−","Enter":"=","=":"=","Backspace":"BS","Escape":"C","p":"π","r":"√"};
+    const k=map[e.key]||e.key;
+    if(/^[0-9.+()%^]$/.test(k)||["×","÷","−","=","BS","C","π","√"].includes(k)){ e.preventDefault(); press(k); }
+  });
+  const ci=$("cv-in"), cm=$("cv-mm"); ci.value=1; cm.value=25.4;
+  ci.addEventListener("input",()=>{const v=parseFloat(ci.value); cm.value=isFinite(v)?+(v*25.4).toFixed(4):"";});
+  cm.addEventListener("input",()=>{const v=parseFloat(cm.value); ci.value=isFinite(v)?+(v/25.4).toFixed(5):"";});
+  const dd=$("dm-d"), dm=$("dm-m"), ds=$("dm-s"), dx=$("dm-dec");
+  const fromDMS=()=>{ const v=(+dd.value||0)+(+dm.value||0)/60+(+ds.value||0)/3600; dx.value=+v.toFixed(6); };
+  const toDMS=()=>{ const v=parseFloat(dx.value); if(!isFinite(v)) return; let D=Math.floor(v), M=Math.floor((v-D)*60), Sx=+(((v-D)*60-M)*60).toFixed(2); if(Sx>=60){Sx=0;M++;} if(M>=60){M=0;D++;} dd.value=D; dm.value=M; ds.value=Sx; };
+  [dd,dm,ds].forEach(x=>x.addEventListener("input",fromDMS)); dx.addEventListener("input",toDMS);
+  dd.value=30; dm.value=15; ds.value=0; fromDMS();
+}
+
+/* ================= 記録の保存先 ================= */
+const Store={mode:"local",state:"ready",items:[],col:null,unsub:null,listeners:[]};
+function localItems(){ const a=lsGet("cutcalc-notes",[]); return Array.isArray(a)?a:[]; }
+function setLocal(items){ lsSet("cutcalc-notes",items); }
+function emit(){ Store.listeners.forEach(f=>f()); }
+Store.items=localItems();
+async function initStore(){
+  if(!(window.claude&&typeof window.claude.use==="function")) return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user) return;
+    const uid=await user.id(); if(!uid) return;
+    const can=await (user.can?user.can("data.write"):Promise.resolve(null));
+    if(can===false) return;
+    Store.col=db.collection("data/users/"+uid);
+    Store.mode="cloud"; Store.state="loading"; Store.items=[]; emit();
+    const timer=setTimeout(()=>{ if(Store.state==="loading"){ Store.state="slow"; emit(); } },10000);
+    Store.unsub=Store.col.orderBy("at","desc").limit(1000).onSnapshot(snap=>{
+      Store.items=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id}));
+      if(!snap.metadata.fromCache){ clearTimeout(timer); Store.state="ready"; }
+      emit();
+    },err=>{ clearTimeout(timer); Store.mode="local"; Store.state="ready"; Store.items=localItems(); emit(); toast("アカウントの記録に接続できないため、この端末に保存します"); });
+  }catch(e){}
+}
+function newId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+async function storeAdd(rec){
+  rec.id=rec.id||newId();
+  if(Store.mode==="cloud"){
+    const {id,...body}=rec;
+    try{ await Store.col.doc(id).set(body); return true; }
+    catch(e){ if(e&&e.code==="quota_exceeded"){ toast("保存できる件数の上限です。古い記録を削除してください"); return false; }
+      Store.mode="local"; Store.items=localItems(); emit(); toast("アカウントに保存できないため、この端末に保存しました"); }
+  }
+  const items=localItems(); items.unshift(rec); setLocal(items); Store.items=items; emit(); return true;
+}
+async function storeUpdate(id,patch){
+  if(Store.mode==="cloud"){ try{ await Store.col.doc(id).update(patch); return; }catch(e){ toast("更新できませんでした。もう一度お試しください"); return; } }
+  const items=localItems().map(x=>x.id===id?Object.assign({},x,patch):x); setLocal(items); Store.items=items; emit();
+}
+async function storeRemove(id){
+  if(Store.mode==="cloud"){ try{ await Store.col.doc(id).delete(); return; }catch(e){ toast("削除できませんでした。もう一度お試しください"); return; } }
+  const items=localItems().filter(x=>x.id!==id); setLocal(items); Store.items=items; emit();
+}
+async function migrateLocal(){
+  const loc=localItems(); if(!loc.length||Store.mode!=="cloud") return;
+  let n=0; for(const r of loc){ const {id,...body}=r; try{ await Store.col.doc(id||newId()).set(body); n++; }catch(e){ break; } }
+  if(n===loc.length) setLocal([]);
+  toast(n+"件をアカウントに移しました"); renderNotes();
+}
+function storeBadge(){
+  if(Store.mode==="cloud"&&Store.state!=="ready") return `<span class="store wait">${ICON.cloud}${Store.state==="slow"?"接続を待っています":"読み込み中"}</span>`;
+  return Store.mode==="cloud"?`<span class="store cloud">${ICON.cloud}アカウントに保存</span>`:`<span class="store">${ICON.device}この端末に保存</span>`;
+}
+function refreshChrome(){
+  document.querySelectorAll("[data-count]").forEach(b=>{ b.textContent=Store.items.length||""; b.hidden=!Store.items.length; });
+  $("mstore").innerHTML=storeBadge();
+  $("sidefoot").innerHTML=(Store.mode==="cloud"?ICON.cloud:ICON.device)+`<span>${Store.mode==="cloud"?"記録はあなたのアカウントに保存され、ほかの人には見えません。":"記録はこの端末のブラウザに保存されます。"}</span>`;
+}
+Store.listeners.push(refreshChrome);
+Store.listeners.push(()=>{ if(S.route==="notes") renderNotes(); });
+
+/* ================= 記録の作成 ================= */
+function recordFromTool(id){
+  const T=TOOLS[id], s=S.t[id], r=RES[id];
+  const plain=h=>String(h||"").replace(/<[^>]+>/g,"");
+  const ctx={}; if(T.selects==="matTool"){ ctx.mat=S.mat; ctx.tool=S.tool; } if(T.selects==="matTap") ctx.mat=S.mat; if(T.selects==="wheel") ctx.wheel=S.wheel;
+  let title=T.name; const segv=T.seg?(T.seg.find(x=>x[0]===s[T.segKey||"mode"])||[])[1]:""; if(id==="grind") title=segv;
+  const cond=[]; if(ctx.mat) cond.push(MATS[ctx.mat].name); if(ctx.tool) cond.push(ctx.tool==="carb"?"超硬":"ハイス"); if(ctx.wheel) cond.push("砥石 "+ctx.wheel+" m/s");
+  const fieldsText=T.fields(s).map(([fid,lab,sym,u])=>[lab,fmt(+s[fid],Math.abs(s[fid])>=100?1:3).replace(/\.?0+$/,""),u]);
+  return {kind:id,title,cond:cond.join("・"),
+    cells:r.err?[["エラー",r.err,""]]:r.cells.map(c=>[c.k,plain(c.v),c.u||""]),
+    rows:(r.err?[]:r.rows.map(x=>[x[0],plain(x[2]),x[3]||""])).concat(fieldsText.map(x=>["入力："+x[0],x[1],x[2]])),
+    inputs:clone(s),ctx};
+}
+const lastMeta=lsGet("cutcalc-meta",{part:"",machine:""});
+
+/* ================= 保存シート ================= */
+let sheetDraft=null, dict=null, dictTarget=null, dictBtn=null;
+function micBtn(target){ return dict?`<button type="button" class="mic" data-mic="${target}" aria-label="音声でメモを入力">${ICON.mic}</button>`:""; }
+function tagButtons(sel,name){ return `<div class="tags" data-tags="${name}">${TAGS.map(([t,c])=>`<button type="button" class="tagbtn ${c}" data-tag="${t}" aria-pressed="${sel.includes(t)}">${t}</button>`).join("")}</div>`; }
+function openSave(draft){
+  sheetDraft=draft;
+  const T=TOOLS[draft.kind];
+  const icon=draft.kind==="calc"?ICON.calc:ICON[draft.kind];
+  $("overlay").innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">
+    <div class="sheet-h">${KEY(draft.kind,"xl")}<div><h3 id="sh-t">計算を記録</h3><p>${esc(draft.title)}${draft.cond?" ・ "+esc(draft.cond):""}</p></div><button class="iconbtn" data-close aria-label="閉じる">${ICON.close}</button></div>
+    <div class="sheet-b">
+      <div class="e-cells">${draft.cells.map(c=>`<div><span>${esc(c[0])}</span><b>${esc(c[1])}<small>${esc(c[2])}</small></b></div>`).join("")}</div>
+      <div class="row2"><label class="flabel">図番・品番<input class="tin" id="sh-part" value="${esc(lastMeta.part)}" placeholder="例：A-1024"></label><label class="flabel">機械・設備<input class="tin" id="sh-mach" value="${esc(lastMeta.machine)}" placeholder="例：NC旋盤 3号機"></label></div>
+      <label class="flabel">メモ<div class="ta"><textarea id="sh-memo" placeholder="気づいたこと、条件を変えた理由、仕上がりなど"></textarea>${micBtn("sh-memo")}</div></label>
+      <div class="flabel">タグ${tagButtons([],"sheet")}</div>
+    </div>
+    <div class="sheet-f"><button class="btn ghost" data-close>やめる</button><button class="btn primary" id="sh-ok">${ICON.save}記録する</button></div>
+  </div>`;
+  $("overlay").hidden=false;
+  setTimeout(()=>$("sh-memo").focus(),30);
+}
+function closeSheet(){ stopDict(); $("overlay").hidden=true; $("overlay").innerHTML=""; sheetDraft=null; }
+$("overlay").addEventListener("click",async e=>{
+  if(e.target===$("overlay")||e.target.closest("[data-close]")){ closeSheet(); return; }
+  const tg=e.target.closest("[data-tag]"); if(tg){ tg.setAttribute("aria-pressed",String(tg.getAttribute("aria-pressed")!=="true")); return; }
+  if(e.target.closest("#sh-ok")){
+    const part=$("sh-part").value.trim(), machine=$("sh-mach").value.trim(), memo=$("sh-memo").value.trim();
+    const tags=[...$("overlay").querySelectorAll('[data-tag][aria-pressed="true"]')].map(b=>b.dataset.tag);
+    lastMeta.part=part; lastMeta.machine=machine; lsSet("cutcalc-meta",lastMeta);
+    const rec=Object.assign({},sheetDraft,{part,machine,memo,tags,pin:false,at:Date.now()});
+    closeSheet();
+    if(await storeAdd(rec)) toast("記録ノートに保存しました",{label:"見る",fn:()=>go("notes",true)});
+  }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("overlay").hidden) closeSheet(); });
+
+/* ================= 音声入力 ================= */
+async function initDictation(){
+  if(!(window.claude&&typeof window.claude.use==="function")) return;
+  try{ dict=await window.claude.use("dictation"); }catch(e){ dict=null; }
+  if(!dict) return;
+  dict.onFinal(({text})=>{ const t=dictTarget&&$(dictTarget); if(!t) return; t.value=(t.value?t.value+text:text.replace(/^\s+/,"")); });
+  dict.onState(({state})=>{ if(dictBtn) dictBtn.classList.toggle("live",state!=="idle"); if(state==="idle") dictBtn=null; });
+  if(S.route==="notes") renderNotes();
+}
+function stopDict(){ if(dict&&dict.active()) dict.stop().catch(()=>{}); }
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-mic]"); if(!b||!dict) return;
+  e.preventDefault();
+  if(dict.active()){ dict.stop().catch(()=>{}); return; }
+  dictTarget=b.dataset.mic; dictBtn=b;
+  dict.start({language:"ja"}).catch(err=>{
+    b.classList.remove("live");
+    if(err&&err.code==="not_granted") toast("音声入力が許可されていません");
+    else if(err&&err.code==="unavailable") { toast("この画面では音声入力を使えません"); }
+    else if(err&&err.code!=="stopped"&&err.code!=="dismissed") toast("音声入力を開始できませんでした");
+  });
+});
+
+/* ================= 記録ノート ================= */
+const NF={q:"",kind:"",pin:false};
+let editing=null, confirming=null;
+function notesView(){
+  return `<section id="view-notes" hidden>
+    ${viewHead("notes","記録ノート","計算結果と現場のメモをまとめて残せます。品番・機械・タグで探せます")}
+    <div class="ngrid">
+      <div class="stack" id="n-left"></div>
+      <div class="stack" id="n-right"></div>
+    </div></section>`;
+}
+function composerHTML(){
+  return `<div class="card">${H2("memo","メモを書く")}
+    <div class="stack" style="gap:12px">
+      <div class="ta"><textarea id="q-memo" placeholder="例：3号機 主軸から異音。明日点検予定"></textarea>${micBtn("q-memo")}</div>
+      <div class="row2"><input class="tin" id="q-part" placeholder="図番・品番" aria-label="図番・品番"><input class="tin" id="q-mach" placeholder="機械・設備" aria-label="機械・設備"></div>
+      ${tagButtons([],"quick")}
+      <button class="btn primary" id="q-add">${ICON.plus}メモを追加</button>
+    </div></div>
+    <div class="card">${H2("download","書き出し")}
+      <div class="stack" style="gap:8px">
+        <button class="btn" id="x-csv">${ICON.download}CSVファイルで保存</button>
+        <button class="btn" id="x-copy">${ICON.copy}テキストをコピー</button>
+      </div>
+      <p class="hint">表示中の記録（絞り込み後）を書き出します。CSVは表計算ソフトで開けます。</p>
+    </div>`;
+}
+function filtered(){
+  const q=NF.q.trim().toLowerCase();
+  let a=Store.items.slice();
+  if(NF.kind) a=a.filter(x=>x.kind===NF.kind);
+  if(NF.pin) a=a.filter(x=>x.pin);
+  if(q) a=a.filter(x=>[x.title,x.part,x.machine,x.memo,x.cond,(x.tags||[]).join(" "),(x.cells||[]).map(c=>c.join(" ")).join(" ")].join(" ").toLowerCase().includes(q));
+  a.sort((p,r)=>(r.pin?1:0)-(p.pin?1:0)||(r.at||0)-(p.at||0));
+  return a;
+}
+function dayLabel(t){
+  const d=new Date(t), n=new Date(), y=new Date(); y.setDate(n.getDate()-1);
+  const same=(a,b)=>a.toDateString()===b.toDateString();
+  const base=`${d.getMonth()+1}月${d.getDate()}日（${"日月火水木金土"[d.getDay()]}）`;
+  return same(d,n)?"今日 · "+base:same(d,y)?"昨日 · "+base:(d.getFullYear()!==n.getFullYear()?d.getFullYear()+"年":"")+base;
+}
+const hhmm=t=>{ const d=new Date(t); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); };
+function entryHTML(x){
+  const icon=x.kind==="calc"?ICON.calc:x.kind==="memo"?ICON.memo:(ICON[x.kind]||ICON.memo);
+  const kindName=x.kind==="units"?"単位変換":x.kind==="memo"?"メモ":x.kind==="calc"?"電卓":(TOOLS[x.kind]?TOOLS[x.kind].name:"記録");
+  const canRestore=!!TOOLS[x.kind]||x.kind==="units";
+  if(editing===x.id) return `<article class="entry${x.pin?" pinned":""}"><div class="e-time">${KEY(x.kind==="calc"||x.kind==="memo"||x.kind==="units"||TOOLS[x.kind]?x.kind:"memo")}<span>${hhmm(x.at)}</span></div><div class="e-body">
+    <div class="row2"><input class="tin" id="ed-part" value="${esc(x.part)}" placeholder="図番・品番" aria-label="図番・品番"><input class="tin" id="ed-mach" value="${esc(x.machine)}" placeholder="機械・設備" aria-label="機械・設備"></div>
+    <div class="ta"><textarea id="ed-memo" aria-label="メモ">${esc(x.memo)}</textarea>${micBtn("ed-memo")}</div>
+    ${tagButtons(x.tags||[],"edit")}
+    <div class="e-actions"><button class="btn small primary" data-edsave="${esc(x.id)}">${ICON.check}保存</button><button class="btn small ghost" data-edcancel>やめる</button></div>
+  </div></article>`;
+  return `<article class="entry${x.pin?" pinned":""}"><div class="e-time">${KEY(x.kind==="calc"||x.kind==="memo"||x.kind==="units"||TOOLS[x.kind]?x.kind:"memo")}<span>${hhmm(x.at)}</span></div><div class="e-body">
+    <div class="e-head"><span class="e-kind">${esc(kindName)}${x.kind==="grind"?" · "+esc(x.title):""}</span>${x.part?`<span class="e-part">${esc(x.part)}</span>`:""}${x.machine?`<span class="e-mach">${esc(x.machine)}</span>`:""}
+      <button class="iconbtn${x.pin?" on":""}" data-pin="${esc(x.id)}" aria-pressed="${!!x.pin}" aria-label="重要にする">${ICON.star}</button></div>
+    ${x.cond?`<div class="e-mach">${esc(x.cond)}</div>`:""}
+    ${x.cells&&x.cells.length?`<div class="e-cells">${x.cells.map(c=>`<div><span>${esc(c[0])}</span><b>${esc(c[1])}<small>${esc(c[2])}</small></b></div>`).join("")}</div>`:""}
+    ${x.memo?`<p class="e-memo">${esc(x.memo)}</p>`:""}
+    ${(x.tags||[]).length?`<div class="tags">${x.tags.map(t=>`<span class="chip ${tagClass(t)}">${esc(t)}</span>`).join("")}</div>`:""}
+    ${x.rows&&x.rows.length?`<details class="e-more"><summary>詳細と入力値</summary><ul>${x.rows.map(r=>`<li>${esc(r[0])}：${esc(r[1])} ${esc(r[2])}</li>`).join("")}</ul></details>`:""}
+    ${confirming===x.id?`<div class="confirm">${ICON.alert}この記録を削除しますか？<button class="btn small danger" data-delok="${esc(x.id)}">削除する</button><button class="btn small ghost" data-delno>やめる</button></div>`:
+    `<div class="e-actions">${canRestore?`<button class="btn small ghost" data-restore="${esc(x.id)}">${ICON.restore}この条件を呼び出す</button>`:""}<button class="btn small ghost" data-edit="${esc(x.id)}">${ICON.edit}編集</button><button class="btn small ghost danger" data-del="${esc(x.id)}">${ICON.trash}削除</button></div>`}
+  </div></article>`;
+}
+let notesBuilt=false;
+function renderNotes(){
+  if(!notesBuilt){ $("n-left").innerHTML=composerHTML(); notesBuilt=true; }
+  if(dict&&!$("n-left").querySelector('[data-mic="q-memo"]')){ $("q-memo").insertAdjacentHTML("afterend",micBtn("q-memo")); }
+  const list=filtered();
+  const kinds=["","memo","calc","units",...Object.keys(TOOLS)];
+  const migr=Store.mode==="cloud"&&localItems().length?`<div class="banner">${ICON.upload}<span>この端末に保存した記録が <b class="count">${localItems().length}</b> 件あります。</span><button class="btn small" id="m-go">アカウントに移す</button></div>`:"";
+  let body;
+  if(Store.mode==="cloud"&&Store.state==="loading") body=`<div class="card estate">${ICON.cloud}<b>記録を読み込んでいます</b>少しお待ちください。</div>`;
+  else if(!Store.items.length) body=`<div class="card estate">${ICON.notes}<b>まだ記録がありません</b>各計算画面の「この計算を記録」か、左の「メモを書く」から残せます。</div>`;
+  else if(!list.length) body=`<div class="card estate">${ICON.search}<b>見つかりませんでした</b>検索語や絞り込みを変えてください。</div>`;
+  else { const groups=[]; let cur=null;
+    list.forEach(x=>{ const key=x.pin?"__pin":new Date(x.at).toDateString(); if(!cur||cur.key!==key){ cur={key,label:x.pin?"重要":dayLabel(x.at),items:[]}; groups.push(cur);} cur.items.push(x); });
+    body=groups.map(g=>`<div class="daygroup"><div class="dayh">${esc(g.label)}<small>${g.items.length}件</small></div>${g.items.map(entryHTML).join("")}</div>`).join(""); }
+  const active=document.activeElement&&document.activeElement.id;
+  $("n-right").innerHTML=`${migr}
+    <div class="card" style="padding:12px">
+      <div class="toolbar">
+        <div class="search"><input class="tin" id="n-q" type="search" placeholder="品番・機械・メモで検索" value="${esc(NF.q)}" aria-label="記録を検索">${ICON.search}</div>
+        ${selbox(`<select id="n-kind" aria-label="種類で絞り込み">${kinds.map(k=>`<option value="${k}"${NF.kind===k?" selected":""}>${k===""?"すべての種類":k==="memo"?"メモ":k==="calc"?"電卓":k==="units"?"単位変換":TOOLS[k].name}</option>`).join("")}</select>`)}
+        <button class="btn small${NF.pin?" primary":""}" id="n-pin" aria-pressed="${NF.pin}">${ICON.star}重要のみ</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap"><span><b class="count">${list.length}</b> 件を表示（全 ${Store.items.length} 件）</span>${storeBadge()}</div>
+    </div>
+    ${body}`;
+  if(active==="n-q"){ const q=$("n-q"); q.focus(); q.setSelectionRange(q.value.length,q.value.length); }
+}
+function bindNotes(){
+  const v=$("view-notes");
+  v.addEventListener("input",e=>{ if(e.target.id==="n-q"){ NF.q=e.target.value; renderNotes(); } });
+  v.addEventListener("change",e=>{ if(e.target.id==="n-kind"){ NF.kind=e.target.value; renderNotes(); } });
+  v.addEventListener("click",async e=>{
+    const t=e.target;
+    const tg=t.closest("[data-tag]"); if(tg){ tg.setAttribute("aria-pressed",String(tg.getAttribute("aria-pressed")!=="true")); return; }
+    if(t.closest("#n-pin")){ NF.pin=!NF.pin; renderNotes(); return; }
+    if(t.closest("#m-go")){ migrateLocal(); return; }
+    if(t.closest("#q-add")){
+      const memo=$("q-memo").value.trim(); if(!memo){ toast("メモを入力してください"); $("q-memo").focus(); return; }
+      const tags=[...$("n-left").querySelectorAll('[data-tags="quick"] [aria-pressed="true"]')].map(b=>b.dataset.tag);
+      const ok=await storeAdd({kind:"memo",title:"メモ",memo,part:$("q-part").value.trim(),machine:$("q-mach").value.trim(),tags,pin:false,at:Date.now(),cells:[],rows:[]});
+      if(ok){ $("q-memo").value=""; $("n-left").querySelectorAll('[data-tags="quick"] [data-tag]').forEach(b=>b.setAttribute("aria-pressed","false")); toast("メモを追加しました"); }
+      return;
+    }
+    if(t.closest("#x-csv")){ exportCSV(); return; }
+    if(t.closest("#x-copy")){ exportText(); return; }
+    const pin=t.closest("[data-pin]"); if(pin){ const x=Store.items.find(i=>i.id===pin.dataset.pin); if(x) storeUpdate(x.id,{pin:!x.pin}); return; }
+    const ed=t.closest("[data-edit]"); if(ed){ editing=ed.dataset.edit; confirming=null; renderNotes(); setTimeout(()=>{const m=$("ed-memo"); if(m) m.focus();},20); return; }
+    if(t.closest("[data-edcancel]")){ editing=null; renderNotes(); return; }
+    const es=t.closest("[data-edsave]"); if(es){
+      const tags=[...v.querySelectorAll('[data-tags="edit"] [aria-pressed="true"]')].map(b=>b.dataset.tag);
+      const patch={part:$("ed-part").value.trim(),machine:$("ed-mach").value.trim(),memo:$("ed-memo").value.trim(),tags};
+      editing=null; await storeUpdate(es.dataset.edsave,patch); renderNotes(); toast("記録を更新しました"); return; }
+    const del=t.closest("[data-del]"); if(del){ confirming=del.dataset.del; editing=null; renderNotes(); return; }
+    if(t.closest("[data-delno]")){ confirming=null; renderNotes(); return; }
+    const dok=t.closest("[data-delok]"); if(dok){ confirming=null; await storeRemove(dok.dataset.delok); renderNotes(); toast("削除しました"); return; }
+    const rs=t.closest("[data-restore]"); if(rs){
+      const x=Store.items.find(i=>i.id===rs.dataset.restore); if(!x) return;
+      if(x.kind==="units"){ S.units=merge(DEF.units,x.inputs||{}); renderUnits(); go("units",true); toast("記録した換算を呼び出しました"); return; }
+      if(!TOOLS[x.kind]) return;
+      S.t[x.kind]=merge(DEF.t[x.kind],x.inputs||{});
+      if(x.ctx){ if(x.ctx.mat) S.mat=x.ctx.mat; if(x.ctx.tool) S.tool=x.ctx.tool; if(x.ctx.wheel) S.wheel=x.ctx.wheel; }
+      buildPanel(x.kind); renderAll(); go(x.kind,true); toast("記録した条件を呼び出しました"); }
+  });
+}
+function rowsForExport(){ return filtered().map(x=>{ const d=new Date(x.at);
+  return {date:`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${hhmm(x.at)}`,kind:x.kind==="memo"?"メモ":x.kind==="calc"?"電卓":x.kind==="units"?"単位変換（"+(x.cond||"")+"）":(TOOLS[x.kind]?TOOLS[x.kind].name:x.kind)+(x.kind==="grind"?"（"+x.title+"）":""),
+    part:x.part||"",machine:x.machine||"",cond:x.cond||"",tags:(x.tags||[]).join(" "),result:(x.cells||[]).map(c=>`${c[0]} ${c[1]}${c[2]?" "+c[2]:""}`).join(" / "),memo:x.memo||""}; }); }
+async function exportCSV(){
+  const rows=rowsForExport(); if(!rows.length){ toast("書き出す記録がありません"); return; }
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const csv="﻿"+[["日時","種類","図番・品番","機械","条件","タグ","結果","メモ"].map(q).join(","),...rows.map(r=>[r.date,r.kind,r.part,r.machine,r.cond,r.tags,r.result,r.memo].map(q).join(","))].join("\r\n");
+  let dl=null; try{ dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null; }catch(e){}
+  if(!dl){
+    if(!(window.claude&&window.claude.use)){ const d0=new Date(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download=`加工記録_${d0.getFullYear()}${String(d0.getMonth()+1).padStart(2,"0")}${String(d0.getDate()).padStart(2,"0")}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast("CSVを保存しました"); return; }
+    copyText(csv.slice(1),"CSVの内容をコピーしました（この画面ではファイル保存を使えません）"); return; }
+  const d=new Date();
+  try{ await dl.save({filename:`加工記録_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.csv`,data:csv}); toast("CSVを保存しました"); }
+  catch(e){ if(e&&e.code==="declined") return; copyText(csv.slice(1),"ファイルを保存できなかったため、内容をコピーしました"); }
+}
+function exportText(){
+  const rows=rowsForExport(); if(!rows.length){ toast("書き出す記録がありません"); return; }
+  copyText(rows.map(r=>`■ ${r.date}　${r.kind}${r.part?"　"+r.part:""}${r.machine?"　"+r.machine:""}\n${r.cond?"条件："+r.cond+"\n":""}${r.result?"結果："+r.result+"\n":""}${r.memo?"メモ："+r.memo+"\n":""}${r.tags?"タグ："+r.tags+"\n":""}`).join("\n"),"テキストをコピーしました");
+}
+function copyText(text,msg){
+  const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); let ok=false; try{ ok=document.execCommand("copy"); }catch(e){} ta.remove(); toast(ok?msg:"コピーできませんでした"); };
+  try{ navigator.clipboard.writeText(text).then(()=>toast(msg),fallback); }catch(e){ fallback(); }
+}
+
+/* ================= トースト ================= */
+let toastT;
+function toast(msg,action){
+  const t=$("toast"); clearTimeout(toastT);
+  t.innerHTML=`${ICON.check}<span>${esc(msg)}</span>${action?`<button type="button">${esc(action.label)}</button>`:""}`;
+  if(action) t.querySelector("button").onclick=()=>{ t.classList.remove("show"); action.fn(); };
+  t.classList.add("show"); toastT=setTimeout(()=>t.classList.remove("show"),action?4500:2600);
+}
+
+/* ================= 単位変換 ================= */
+const UCATS=[
+  ["length","長さ","mm・inch",[["mm","ミリメートル",1],["µm","マイクロメートル",.001],["cm","センチメートル",10],["m","メートル",1000],["km","キロメートル",1e6],["inch","インチ",25.4],["ft","フィート",304.8],["yd","ヤード",914.4],["mil","ミル（1/1000インチ）",.0254],["尺","尺（曲尺）",1000/3.3],["寸","寸",100/3.3]]],
+  ["area","面積","mm²・m²",[["mm²","平方ミリメートル",1],["cm²","平方センチメートル",100],["m²","平方メートル",1e6],["in²","平方インチ",645.16],["ft²","平方フィート",92903.04],["坪","坪",4e8/121]]],
+  ["volume","体積・容量","L・cm³",[["mL","ミリリットル",1],["cm³","立方センチメートル",1],["L","リットル",1000],["m³","立方メートル",1e6],["in³","立方インチ",16.387064],["ft³","立方フィート",28316.846592],["gal","ガロン（米）",3785.411784],["升","升",1803.906]]],
+  ["mass","重さ","kg・lb",[["g","グラム",1],["mg","ミリグラム",.001],["kg","キログラム",1000],["t","トン",1e6],["oz","オンス",28.349523125],["lb","ポンド",453.59237],["貫","貫",3750],["匁","匁",3.75]]],
+  ["force","力","N・kgf",[["N","ニュートン",1],["kN","キロニュートン",1000],["kgf","重量キログラム",9.80665],["gf","重量グラム",.00980665],["tf","重量トン",9806.65],["lbf","重量ポンド",4.4482216152605]]],
+  ["pressure","圧力・応力","MPa・kgf/cm²",[["MPa","メガパスカル",1e6],["N/mm²","ニュートン毎平方ミリ（=MPa）",1e6],["kPa","キロパスカル",1e3],["Pa","パスカル",1],["GPa","ギガパスカル",1e9],["bar","バール",1e5],["kgf/cm²","重量キログラム毎平方センチ",98066.5],["kgf/mm²","重量キログラム毎平方ミリ",9806650],["psi","ポンド毎平方インチ",6894.757293168],["ksi","キロpsi",6894757.293168],["atm","気圧",101325],["mmHg","水銀柱ミリメートル",133.322387415],["mmH₂O","水柱ミリメートル",9.80665]]],
+  ["torque","トルク","N·m・kgf·cm",[["N·m","ニュートンメートル",1],["N·cm","ニュートンセンチ",.01],["kN·m","キロニュートンメートル",1000],["kgf·m","重量キログラムメートル",9.80665],["kgf·cm","重量キログラムセンチ",.0980665],["lbf·ft","ポンドフィート",1.3558179483314],["lbf·in","ポンドインチ",.1129848290276]]],
+  ["power","動力","kW・PS",[["kW","キロワット",1000],["W","ワット",1],["PS","仏馬力",735.49875],["HP","英馬力",745.69987158227],["kcal/h","キロカロリー毎時",1.163]]],
+  ["energy","エネルギー","kWh・kJ",[["J","ジュール",1],["kJ","キロジュール",1000],["Wh","ワット時",3600],["kWh","キロワット時",3.6e6],["cal","カロリー",4.184],["kcal","キロカロリー",4184],["kgf·m","重量キログラムメートル",9.80665],["BTU","英熱量",1055.05585262]]],
+  ["speed","速度","m/min・sfm",[["m/min","メートル毎分",1],["m/s","メートル毎秒",60],["mm/min","ミリ毎分",.001],["mm/s","ミリ毎秒",.06],["km/h","キロメートル毎時",1000/60],["sfm","フィート毎分（SFM）",.3048],["in/min","インチ毎分（IPM）",.0254],["ft/s","フィート毎秒",18.288]]],
+  ["feed","送り量","mm/rev・IPR",[["mm/rev","ミリ毎回転（mm/刃も同じ）",1],["µm/rev","マイクロ毎回転",.001],["in/rev","インチ毎回転（IPR・IPT）",25.4]]],
+  ["rot","回転数","min⁻¹・rad/s",[["min⁻¹","回転毎分（rpm）",1],["s⁻¹","回転毎秒（Hz）",60],["rad/s","ラジアン毎秒",30/Math.PI],["°/s","度毎秒",1/6]]],
+  ["angle","角度","度・rad",[["°","度",1],["′","分",1/60],["″","秒",1/3600],["rad","ラジアン",180/Math.PI],["mrad","ミリラジアン",.18/Math.PI],["grad","グラード",.9],["rev","回転",360]]],
+  ["temp","温度","℃・℉",[["°C","セルシウス度",0],["°F","ファーレンハイト度",0],["K","ケルビン",0]]],
+  ["flow","流量","L/min・m³/h",[["L/min","リットル毎分",1],["L/s","リットル毎秒",60],["L/h","リットル毎時",1/60],["mL/min","ミリリットル毎分",.001],["m³/h","立方メートル毎時",1000/60],["m³/min","立方メートル毎分",1000],["gal/min","ガロン毎分（米）",3.785411784]]],
+  ["time","時間","分・秒",[["s","秒",1],["ms","ミリ秒",.001],["min","分",60],["h","時間",3600],["日","日",86400]]],
+  ["density","密度","g/cm³・kg/m³",[["g/cm³","グラム毎立方センチ",1],["kg/m³","キログラム毎立方メートル",.001],["kg/L","キログラム毎リットル",1],["lb/in³","ポンド毎立方インチ",27.679904710191],["lb/ft³","ポンド毎立方フィート",.016018463374]]],
+  ["rough","表面粗さ","µm・µin",[["µm","マイクロメートル",1],["µin","マイクロインチ",.0254],["mm","ミリメートル",1000]]]
+];
+const UC=Object.fromEntries(UCATS.map(c=>[c[0],c]));
+const TEMP={"°C":[v=>v,v=>v],"°F":[v=>(v-32)*5/9,v=>v*9/5+32],"K":[v=>v-273.15,v=>v+273.15]};
+function uconv(cat,v,from,to){
+  if(cat==="temp") return TEMP[to][1](TEMP[from][0](v));
+  const us=UC[cat][3], f=us.find(u=>u[0]===from), t=us.find(u=>u[0]===to);
+  return v*f[2]/t[2];
+}
+function sig(v){
+  if(!isFinite(v)) return "—"; if(v===0) return "0";
+  const a=Math.abs(v); if(a>=1e10||a<1e-6) return v.toExponential(5).replace("e","×10^");
+  return v.toLocaleString("ja-JP",{maximumSignificantDigits:8});
+}
+const uname=(cat,sym)=>(UC[cat][3].find(u=>u[0]===sym)||[0,""])[1];
+function unitsView(){
+  return `<section id="view-units" hidden>
+    ${subnav("calc")}
+    ${viewHead("units","単位変換","長さ・圧力・トルク・温度など、現場でよく使う単位を換算します")}
+    <div class="ugrid">
+      <div class="card">${H2("list","種類を選ぶ")}<div class="cats" id="u-cats">${UCATS.map(c=>`<button type="button" data-cat="${c[0]}"><b>${c[1]}</b><span>${c[2]}</span></button>`).join("")}</div></div>
+      <div class="stack">
+        <div class="card">
+          <div class="uhead"><h2 class="h" style="margin:0">${ICON.swap}<span id="u-title"></span></h2><button class="btn small primary" id="u-save">${ICON.save}記録</button></div>
+          <div class="urow">
+            <label class="flabel">変換する値<div class="inbox big"><input id="u-v" type="number" inputmode="decimal" step="any" aria-label="変換する値"></div></label>
+            <label class="flabel">単位${selbox('<select id="u-from" aria-label="変換元の単位"></select>')}</label>
+          </div>
+          <div class="uswap"><button class="iconbtn" id="u-swap" aria-label="単位を入れ替える">${I('<path d="M8 4v16M4 16l4 4 4-4M16 20V4M12 8l4-4 4 4"/>')}</button></div>
+          <div class="ures">
+            <div class="dro-mini"><span>変換結果</span><b id="u-out">—</b><small id="u-outu"></small></div>
+            <label class="flabel">変換先の単位${selbox('<select id="u-to" aria-label="変換先の単位"></select>')}</label>
+          </div>
+          <div class="ufoot"><span id="u-rate"></span><button class="btn small ghost" id="u-copy">${ICON.copy}結果をコピー</button></div>
+        </div>
+        <div class="card">${H2("table","すべての単位での値")}<div class="tablewrap"><table class="ref pick" id="u-all"></table></div><p class="hint">行を押すと、その単位を変換先にします。</p></div>
+      </div>
+    </div></section>`;
+}
+function renderUnits(){
+  const u=S.units, c=UC[u.cat], us=c[3];
+  if(!us.some(x=>x[0]===u.from)) u.from=us[0][0];
+  if(!us.some(x=>x[0]===u.to)) u.to=us[1][0];
+  document.querySelectorAll("#u-cats [data-cat]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.cat===u.cat)));
+  $("u-title").textContent=c[1]+"を換算";
+  const opts=us.map(x=>`<option value="${x[0]}">${x[0]}　${x[1]}</option>`).join("");
+  const fs=$("u-from"), ts=$("u-to");
+  if(fs.dataset.cat!==u.cat){ fs.innerHTML=opts; ts.innerHTML=opts; fs.dataset.cat=u.cat; }
+  fs.value=u.from; ts.value=u.to;
+  const vi=$("u-v"); if(document.activeElement!==vi) vi.value=u.v;
+  const r=uconv(u.cat,u.v,u.from,u.to);
+  $("u-out").textContent=sig(r); $("u-outu").textContent=u.to;
+  $("u-rate").textContent = u.cat==="temp" ? `${u.v} ${u.from} = ${sig(r)} ${u.to}` : `1 ${u.from} = ${sig(uconv(u.cat,1,u.from,u.to))} ${u.to}`;
+  $("u-all").innerHTML=`<thead><tr><th>単位</th><th>名前</th><th>値</th></tr></thead><tbody>${us.map(x=>`<tr data-to="${esc(x[0])}" tabindex="0"${x[0]===u.to?' class="on"':""}><td>${esc(x[0])}</td><td class="jp">${esc(x[1])}</td><td>${sig(uconv(u.cat,u.v,u.from,x[0]))}</td></tr>`).join("")}</tbody>`;
+  save();
+}
+function bindUnits(){
+  const v=$("view-units");
+  v.addEventListener("click",e=>{
+    const c=e.target.closest("[data-cat]"); if(c){ S.units.cat=c.dataset.cat; const us=UC[c.dataset.cat][3]; S.units.from=us[0][0]; S.units.to=us[1][0]; S.units.v=1; renderUnits(); return; }
+    if(e.target.closest("#u-swap")){ const f=S.units.from; S.units.v=+uconv(S.units.cat,S.units.v,S.units.from,S.units.to).toPrecision(10); S.units.from=S.units.to; S.units.to=f; renderUnits(); return; }
+    const tr=e.target.closest("tr[data-to]"); if(tr){ S.units.to=tr.dataset.to; renderUnits(); return; }
+    if(e.target.closest("#u-copy")){ copyText($("u-out").textContent.replace(/,/g,"")+" "+S.units.to,"結果をコピーしました"); return; }
+    if(e.target.closest("#u-save")){ const u=S.units, r=uconv(u.cat,u.v,u.from,u.to);
+      openSave({kind:"units",title:"単位変換",cond:UC[u.cat][1],cells:[["変換前",sig(u.v),u.from],["変換後",sig(r),u.to]],rows:[],inputs:clone(u)}); }
+  });
+  v.addEventListener("keydown",e=>{ const tr=e.target.closest("tr[data-to]"); if(tr&&(e.key==="Enter"||e.key===" ")){ e.preventDefault(); tr.click(); } });
+  $("u-v").addEventListener("input",e=>{ const x=parseFloat(e.target.value); if(isFinite(x)){ S.units.v=x; renderUnits(); } });
+  $("u-from").addEventListener("change",e=>{ S.units.from=e.target.value; renderUnits(); });
+  $("u-to").addEventListener("change",e=>{ S.units.to=e.target.value; renderUnits(); });
+}
+
+/* ================= 起動 ================= */
+$("views").innerHTML=calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+notesView()+
+  `<p class="foot">${ICON.info}<span>推奨切削速度・速度比などは一般的な目安です。実際の条件は工具・砥石メーカーのカタログ値と、機械の剛性・クーラント条件に合わせて調整してください。砥石は表示された最高使用周速度を超えて使わないでください。</span></p>`;
+buildNav();
+Object.keys(TOOLS).forEach(id=>{ buildPanel(id); bindTool(id); });
+bindCalc(); bindNotes(); bindUnits(); renderUnits();
+expr="1000×180÷(π×50)"; showCalc(); justEval=true; renderHist();
+renderAll(); refreshChrome();
+go(ROUTES.includes(location.hash.slice(1))?location.hash.slice(1):S.route);
+initStore(); initDictation();
+})();
+</script>
+
+</body>
+</html>
