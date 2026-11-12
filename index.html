@@ -484,6 +484,54 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 .switch input:checked+i::after{transform:translateX(20px)}
 .switch input:focus-visible+i{outline:3px solid #0071e366;outline-offset:2px}
 .k-settings,.k-home{--kc:#8e8e93}
+.k-gdt{--kc:#0e7490}
+/* ===== 幾何公差 ===== */
+.gsym{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fcard .fwrap{overflow-x:auto;padding:4px 0}
+.fcf{display:block;width:100%;max-width:520px;height:auto}
+.fcf .fbox{fill:none;stroke:var(--ink);stroke-width:2}
+.fcf text{font-family:var(--f-num);font-size:20px;font-weight:600;fill:var(--ink)}
+.fcf .fsym{color:var(--ink)}
+.fcf .fsym path,.fcf .fsym circle{fill:none;stroke:currentColor;stroke-width:1.8}
+.fcf .fnum circle{fill:var(--accent)}
+.fcf .fnum text{fill:#fff;font-size:12px}
+.flegend{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:f}
+.flegend li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;counter-increment:f}
+.flegend li::before{content:counter(f);width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:inline-grid;place-items:center;flex:none;align-self:center}
+.flegend li b{font-weight:600}
+.flegend li span{color:var(--muted);font-size:14px}
+.gtool{display:flex;flex-direction:column;gap:10px;margin:22px 0 0}
+.gchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.gchips::-webkit-scrollbar{display:none}
+.gchips button{flex:none;display:flex;align-items:center;gap:6px;border:0;background:var(--surface);box-shadow:0 0 0 1px var(--line);color:var(--ink);border-radius:99px;padding:6px 13px;font-size:14px;font-weight:500;cursor:pointer}
+.gchips button small{color:var(--muted);font-size:11.5px}
+.gchips button i{width:8px;height:8px;border-radius:50%}
+.gchips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
+.gchips button[aria-pressed="true"] small{color:inherit;opacity:.7}
+.hsec small{font-size:14px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
+.gdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:9px;vertical-align:2px}
+.glist{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+@media (max-width:640px){.glist{grid-template-columns:minmax(0,1fr)}}
+.gcard{background:var(--surface);border-radius:18px;padding:16px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-width:0}
+.ghead{display:flex;align-items:center;gap:14px}
+.gbox{width:54px;height:54px;border:2px solid var(--ink);border-radius:6px;display:grid;place-items:center;font-size:34px;color:var(--ink);flex:none;background:var(--surface);box-shadow:inset 0 -4px 0 var(--gc)}
+.gname{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.gname b{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.gname span{font-size:14px;color:var(--accent-ink);font-weight:500}
+.gdat{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;align-self:flex-start}
+.gdat.no{background:var(--fill);color:var(--muted)}
+.gdat.yes{background:var(--accent-soft);color:var(--accent-ink)}
+.gwhat{margin:0;font-size:15.5px}
+.gdl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;margin:0;font-size:13.5px;padding-top:10px;border-top:.5px solid var(--line-2)}
+.gdl dt{color:var(--muted);font-weight:500;white-space:nowrap}
+.gdl dd{margin:0}
+.mrow{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border-bottom:.5px solid var(--line-2)}
+.card.list>.mrow:last-child{border-bottom:0}
+.mbox{min-width:54px;height:40px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;display:grid;place-items:center;font-size:19px;font-weight:600;flex:none;white-space:nowrap}
+.mt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mt b{font-size:15.5px;font-weight:600}
+.mt small{font-size:13px;color:var(--muted)}
+.mt .men{color:var(--accent-ink);font-weight:500}
 @media (max-width:959px){body[data-route="home"] .mtop{display:none}body[data-route="home"] .hhead{padding-top:16px}}
 /* ===== 動き・仕上げ ===== */
 .main-in>section:not([hidden]){animation:vin .26s cubic-bezier(.2,.7,.2,1)}
@@ -572,6 +620,7 @@ const ICON={
   info:I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>'),
   backspace:I('<path d="M9 5h11a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 20 19H9l-6-7z"/><path d="m12 9.5 5 5M17 9.5l-5 5"/>'),
   minus:I('<path d="M6 12h12"/>'),
+  gdt:I('<rect x="2.5" y="7" width="19" height="10" rx="1.5"/><path d="M9.5 7v10M15.5 7v10"/><circle cx="6" cy="12" r="2"/><path d="M6 9v6M3.5 12h5"/>'),
   home:I('<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>'),
   gear:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   plus:I('<path d="M12 6v12M6 12h12"/>'),
@@ -898,14 +947,14 @@ const DIAG={
 };
 
 /* ================= ルーティング ================= */
-const ROUTES=["home","calc","units",...Object.keys(TOOLS),"notes","settings"];
-const groupOf=r=> r==="home"||r==="settings"?"home": r==="calc"||r==="units"?"calc": r==="notes"?"notes": TOOLS[r].group;
+const ROUTES=["home","calc","units",...Object.keys(TOOLS),"gdt","notes","settings"];
+const groupOf=r=> r==="home"||r==="settings"?"home": r==="calc"||r==="units"?"calc": r==="gdt"?"geo": r==="notes"?"notes": TOOLS[r].group;
 const routeIcon=r=>r==="settings"?ICON.gear:ICON[r==="calc"?"calc":r==="notes"?"notes":r==="memo"?"memo":r==="units"?"units":r];
 const KEY=(r,cls)=>`<span class="key k-${r}${["calc","sine","notes","memo"].includes(r)?" dk":""}${cls?" "+cls:""}" aria-hidden="true">${routeIcon(r)}</span>`;
-const routeName=r=> r==="home"?"ホーム": r==="settings"?"設定": r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
+const routeName=r=> r==="gdt"?"幾何公差": r==="home"?"ホーム": r==="settings"?"設定": r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
 
 function buildNav(){
-  const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo")],["notes",["notes"]]];
+  const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo").concat(["gdt"])],["notes",["notes"]]];
   $("sidenav").innerHTML=`<div class="navgroup"><button data-go="home">${KEY("home")}<span>ホーム</span></button></div>`+groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
   const bn=[["home","ホーム","home"],["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
   $("bnav").innerHTML=bn.map(([g,l,ic])=>`<button data-gogroup="${g}">${routeIcon(ic)}<span>${l}</span>${g==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("");
@@ -913,12 +962,12 @@ function buildNav(){
   $("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-gogroup]"); if(!b) return; const g=b.dataset.gogroup; go(g==="home"?"home":g==="notes"?"notes":S.last[g]||(g==="calc"?"calc":g),true);});
 }
 function subnav(group){
-  const list=group==="calc"?["calc","units"]:Object.keys(TOOLS).filter(k=>TOOLS[k].group===group);
+  const list=group==="calc"?["calc","units"]:Object.keys(TOOLS).filter(k=>TOOLS[k].group===group).concat(group==="geo"?["gdt"]:[]);
   return `<nav class="subnav" aria-label="${GROUPS[group]}">${list.map(k=>`<button data-go="${k}">${KEY(k)}${routeName(k)}</button>`).join("")}</nav>`;
 }
 function go(route,push){
   if(!ROUTES.includes(route)) route="home";
-  if(TOOLS[route]||route==="calc"||route==="units"){ USAGE[route]=(USAGE[route]||0)+1; lsSet("kirico-usage",USAGE); }
+  if(TOOLS[route]||route==="calc"||route==="units"||route==="gdt"){ USAGE[route]=(USAGE[route]||0)+1; lsSet("kirico-usage",USAGE); }
   S.route=route; document.body.dataset.route=route; const g=groupOf(route); if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
   ROUTES.forEach(r=>{ $("view-"+r).hidden=r!==route; });
   document.querySelectorAll("[data-go]").forEach(b=>{ if(b.dataset.go===route) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -927,6 +976,7 @@ function go(route,push){
   if(route==="notes") renderNotes();
   if(route==="home") renderHome();
   if(route==="settings") renderSettings();
+  if(route==="gdt") renderGdt();
   if(route==="calc") requestAnimationFrame(fitRes);
   if(push){ try{ history.replaceState(null,"","#"+route); }catch(e){} window.scrollTo(0,0); }
 }
@@ -939,7 +989,7 @@ const matOptions=()=>Object.entries(MATS).map(([k,m])=>`<option value="${k}">${e
 const H2=(icon,text)=>`<h2 class="h">${ICON[icon]}${text}</h2>`;
 function viewHead(r,title,desc){
   return `<header class="vhead"><div class="vtitle">${KEY(r,"xl")}<div><div class="crumb">${GROUPS[groupOf(r)]}</div><h2>${title}</h2><p>${desc}</p></div></div>
-    ${r!=="notes"&&r!=="calc"&&r!=="units"?`<div class="actions"><button class="btn ghost" data-reset="${r}">${ICON.reset}初期値に戻す</button><button class="btn primary" data-save="${r}">${ICON.save}この計算を記録</button></div>`:""}</header>`;
+    ${r!=="notes"&&r!=="calc"&&r!=="units"&&r!=="gdt"?`<div class="actions"><button class="btn ghost" data-reset="${r}">${ICON.reset}初期値に戻す</button><button class="btn primary" data-save="${r}">${ICON.save}この計算を記録</button></div>`:""}</header>`;
 }
 function toolView(id){
   const T=TOOLS[id];
@@ -1614,9 +1664,9 @@ function haptic(ms){ if(PREF.haptic&&navigator.vibrate){ try{ navigator.vibrate(
 
 /* ================= ホーム ================= */
 const USAGE=lsGet("kirico-usage",{});
-const KW={calc:"電卓 計算 ルート 平方根 π",units:"単位 換算 変換 inch mm psi MPa kgf トルク 温度 圧力",turn:"旋盤 旋削 回転数 周速 送り 粗さ",mill:"フライス エンドミル マシニング 1刃送り テーブル送り",drill:"ドリル 穴あけ 下穴",tap:"タップ ねじ 下穴 ピッチ",grind:"研削 砥石 周速 円筒 平面 トラバース",tri:"三角 三角関数 斜辺 角度 sin cos tan",taper:"テーパー 角度 勾配 刃物台",pcd:"PCD ピッチ円 穴位置 座標",sine:"サインバー ブロックゲージ 角度",arc:"円弧 弦 R 半径 弧長",notes:"記録 メモ ノート"};
-const SHORT={calc:"√・π・履歴",units:"18種類の単位",turn:"回転数・送り・粗さ",mill:"テーブル送り・動力",drill:"送り・加工時間",tap:"同期送り・下穴径",grind:"砥石周速・研削時間",tri:"2つの値から残りを",taper:"角度・刃物台旋回角",pcd:"穴の X・Y 座標",sine:"ブロック高さ",arc:"弦・弧・R",notes:"計算とメモ"};
-const HOMEGROUPS=[["電卓・単位",["calc","units"]],["加工条件",["turn","mill","drill","tap","grind"]],["図面・寸法",["tri","taper","pcd","sine","arc"]]];
+const KW={gdt:"幾何公差 GD&T 記号 真直度 平面度 真円度 円筒度 輪郭度 平行度 直角度 傾斜度 位置度 同軸度 同心度 対称度 振れ 全振れ データム straightness flatness roundness cylindricity profile parallelism perpendicularity angularity position concentricity coaxiality symmetry runout datum MMC",calc:"電卓 計算 ルート 平方根 π",units:"単位 換算 変換 inch mm psi MPa kgf トルク 温度 圧力",turn:"旋盤 旋削 回転数 周速 送り 粗さ",mill:"フライス エンドミル マシニング 1刃送り テーブル送り",drill:"ドリル 穴あけ 下穴",tap:"タップ ねじ 下穴 ピッチ",grind:"研削 砥石 周速 円筒 平面 トラバース",tri:"三角 三角関数 斜辺 角度 sin cos tan",taper:"テーパー 角度 勾配 刃物台",pcd:"PCD ピッチ円 穴位置 座標",sine:"サインバー ブロックゲージ 角度",arc:"円弧 弦 R 半径 弧長",notes:"記録 メモ ノート"};
+const SHORT={gdt:"記号と英語名の早見表",calc:"√・π・履歴",units:"18種類の単位",turn:"回転数・送り・粗さ",mill:"テーブル送り・動力",drill:"送り・加工時間",tap:"同期送り・下穴径",grind:"砥石周速・研削時間",tri:"2つの値から残りを",taper:"角度・刃物台旋回角",pcd:"穴の X・Y 座標",sine:"ブロック高さ",arc:"弦・弧・R",notes:"計算とメモ"};
+const HOMEGROUPS=[["電卓・単位",["calc","units"]],["加工条件",["turn","mill","drill","tap","grind"]],["図面・寸法",["tri","taper","pcd","sine","arc","gdt"]]];
 let homeQ="";
 function homeView(){
   return `<section id="view-home" hidden>
@@ -1734,12 +1784,117 @@ document.addEventListener("click",e=>{
   const v=e.target.closest(".dro-v"); if(v&&!e.target.closest(".dro.err")){ copyText(v.textContent.replace(/,/g,"").replace(/\s+/g," ").trim(),"「"+v.textContent.trim()+"」をコピーしました"); }
 },true);
 
+/* ================= 幾何公差の早見表 ================= */
+const GS=(d)=>`<svg class="gsym" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const GSYM={
+  straight:GS('<path d="M3.5 12h17"/>'),
+  flat:GS('<path d="M8 7h12.5l-4.5 10H3.5z"/>'),
+  round:GS('<circle cx="12" cy="12" r="7"/>'),
+  cyl:GS('<circle cx="12" cy="12" r="5.2"/><path d="M4.4 17.7 9.9 2.7M14.1 21.3 19.6 6.3"/>'),
+  lprof:GS('<path d="M3.5 17.5a8.5 8.5 0 0 1 17 0"/>'),
+  sprof:GS('<path d="M3.5 17.5a8.5 8.5 0 0 1 17 0z"/>'),
+  para:GS('<path d="M6.5 19.5 12 4.5M12 19.5 17.5 4.5"/>'),
+  perp:GS('<path d="M12 4.5v15M3.5 19.5h17"/>'),
+  ang:GS('<path d="M3.5 19.5h17M3.5 19.5 18 6"/>'),
+  pos:GS('<circle cx="12" cy="12" r="6"/><path d="M12 2.5v19M2.5 12h19"/>'),
+  coax:GS('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.6"/>'),
+  sym:GS('<path d="M3 12h18M7 7.5h10M7 16.5h10"/>'),
+  crun:GS('<path d="M6 19 16.5 8.5"/><path d="M11.5 7h6.5v6.5z" fill="currentColor"/>'),
+  trun:GS('<path d="M3.5 19.5h11M4.5 19.5 13 11M10 19.5 18.5 11"/><path d="M9 10h5v5zM14.5 10h5v5z" fill="currentColor"/>')
+};
+const GCAT={form:["形状","Form","#0a84ff"],ori:["姿勢","Orientation","#34c759"],loc:["位置","Location","#af52de"],run:["振れ","Run-out","#ff9500"]};
+const GDT=[
+ {id:"straight",cat:"form",jp:"真直度",en:"Straightness",datum:"不要",what:"線や軸が、どれだけまっすぐか。",zone:"2本の平行な直線の間（軸の場合は直径 t の円筒の中）",meas:"定盤の上で直定規やダイヤルゲージを当て、移動させたときの振れを見る。",ex:"シャフトの曲がり、案内面の真っすぐさ"},
+ {id:"flat",cat:"form",jp:"平面度",en:"Flatness",datum:"不要",what:"面が、どれだけ平らか。反りやうねりを抑える。",zone:"間隔 t の平行な2平面の間",meas:"定盤に置き、ダイヤルゲージで面全体をなぞって最大と最小の差を見る。",ex:"取付面、シール面、フランジ面"},
+ {id:"round",cat:"form",jp:"真円度",en:"Roundness（Circularity）",datum:"不要",what:"断面が、どれだけ真円に近いか。",zone:"同じ中心をもつ、半径差 t の2つの円の間（断面ごと）",meas:"真円度測定機で回して測る。簡易的には V ブロックとダイヤルゲージ。",ex:"軸受けのはまり部、ピン、ブッシュ"},
+ {id:"cyl",cat:"form",jp:"円筒度",en:"Cylindricity",datum:"不要",what:"円筒面全体が、どれだけ理想の円筒に近いか。真直度と真円度をまとめた考え方。",zone:"同じ軸をもつ、半径差 t の2つの円筒の間",meas:"真円度測定機で、高さを変えながら複数の断面を測る。",ex:"シリンダー内面、ピストン、精密軸"},
+ {id:"lprof",cat:"form",jp:"線の輪郭度",en:"Profile of a line",datum:"場合による",what:"曲線の形が、図面の理想の形からどれだけずれているか。",zone:"理想の線を中心に、直径 t の円が転がってできる2本の線の間",meas:"輪郭形状測定機や三次元測定機で、断面の形を測る。",ex:"カム、R形状、翼形"},
+ {id:"sprof",cat:"form",jp:"面の輪郭度",en:"Profile of a surface",datum:"場合による",what:"曲面全体の形が、理想の形からどれだけずれているか。",zone:"理想の面を中心に、直径 t の球が転がってできる2つの面の間",meas:"三次元測定機で面上の多数の点を測る。",ex:"金型の曲面、外装部品、鋳物の面"},
+ {id:"para",cat:"ori",jp:"平行度",en:"Parallelism",datum:"必要",what:"データムに対して、面や軸がどれだけ平行か。",zone:"データムに平行で、間隔 t の2平面の間（軸なら直径 t の円筒）",meas:"データム面を定盤に置き、対象の面をダイヤルゲージでなぞる。",ex:"上下面の平行、2本の穴の軸の平行"},
+ {id:"perp",cat:"ori",jp:"直角度",en:"Perpendicularity",datum:"必要",what:"データムに対して、面や軸がどれだけ直角か。",zone:"データムに直角で、間隔 t の2平面の間（軸なら直径 t の円筒）",meas:"直角定規やスコヤ、またはアングルプレートに当ててダイヤルゲージで見る。",ex:"端面と軸の直角、ボス・穴の立ち"},
+ {id:"ang",cat:"ori",jp:"傾斜度",en:"Angularity",datum:"必要",what:"データムに対して、指定した角度（理論的に正確な角度）をどれだけ正しく保っているか。",zone:"データムに対して指定角度に傾いた、間隔 t の2平面の間",meas:"サインバーで指定角度に傾け、ダイヤルゲージで平行を見る。",ex:"斜面、角度の付いた穴"},
+ {id:"pos",cat:"loc",jp:"位置度",en:"Position",datum:"多くは必要",what:"穴や軸などが、理論的に正確な位置からどれだけずれているか。",zone:"理論的に正しい位置を中心とする直径 t の円・円筒の中（Ø 付きの場合）",meas:"三次元測定機で中心座標を測り、ずれ量の2倍（直径換算）で判定する。",ex:"ボルト穴、ピン穴、PCD の穴位置"},
+ {id:"coax",cat:"loc",jp:"同軸度（同心度）",en:"Coaxiality（Concentricity）",datum:"必要",what:"軸（または円の中心）が、データム軸とどれだけ一致しているか。",zone:"データム軸と同じ軸をもつ直径 t の円筒の中（同心度は円の中心）",meas:"三次元測定機や真円度測定機で、各断面の中心を求める。",ex:"段付き軸の各径、ハブの穴と外径"},
+ {id:"sym",cat:"loc",jp:"対称度",en:"Symmetry",datum:"必要",what:"溝や幅の中心面が、データムの中心面に対してどれだけ対称か。",zone:"データム中心面に対称な、間隔 t の2平面の間",meas:"両側の面までの距離をそれぞれ測り、その差から中心のずれを求める。",ex:"キー溝、スリット、凸部の中心"},
+ {id:"crun",cat:"run",jp:"円周振れ",en:"Circular run-out",datum:"必要",what:"データム軸を中心に1回転させたとき、ある位置での振れの大きさ。",zone:"測る位置ごとに、データム軸まわりで1回転したときの振れが t 以内",meas:"データム部をセンターや V ブロックで支え、回しながら1点でダイヤルゲージを読む。",ex:"回転体の外径の振れ、端面の振れ"},
+ {id:"trun",cat:"run",jp:"全振れ",en:"Total run-out",datum:"必要",what:"データム軸を中心に回しながら、測定子を面全体に動かしたときの振れの大きさ。",zone:"面全体で、データム軸まわりの振れの合計が t 以内",meas:"回転させながら、ダイヤルゲージを軸方向（端面なら半径方向）に動かして最大値を読む。",ex:"軸受け部の外径全体、ブレーキディスク面"}
+];
+const GMODS=[
+ ["Ⓜ","最大実体公差方式","Maximum material requirement（MMC / MMR）","穴が最も小さく、軸が最も大きいとき（材料が最大）を基準にする。実寸がそこから離れた分だけ、幾何公差を大きくしてよい（ボーナス公差）。はめあい部品で使う。"],
+ ["Ⓛ","最小実体公差方式","Least material requirement（LMC / LMR）","材料が最も少ない状態を基準にする。肉厚を確保したいときなどに使う。"],
+ ["Ⓔ","包絡の条件","Envelope requirement","最大実体寸法の完全な形の包絡面を超えてはならない。はめあいの確実さを保証する。"],
+ ["Ⓟ","突出公差域","Projected tolerance zone","穴の外側（相手部品が入る部分）まで公差域を延長して指定する。ねじ穴に植込むボルトなど。"],
+ ["Ⓕ","自由状態","Free state","ゴムや薄板など、拘束しない自然な状態で測ることを示す。"],
+ ["Ⓣ","接平面","Tangent plane","面そのものではなく、面に接する平面で評価する。"],
+ ["Ø","直径の公差域","Diameter","公差域が円または円筒であることを示す（位置度・同軸度などで公差値の前に付ける）。"],
+ ["SØ","球の公差域","Spherical diameter","公差域が球であることを示す。"],
+ ["CZ","共通公差域","Combined zone","離れた複数の形体を、ひとつの共通の公差域で規制する。"],
+ ["A","データム","Datum","基準になる面・軸・中心面。図面では三角の記号と英大文字で示し、公差記入枠の右側に優先順に書く。"],
+ ["[ 50 ]","理論的に正確な寸法","Theoretically exact dimension（TED / Basic dimension）","枠で囲んだ寸法。寸法公差を持たず、位置度・輪郭度・傾斜度などの理想の位置や形を決める。"]
+];
+let GF={cat:"",q:""};
+function gdtView(){
+  const frame=`<svg viewBox="0 0 340 92" class="fcf" role="img" aria-label="公差記入枠の例：位置度、直径0.1、最大実体、データムA・B・C">
+    <g class="fbox"><rect x="10" y="16" width="320" height="40" rx="2"/><path d="M58 16v40M168 16v40M222 16v40M276 16v40"/></g>
+    <g transform="translate(19 21) scale(1.25)" class="fsym">${GSYM.pos.replace(/<\/?svg[^>]*>/g,"")}</g>
+    <text x="113" y="43" text-anchor="middle">Ø0.1 Ⓜ</text><text x="195" y="43" text-anchor="middle">A</text><text x="249" y="43" text-anchor="middle">B</text><text x="303" y="43" text-anchor="middle">C</text>
+    <g class="fnum"><circle cx="34" cy="76" r="9"/><text x="34" y="80" text-anchor="middle">1</text><circle cx="113" cy="76" r="9"/><text x="113" y="80" text-anchor="middle">2</text><circle cx="249" cy="76" r="9"/><text x="249" y="80" text-anchor="middle">3</text></g>
+  </svg>`;
+  return `<section id="view-gdt" hidden>
+    ${subnav("geo")}
+    ${viewHead("gdt","幾何公差","記号の意味と英語名、データムの要否、公差域をすぐに確認できます")}
+    <div class="card fcard">${H2("table","公差記入枠の読み方 / Feature control frame")}
+      <div class="fwrap">${frame}</div>
+      <ol class="flegend"><li><b>幾何特性の記号</b><span>何を規制するか（この例は位置度 / Position）</span></li><li><b>公差値と付加記号</b><span>Ø は円筒の公差域、Ⓜ は最大実体公差方式</span></li><li><b>データム</b><span>基準。左から第1・第2・第3データムの順</span></li></ol>
+      <p class="hint">読み方の例：「データム A・B・C を基準に、理論的に正確な位置から直径 0.1 mm の円筒の中に軸線があること。最大実体公差方式を適用」</p>
+    </div>
+    <div class="gtool">
+      <div class="hsearch">${ICON.search}<input id="g-q" type="search" placeholder="名前・英語で探す（例：直角、runout、position）" aria-label="幾何公差を探す"></div>
+      <div class="gchips" id="g-cats"><button type="button" data-gcat="">すべて</button>${Object.entries(GCAT).map(([k,c])=>`<button type="button" data-gcat="${k}"><i style="background:${c[2]}"></i>${c[0]}<small>${c[1]}</small></button>`).join("")}<button type="button" data-gcat="mod">付加記号<small>Modifiers</small></button></div>
+    </div>
+    <div id="g-list"></div>
+  </section>`;
+}
+function renderGdt(){
+  document.querySelectorAll("#g-cats [data-gcat]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.gcat===GF.cat)));
+  const nz=x=>String(x).toLowerCase().replace(/[\s\-・（）()]/g,""), q=nz(GF.q), m=x=>!q||nz(x).includes(q);
+  let html="";
+  if(GF.cat!=="mod"){
+    const groups=Object.keys(GCAT).filter(c=>!GF.cat||GF.cat===c);
+    html+=groups.map(c=>{
+      const items=GDT.filter(g=>g.cat===c&&m([g.jp,g.en,g.what,g.ex].join(" ")));
+      if(!items.length) return "";
+      const C=GCAT[c];
+      return `<h3 class="hsec"><span class="gdot" style="background:${C[2]}"></span>${C[0]}公差 <small>${C[1]} tolerances</small></h3>
+        <div class="glist">${items.map(g=>`<article class="gcard">
+          <div class="ghead"><div class="gbox" style="--gc:${C[2]}">${GSYM[g.id]}</div>
+            <div class="gname"><b>${g.jp}</b><span>${g.en}</span></div>
+            <span class="gdat ${g.datum==="不要"?"no":"yes"}">データム ${g.datum}</span></div>
+          <p class="gwhat">${g.what}</p>
+          <dl class="gdl"><dt>公差域</dt><dd>${g.zone}</dd><dt>測り方</dt><dd>${g.meas}</dd><dt>使う場所</dt><dd>${g.ex}</dd></dl>
+        </article>`).join("")}</div>`;
+    }).join("");
+  }
+  if(!GF.cat||GF.cat==="mod"){
+    const mods=GMODS.filter(x=>m(x.join(" ")));
+    if(mods.length) html+=`<h3 class="hsec"><span class="gdot" style="background:#8e8e93"></span>付加記号 <small>Modifiers / Symbols</small></h3>
+      <div class="card list">${mods.map(x=>`<div class="mrow"><span class="mbox">${esc(x[0])}</span><span class="mt"><b>${x[1]}</b><small class="men">${x[2]}</small><small>${x[3]}</small></span></div>`).join("")}</div>`;
+  }
+  if(!html) html=`<div class="card estate">${ICON.search}<b>見つかりませんでした</b>別のことばで探してください。</div>`;
+  if(!q&&!GF.cat) html+=`<p class="hint">JIS B 0021 / ISO 1101 の記号です。ASME Y14.5（2018年版）では同心度と対称度は廃止され、位置度や輪郭度で指示します。</p>`;
+  $("g-list").innerHTML=html;
+}
+function bindGdt(){
+  $("g-q").addEventListener("input",e=>{ GF.q=e.target.value; renderGdt(); });
+  $("g-cats").addEventListener("click",e=>{ const b=e.target.closest("[data-gcat]"); if(b){ GF.cat=b.dataset.gcat; renderGdt(); } });
+}
+
 /* ================= 起動 ================= */
-$("views").innerHTML=homeView()+calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+notesView()+settingsView()+
+$("views").innerHTML=homeView()+calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+gdtView()+notesView()+settingsView()+
   `<p class="foot">${ICON.info}<span>推奨切削速度・速度比などは一般的な目安です。実際の条件は工具・砥石メーカーのカタログ値と、機械の剛性・クーラント条件に合わせて調整してください。砥石は表示された最高使用周速度を超えて使わないでください。</span></p>`;
 buildNav();
 Object.keys(TOOLS).forEach(id=>{ buildPanel(id); bindTool(id); });
-bindCalc(); bindNotes(); bindUnits(); renderUnits(); bindHome(); bindSettings();
+bindCalc(); bindNotes(); bindUnits(); renderUnits(); bindHome(); bindSettings(); bindGdt();
 Store.listeners.push(()=>{ if(S.route==="home") renderHome(); if(S.route==="settings") renderSettings(); });
 expr=""; showCalc(); renderHist();
 renderAll(); refreshChrome();
