@@ -174,6 +174,10 @@ select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-
 .dro-s b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 .dro.err{display:block;padding:20px 22px;font-size:15px;background:var(--danger-soft);box-shadow:none}
 .dro.err b{color:var(--danger)}
+.dro.blank{background:var(--surface);box-shadow:var(--shadow);color:var(--muted)}
+.dro.blank b{color:var(--ink)}
+.pill.none{background:var(--fill);color:var(--muted)}
+.dot.none{background:#c7c7cc}
 @media (max-width:700px){
   .dro{grid-template-columns:minmax(0,1fr);padding:2px 4px}
   .dro-cell{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:2px 10px;padding:13px 14px}
@@ -544,23 +548,23 @@ const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
 
 /* ================= 状態 ================= */
 const DEF={
-  route:"turn", mat:"s45c", tool:"carb", wheel:33, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:1},
+  route:"turn", mat:"s45c", tool:"carb", wheel:33, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
   t:{
-    turn:{mode:"n",D:50,vc:180,n:1146,f:.2,ap:2,L:100,r:.8},
-    mill:{mode:"n",D:10,z:4,vc:120,n:3820,fz:.05,ap:5,ae:3,L:200},
-    drill:{mode:"n",D:8.5,vc:70,n:2622,f:.15,L:25},
-    tap:{mode:"n",D:10,P:1.5,vc:10,n:318,L:20},
-    grind:{variant:"cyl",Ds:405,Ns:1500,Dw:50,Vw:20,B:40,k:.5,a:.01,Z:.2,L:100,Vt:15,cf:5,W:100,Ls:200,ov:20,as:.01,Zs:.1},
-    tri:{known:["a","A"],a:100,b:57.735,c:115.47,A:30},
-    taper:{mode:"angle",D:30,d:20,L:50,ang:11.42},
-    pcd:{P:100,N:6,s0:0,x0:0,y0:0},
-    sine:{mode:"H",L:100,ang:15,H:25.882},
-    arc:{mode:"ra",R:50,th:60,c:50,h:6.7}
+    turn:{mode:"n",D:0,vc:0,n:0,f:0,ap:0,L:0,r:0},
+    mill:{mode:"n",D:0,z:0,vc:0,n:0,fz:0,ap:0,ae:0,L:0},
+    drill:{mode:"n",D:0,vc:0,n:0,f:0,L:0},
+    tap:{mode:"n",D:0,P:0,vc:0,n:0,L:0},
+    grind:{variant:"cyl",Ds:0,Ns:0,Dw:0,Vw:0,B:0,k:0,a:0,Z:0,L:0,Vt:0,cf:0,W:0,Ls:0,ov:0,as:0,Zs:0},
+    tri:{known:["a","A"],a:0,b:0,c:0,A:0},
+    taper:{mode:"angle",D:0,d:0,L:0,ang:0},
+    pcd:{P:0,N:0,s0:0,x0:0,y0:0},
+    sine:{mode:"H",L:0,ang:0,H:0},
+    arc:{mode:"ra",R:0,th:0,c:0,h:0}
   }
 };
 function merge(a,b){ if(Array.isArray(a)) return Array.isArray(b)?b:a; const o={}; for(const k in a){ o[k]=(a[k]&&typeof a[k]==="object")?merge(a[k],(b&&b[k])||{}):(b&&b[k]!==undefined?b[k]:a[k]); } return o; }
-let S=merge(DEF,lsGet("cutcalc-v2",null)||{});
-let saveT; function save(){ clearTimeout(saveT); saveT=setTimeout(()=>lsSet("cutcalc-v2",S),250); }
+let S=merge(DEF,lsGet("cutcalc-v3",null)||{});
+let saveT; function save(){ clearTimeout(saveT); saveT=setTimeout(()=>lsSet("cutcalc-v3",S),250); }
 
 /* ================= ツール定義 ================= */
 const NV=[["n","回転数を求める","rpm"],["vc","切削速度を求める","speed"]];
@@ -723,7 +727,7 @@ const TOOLS={
   pcd:{group:"geo",name:"PCD穴位置",title:"PCD（ピッチ円）の穴位置",desc:"ピッチ円径と穴数から各穴の X・Y 座標を求めます",
     fields:()=>[["P","ピッチ円径","PCD","mm",5],["N","穴数","N","個",1,{int:1,min:1,max:72}],["s0","1番穴の角度","θ₀","°",15],["x0","中心 X","X₀","mm",1,{neg:1}],["y0","中心 Y","Y₀","mm",1,{neg:1}]],
     compute(s){
-      const N=Math.max(1,Math.min(72,Math.round(s.N))); s.N=N;
+      const N=Math.max(0,Math.min(72,Math.round(s.N)||0)); s.N=N;
       const R=s.P/2, pitch=360/N, chord=N>1?s.P*Math.sin(PI/N):0, pts=[];
       for(let i=0;i<N;i++){ const a=s.s0+i*pitch; pts.push([i+1,a,s.x0+R*Math.cos(rad(a)),s.y0+R*Math.sin(rad(a))]); }
       r_pts=pts;
@@ -921,12 +925,14 @@ function syncPanel(id,auto){
   const ms=p.querySelector('[data-role="msize"]'); if(ms){ const v=s.D+"|"+s.P; ms.value=[...ms.options].some(o=>o.value===v)?v:""; }
 }
 function droHTML(r){
+  if(r.blank) return {cls:"dro err blank",html:`<b>${ICON.info} 値を入れてください</b><br>入力欄に数値を入れると、ここに結果が表示されます。`};
   if(r.err) return {cls:"dro err",html:`<b>${ICON.alert} 計算できません</b><br>${esc(r.err)}`};
   return {cls:"dro",html:r.cells.map(c=>`<div class="dro-cell${c.lead?" lead":""}${c.auto?" calc":""}${c.given?" given":""}"><div class="dro-k"><span>${c.k}</span>${c.sym&&c.sym!=="—"?`<i>${c.sym}</i>`:""}</div><div class="dro-v">${c.v}<small>${c.u||""}</small></div>${c.s?`<div class="dro-s">${c.s}</div>`:""}</div>`).join("")};
 }
 function gaugeHTML(g){
   const pos=x=>Math.min(100,Math.max(0,x/g.max*100));
-  const icon=g.st==="ok"?ICON.check:ICON.alert;
+  if(!(g.v>0)){ g=Object.assign({},g,{st:"none",label:"未入力",v:0}); }
+  const icon=g.st==="ok"?ICON.check:g.st==="none"?ICON.info:ICON.alert;
   return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill ${g.st}">${icon}${g.label}</span></div>
     <p class="gauge-sub">${esc(g.sub)}</p>
     <div class="bar" role="img" aria-label="目安 ${g.lo}〜${g.hi} ${g.unit}、現在 ${fmt(g.v,1)} ${g.unit}">
@@ -941,10 +947,11 @@ function gaugeHTML(g){
 function renderTool(id){
   const T=TOOLS[id], s=S.t[id];
   const r=T.compute(s); RES[id]=r;
+  r.blank=T.fields(s).every(f=>!(+s[f[0]]));
   syncPanel(id,r.auto||[]);
   const d=droHTML(r), dro=$("dro-"+id); dro.className=d.cls+((r.cols||r.cells.length)>=4?" c4":""); dro.innerHTML=d.html; dro.style.setProperty("--cols",r.cols||r.cells.length);
   if(r.gauge) $("gauge-"+id).innerHTML=gaugeHTML(r.gauge);
-  $("rowsc-"+id).hidden=!r.rows.length||!!r.err;
+  $("rowsc-"+id).hidden=!r.rows.length||!!r.err||r.blank;
   $("rows-"+id).innerHTML=r.rows.map(([k,sym,v,u,sub])=>`<tr><th>${k}${sym?`<span class="sym">${sym}</span>`:""}${sub?`<small>${sub}</small>`:""}</th><td>${v}<small>${u||""}</small></td></tr>`).join("");
   $("extra-"+id).innerHTML=r.extra||"";
   if(T.diagram){ $("dg-"+id).innerHTML=T.diagram(s,r); }
@@ -994,7 +1001,7 @@ function renderDock(){
   const on=!!(r&&TOOLS[S.route]);
   document.body.classList.toggle("has-dock",on);
   if(!on) return;
-  if(r.err){ el.innerHTML=`<div style="grid-column:1/4"><span>${ICON.alert}計算できません</span><b style="font-size:14px;white-space:normal">${esc(r.err)}</b></div><button class="dock-save" data-save="${S.route}" aria-label="この計算を記録">${ICON.save}</button>`; return; }
+  if(r.err||r.blank){ el.innerHTML=`<div style="grid-column:1/4"><span>${r.blank?ICON.info+"未入力":ICON.alert+"計算できません"}</span><b style="font-size:14px;white-space:normal">${r.blank?"値を入れてください":esc(r.err)}</b></div><button class="dock-save" data-save="${S.route}" aria-label="この計算を記録">${ICON.save}</button>`; return; }
   const c=r.cells.slice(0,3), st=r.gauge?r.gauge.st:null;
   el.innerHTML=c.map((x,i)=>`<div><span>${i===0&&st?`<i class="dot ${st}"></i>`:""}${x.k}</span><b>${x.v}<small>${x.u||""}</small></b></div>`).join("")+`<button class="dock-save" data-save="${S.route}" aria-label="この計算を記録">${ICON.save}</button>`;
 }
@@ -1112,14 +1119,14 @@ function bindCalc(){
     const k=map[e.key]||e.key;
     if(/^[0-9.+()%^]$/.test(k)||["×","÷","−","=","BS","C","π","√"].includes(k)){ e.preventDefault(); press(k); }
   });
-  const ci=$("cv-in"), cm=$("cv-mm"); ci.value=1; cm.value=25.4;
+  const ci=$("cv-in"), cm=$("cv-mm"); ci.value=0; cm.value=0;
   ci.addEventListener("input",()=>{const v=parseFloat(ci.value); cm.value=isFinite(v)?+(v*25.4).toFixed(4):"";});
   cm.addEventListener("input",()=>{const v=parseFloat(cm.value); ci.value=isFinite(v)?+(v/25.4).toFixed(5):"";});
   const dd=$("dm-d"), dm=$("dm-m"), ds=$("dm-s"), dx=$("dm-dec");
   const fromDMS=()=>{ const v=(+dd.value||0)+(+dm.value||0)/60+(+ds.value||0)/3600; dx.value=+v.toFixed(6); };
   const toDMS=()=>{ const v=parseFloat(dx.value); if(!isFinite(v)) return; let D=Math.floor(v), M=Math.floor((v-D)*60), Sx=+(((v-D)*60-M)*60).toFixed(2); if(Sx>=60){Sx=0;M++;} if(M>=60){M=0;D++;} dd.value=D; dm.value=M; ds.value=Sx; };
   [dd,dm,ds].forEach(x=>x.addEventListener("input",fromDMS)); dx.addEventListener("input",toDMS);
-  dd.value=30; dm.value=15; ds.value=0; fromDMS();
+  dd.value=0; dm.value=0; ds.value=0; fromDMS();
 }
 
 /* ================= 記録の保存先 ================= */
@@ -1516,7 +1523,7 @@ $("views").innerHTML=calcView()+unitsView()+Object.keys(TOOLS).map(toolView).joi
 buildNav();
 Object.keys(TOOLS).forEach(id=>{ buildPanel(id); bindTool(id); });
 bindCalc(); bindNotes(); bindUnits(); renderUnits();
-expr="1000×180÷(π×50)"; showCalc(); justEval=true; renderHist();
+expr=""; showCalc(); renderHist();
 renderAll(); refreshChrome();
 go(ROUTES.includes(location.hash.slice(1))?location.hash.slice(1):S.route);
 initStore(); initDictation();
