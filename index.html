@@ -947,6 +947,12 @@ table.detail td{font-size:16px}
 /* 結果バー */
 .dock-in span{font-size:10.5px;letter-spacing:0}
 .dock-in b{letter-spacing:-.025em}
+/* 項目名は1行に収める */
+.field .auto{display:none!important}
+.lab{flex-wrap:nowrap;white-space:nowrap;min-width:0}
+.lab b{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lab>span{flex:none}
+@media (max-width:400px){.ctl{grid-template-columns:30px 104px 30px}.ctl input{width:56px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1158,8 +1164,8 @@ const TOOLS={
   grind:{group:"mach",name:"研削",title:"研削（円筒・平面）",desc:"砥石周速・工作物回転数・トラバース送り・研削時間を求めます",
     selects:"wheel",seg:[["cyl","円筒研削","grind"],["surf","平面研削","ruler"]],segKey:"variant",
     fields:(s)=> s.variant==="cyl"
-      ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dw","工作物径","Dw","mm",1],["Vw","工作物周速","Vw","m/min",1],["B","砥石幅","B","mm",5],["k","トラバース比","k","×B",.05],["a","切込み（1パス・半径）","a","mm",.005],["Z","取り代（直径）","Z","mm",.05],["L","研削長さ","L","mm",5]]
-      : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","Sf","mm/往復",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン（片側）","ov","mm",5],["as","切込み（1パス）","a","mm",.005],["Zs","取り代","Z","mm",.05]],
+      ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dw","工作物径","Dw","mm",1],["Vw","工作物周速","Vw","m/min",1],["B","砥石幅","B","mm",5],["k","トラバース比","k","×B",.05],["a","半径切込み","a","mm",.005],["Z","直径取り代","Z","mm",.05],["L","研削長さ","L","mm",5]]
+      : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","Sf","mm/往復",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン","片側","mm",5],["as","切込み","a","mm",.005],["Zs","取り代","Z","mm",.05]],
     compute(s){
       const Vs=PI*s.Ds*s.Ns/60000, R=S.wheel, nmax=R>0?R*60000/(PI*s.Ds):NaN, lim=R>0?"上限 <b>"+R+"</b> m/s":"上限は未入力";
       const st=!(R>0)?"none":Vs>R?"danger":Vs<R*.6?"lo":"ok";
@@ -1181,7 +1187,7 @@ const TOOLS={
   tri:{group:"geo",name:"直角三角形",title:"直角三角形",desc:"わかっている2つの値から、残りの辺と角度を求めます",
     guide:"わかっている値を<b>2つ</b>入れてください。最後に入れた2つを基準に、残りを自動で計算します。",
     editableAuto:true,
-    fields:()=>[["a","底辺","a","mm",1],["b","高さ","b","mm",1],["c","斜辺","c","mm",1],["A","角度（底辺と斜辺）","θ","°",.5]],
+    fields:()=>[["a","底辺","a","mm",1],["b","高さ","b","mm",1],["c","斜辺","c","mm",1],["A","角度","θ","°",.5]],
     onInput(s,id){ if(!s.known.includes(id)) s.known=[s.known[s.known.length-1],id]; },
     compute(s){
       const k=s.known.slice().sort().join(""), A=rad(s.A); let err="";
@@ -1221,7 +1227,7 @@ const TOOLS={
     seg:[["angle","角度を求める","angle"],["d","小径を求める","ruler"]],
     fields:(s)=> s.mode==="angle"
       ? [["D","大径","D","mm",1],["d","小径","d","mm",1],["L","テーパー長さ","L","mm",1]]
-      : [["D","大径","D","mm",1],["L","テーパー長さ","L","mm",1],["ang","テーパー角（全角）","2α","°",.5]],
+      : [["D","大径","D","mm",1],["L","テーパー長さ","L","mm",1],["ang","テーパー角","2α","°",.5]],
     compute(s){
       let err="";
       if(s.mode==="angle"){ if(!(s.D>s.d)) err="大径は小径より大きくしてください"; s.ang=2*deg(Math.atan((s.D-s.d)/(2*s.L))); }
@@ -1249,7 +1255,7 @@ const TOOLS={
     },
     formulas:["α = tan⁻¹((D − d) ÷ 2L)　（刃物台の旋回角）","テーパー角（全角）= 2α","d = D − 2L × tanα","テーパー比 = 1 : L ÷ (D − d)"]},
   pcd:{group:"geo",name:"PCD穴位置",title:"PCD（ピッチ円）の穴位置",desc:"ピッチ円径と穴数から各穴の X・Y 座標を求めます",
-    fields:()=>[["P","ピッチ円径","PCD","mm",5],["N","穴数","N","個",1,{int:1,min:1,max:72}],["s0","1番穴の角度","θ₀","°",15],["x0","中心 X","X₀","mm",1,{neg:1}],["y0","中心 Y","Y₀","mm",1,{neg:1}]],
+    fields:()=>[["P","ピッチ円径","PCD","mm",5],["N","穴数","N","個",1,{int:1,min:1,max:72}],["s0","開始角度","θ₀","°",15],["x0","中心 X","X₀","mm",1,{neg:1}],["y0","中心 Y","Y₀","mm",1,{neg:1}]],
     compute(s){
       const N=Math.max(0,Math.min(72,Math.round(s.N)||0)); s.N=N;
       const R=s.P/2, pitch=360/N, chord=N>1?s.P*Math.sin(PI/N):0, pts=[];
@@ -1273,7 +1279,7 @@ const TOOLS={
     formulas:["X = X₀ + (PCD ÷ 2) × cos(θ₀ + i × 360/N)","Y = Y₀ + (PCD ÷ 2) × sin(θ₀ + i × 360/N)","穴の間隔（弦）= PCD × sin(180° ÷ N)"]},
   sine:{group:"geo",name:"サインバー",title:"サインバー",desc:"角度からブロックゲージの高さ、または高さから角度を求めます",
     seg:[["H","ブロック高さを求める","ruler"],["ang","角度を求める","angle"]],
-    fields:(s)=> s.mode==="H" ? [["L","サインバー長さ","L","mm",100],["ang","角度","θ","°",.5]] : [["L","サインバー長さ","L","mm",100],["H","ブロック高さ","H","mm",.1]],
+    fields:(s)=> s.mode==="H" ? [["L","バー長さ","L","mm",100],["ang","角度","θ","°",.5]] : [["L","バー長さ","L","mm",100],["H","ブロック高さ","H","mm",.1]],
     compute(s){
       let err="";
       if(s.mode==="H"){ if(!(s.ang>0&&s.ang<90)) err="角度は0°より大きく90°未満にしてください"; s.H=s.L*Math.sin(rad(s.ang)); }
