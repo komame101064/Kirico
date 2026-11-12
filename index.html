@@ -92,8 +92,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .mtop .logo{width:28px;height:28px;font-size:17px;border-radius:7px}
   .mtop b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
   .mtop .st{margin-left:auto}
+  .mtop .mgear{color:var(--ink);font-size:21px;width:36px;height:36px}
   .mtop .store{font-size:11.5px;padding:4px 9px;white-space:nowrap}
-  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass-nav);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid #0000002e;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--glass-nav);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid #0000002e;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   .bnav button{height:var(--navh);border:0;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:500;cursor:pointer;position:relative}
   .bnav button svg{font-size:25px}
   .bnav button[aria-current="page"]{color:var(--accent)}
@@ -438,25 +439,6 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 .foot{margin-top:28px;font-size:12.5px;color:var(--faint);display:flex;gap:8px;align-items:flex-start}
 .foot svg{font-size:15px;margin-top:2px}
 
-/* ===== ホーム ===== */
-.hhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:4px 0 16px}
-.htitle{font-size:40px;font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.05}
-.iconbtn.big{width:44px;height:44px;font-size:23px;background:var(--surface);box-shadow:var(--shadow);color:var(--ink)}
-.hsearch{position:relative}
-.hsearch>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:18px}
-.hsearch input{width:100%;font:inherit;font-size:16px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);padding:11px 14px 11px 42px;min-height:46px}
-.hsearch input:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
-.hsec{font-size:22px;font-weight:700;letter-spacing:-.015em;margin:28px 0 12px}
-.hsec-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.hsec-row .hsec{margin-bottom:12px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
-@media (max-width:640px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
-.tile{display:flex;flex-direction:column;align-items:flex-start;gap:1px;border:0;background:var(--surface);color:var(--ink);border-radius:18px;padding:14px 14px 16px;cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:transform .15s ease,box-shadow .15s ease;min-width:0}
-.tile:hover{box-shadow:0 2px 4px rgba(0,0,0,.04),0 10px 24px rgba(0,0,0,.08)}
-.tile:active{transform:scale(.97)}
-.key.tl{width:42px;height:42px;font-size:24px;border-radius:11px;margin-bottom:12px}
-.tn{font-size:16px;font-weight:600;letter-spacing:-.005em}
-.ts{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .card.list{padding:2px 0;overflow:hidden}
 .lrow{display:flex;align-items:center;gap:12px;width:100%;border:0;border-bottom:.5px solid var(--line-2);background:transparent;color:var(--ink);padding:11px 16px;text-align:left;cursor:pointer}
 .card.list>:last-child,#st-wipe{border-bottom:0}
@@ -512,6 +494,11 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 .gchips button i{width:8px;height:8px;border-radius:50%}
 .gchips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
 .gchips button[aria-pressed="true"] small{color:inherit;opacity:.7}
+.hsearch{position:relative}
+.hsearch>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:18px}
+.hsearch input{width:100%;font:inherit;font-size:16px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);padding:11px 14px 11px 42px;min-height:46px}
+.hsearch input:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
+.hsec{font-size:22px;font-weight:700;letter-spacing:-.015em;margin:28px 0 12px}
 .hsec small{font-size:14px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
 .gdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:9px;vertical-align:2px}
 .glist{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
@@ -536,7 +523,6 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 .mt b{font-size:15.5px;font-weight:600}
 .mt small{font-size:13px;color:var(--muted)}
 .mt .men{color:var(--accent-ink);font-weight:500}
-@media (max-width:959px){body[data-route="home"] .mtop{display:none}body[data-route="home"] .hhead{padding-top:16px}}
 /* ===== 動き・仕上げ ===== */
 .main-in>section:not([hidden]){animation:vin .26s cubic-bezier(.2,.7,.2,1)}
 @keyframes vin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -563,7 +549,7 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
   </aside>
 
   <div class="main">
-    <div class="mtop"><div class="logo" id="logo2"></div><b>Kirico</b><span class="st" id="mstore"></span></div>
+    <div class="mtop"><div class="logo" id="logo2"></div><b>Kirico</b><span class="st" id="mstore"></span><button class="iconbtn mgear" data-go="settings" aria-label="設定"></button></div>
     <div class="main-in" id="views"></div>
   </div>
 </div>
@@ -633,6 +619,7 @@ const ICON={
 };
 document.getElementById("logo1").innerHTML=ICON.logo;
 document.getElementById("logo2").innerHTML=ICON.logo;
+document.querySelector(".mgear").innerHTML=ICON.gear;
 
 /* ================= 共通ユーティリティ ================= */
 const PI=Math.PI, rad=d=>d*PI/180, deg=r=>r*180/PI;
@@ -677,7 +664,7 @@ const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
 
 /* ================= 状態 ================= */
 const DEF={
-  route:"home", mat:"s45c", tool:"carb", wheel:0, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
+  route:"calc", mat:"s45c", tool:"carb", wheel:0, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
   t:{
     turn:{mode:"n",D:0,vc:0,n:0,f:0,ap:0,L:0,r:0},
     mill:{mode:"n",D:0,z:0,vc:0,n:0,fz:0,ap:0,ae:0,L:0},
@@ -951,26 +938,26 @@ const DIAG={
 };
 
 /* ================= ルーティング ================= */
-const ROUTES=["home","calc","units",...Object.keys(TOOLS),"gdt","notes","settings"];
-const groupOf=r=> r==="home"||r==="settings"?"home": r==="calc"||r==="units"?"calc": r==="gdt"?"geo": r==="notes"?"notes": TOOLS[r].group;
+const ROUTES=["calc","units",...Object.keys(TOOLS),"gdt","notes","settings"];
+const groupOf=r=> r==="settings"?"settings": r==="calc"||r==="units"?"calc": r==="gdt"?"geo": r==="notes"?"notes": TOOLS[r].group;
 const routeIcon=r=>r==="settings"?ICON.gear:ICON[r==="calc"?"calc":r==="notes"?"notes":r==="memo"?"memo":r==="units"?"units":r];
 const KEY=(r,cls)=>`<span class="key k-${r}${["calc","sine","notes","memo"].includes(r)?" dk":""}${cls?" "+cls:""}" aria-hidden="true">${routeIcon(r)}</span>`;
-const routeName=r=> r==="gdt"?"幾何公差": r==="home"?"ホーム": r==="settings"?"設定": r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
+const routeName=r=> r==="gdt"?"幾何公差": r==="settings"?"設定": r==="units"?"単位変換": r==="calc"?"電卓": r==="notes"?"記録ノート": TOOLS[r].name;
 
 function buildNav(){
   const groups=[["calc",["calc","units"]],["mach",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="mach")],["geo",Object.keys(TOOLS).filter(k=>TOOLS[k].group==="geo").concat(["gdt"])],["notes",["notes"]]];
-  $("sidenav").innerHTML=`<div class="navgroup"><button data-go="home">${KEY("home")}<span>ホーム</span></button></div>`+groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
-  const bn=[["home","ホーム","home"],["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
+  $("sidenav").innerHTML=groups.map(([g,list])=>`<div class="navgroup"><h3>${GROUPS[g]}</h3>${list.map(r=>`<button data-go="${r}">${KEY(r)}<span>${routeName(r)}</span>${r==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("")}</div>`).join("")+`<div class="navgroup"><button data-go="settings">${KEY("settings")}<span>設定</span></button></div>`;
+  const bn=[["calc","電卓","calc"],["mach","加工","turn"],["geo","図面","tri"],["notes","記録","notes"]];
   $("bnav").innerHTML=bn.map(([g,l,ic])=>`<button data-gogroup="${g}">${routeIcon(ic)}<span>${l}</span>${g==="notes"?'<span class="badge" data-count></span>':""}</button>`).join("");
   document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(b.dataset.go,true);});
-  $("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-gogroup]"); if(!b) return; const g=b.dataset.gogroup; go(g==="home"?"home":g==="notes"?"notes":S.last[g]||(g==="calc"?"calc":g),true);});
+  $("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-gogroup]"); if(!b) return; const g=b.dataset.gogroup; go(g==="notes"?"notes":S.last[g]||(g==="calc"?"calc":g),true);});
 }
 function subnav(group){
   const list=group==="calc"?["calc","units"]:Object.keys(TOOLS).filter(k=>TOOLS[k].group===group).concat(group==="geo"?["gdt"]:[]);
   return `<nav class="subnav" aria-label="${GROUPS[group]}">${list.map(k=>`<button data-go="${k}">${KEY(k)}${routeName(k)}</button>`).join("")}</nav>`;
 }
 function go(route,push){
-  if(!ROUTES.includes(route)) route="home";
+  if(!ROUTES.includes(route)) route="calc";
   if(TOOLS[route]||route==="calc"||route==="units"||route==="gdt"){ USAGE[route]=(USAGE[route]||0)+1; lsSet("kirico-usage",USAGE); }
   S.route=route; document.body.dataset.route=route; const g=groupOf(route); if(g==="mach"||g==="geo"||g==="calc") S.last[g]=route; save();
   ROUTES.forEach(r=>{ $("view-"+r).hidden=r!==route; });
@@ -978,7 +965,6 @@ function go(route,push){
   document.querySelectorAll("[data-gogroup]").forEach(b=>{ if(b.dataset.gogroup===g) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   renderDock();
   if(route==="notes") renderNotes();
-  if(route==="home") renderHome();
   if(route==="settings") renderSettings();
   if(route==="gdt") renderGdt();
   if(route==="calc") requestAnimationFrame(fitRes);
@@ -1665,47 +1651,7 @@ if(mqDark&&mqDark.addEventListener) mqDark.addEventListener("change",()=>{ if(PR
 applyTheme();
 function haptic(ms){ if(PREF.haptic&&navigator.vibrate){ try{ navigator.vibrate(ms||8); }catch(e){} } }
 
-/* ================= ホーム ================= */
 const USAGE=lsGet("kirico-usage",{});
-const KW={gdt:"幾何公差 GD&T 記号 真直度 平面度 真円度 円筒度 輪郭度 平行度 直角度 傾斜度 位置度 同軸度 同心度 対称度 振れ 全振れ データム straightness flatness roundness cylindricity profile parallelism perpendicularity angularity position concentricity coaxiality symmetry runout datum MMC",calc:"電卓 計算 ルート 平方根 π",units:"単位 換算 変換 inch mm psi MPa kgf トルク 温度 圧力",turn:"旋盤 旋削 回転数 周速 送り 粗さ",mill:"フライス エンドミル マシニング 1刃送り テーブル送り",drill:"ドリル 穴あけ 下穴",tap:"タップ ねじ 下穴 ピッチ",grind:"研削 砥石 周速 円筒 平面 トラバース",tri:"三角 三角関数 斜辺 角度 sin cos tan",taper:"テーパー 角度 勾配 刃物台",pcd:"PCD ピッチ円 穴位置 座標",sine:"サインバー ブロックゲージ 角度",arc:"円弧 弦 R 半径 弧長",notes:"記録 メモ ノート"};
-const SHORT={gdt:"記号と英語名の早見表",calc:"√・π・履歴",units:"18種類の単位",turn:"回転数・送り・粗さ",mill:"テーブル送り・動力",drill:"送り・加工時間",tap:"同期送り・下穴径",grind:"砥石周速・研削時間",tri:"2つの値から残りを",taper:"角度・刃物台旋回角",pcd:"穴の X・Y 座標",sine:"ブロック高さ",arc:"弦・弧・R",notes:"計算とメモ"};
-const HOMEGROUPS=[["電卓・単位",["calc","units"]],["加工条件",["turn","mill","drill","tap","grind"]],["図面・寸法",["tri","taper","pcd","sine","arc","gdt"]]];
-let homeQ="";
-function homeView(){
-  return `<section id="view-home" hidden>
-    <header class="hhead">
-      <div><div class="crumb" id="h-date"></div><h2 class="htitle">Kirico</h2></div>
-      <button class="iconbtn big" data-go="settings" aria-label="設定">${ICON.gear}</button>
-    </header>
-    <div class="hsearch">${ICON.search}<input id="h-q" type="search" placeholder="ツールを探す（例：回転数、テーパー、psi）" aria-label="ツールを探す"></div>
-    <div id="h-body"></div>
-  </section>`;
-}
-function tile(r){ return `<button class="tile" data-go="${r}">${KEY(r,"tl")}<span class="tn">${routeName(r)}</span><span class="ts">${SHORT[r]||""}</span></button>`; }
-function renderHome(){
-  const d=new Date();
-  $("h-date").textContent=`${d.getMonth()+1}月${d.getDate()}日 ${"日月火水木金土"[d.getDay()]}曜日`;
-  const q=homeQ.trim().toLowerCase();
-  let html="";
-  if(q){
-    const all=HOMEGROUPS.flatMap(g=>g[1]).concat(["notes"]);
-    const hit=all.filter(r=>(routeName(r)+" "+(KW[r]||"")+" "+(SHORT[r]||"")).toLowerCase().includes(q));
-    html=hit.length?`<div class="tiles">${hit.map(tile).join("")}</div>`:`<div class="card estate">${ICON.search}<b>見つかりませんでした</b>別のことばで探してください。</div>`;
-  }else{
-    const use=USAGE, top=Object.keys(use).filter(r=>ROUTES.includes(r)&&r!=="home"&&r!=="settings"&&r!=="notes").sort((a,b)=>use[b]-use[a]).slice(0,4);
-    if(top.length) html+=`<h3 class="hsec">よく使う</h3><div class="tiles fav">${top.map(tile).join("")}</div>`;
-    html+=HOMEGROUPS.map(([t,list])=>`<h3 class="hsec">${t}</h3><div class="tiles">${list.map(tile).join("")}</div>`).join("");
-    const rec=Store.items.slice().sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,3);
-    html+=`<div class="hsec-row"><h3 class="hsec">最近の記録</h3><button class="btn small ghost" data-go="notes">すべて見る</button></div>`;
-    html+=rec.length?`<div class="card list">${rec.map(x=>{ const k=x.kind==="calc"||x.kind==="memo"||x.kind==="units"||TOOLS[x.kind]?x.kind:"memo";
-        const name=x.kind==="memo"?"メモ":x.kind==="calc"?"電卓":x.kind==="units"?"単位変換":(TOOLS[x.kind]?TOOLS[x.kind].name:"記録");
-        const main=(x.cells&&x.cells[0])?`${esc(x.cells[0][1])}<small>${esc(x.cells[0][2])}</small>`:"";
-        return `<button class="lrow" data-go="notes">${KEY(k)}<span class="lt"><b>${esc(x.part||name)}</b><small>${esc(x.part?name:"")}${x.part?" · ":""}${dayLabel(x.at).split(" · ")[0]} ${hhmm(x.at)}${x.memo?" · "+esc(x.memo.slice(0,28)):""}</small></span><span class="lv">${main}</span></button>`; }).join("")}</div>`
-      :`<div class="card estate small">${ICON.notes}<b>まだ記録がありません</b>計算画面の「この計算を記録」から残せます。</div>`;
-  }
-  $("h-body").innerHTML=html;
-}
-function bindHome(){ $("h-q").addEventListener("input",e=>{ homeQ=e.target.value; renderHome(); }); }
 
 /* ================= 設定 ================= */
 function settingsView(){
@@ -1893,12 +1839,12 @@ function bindGdt(){
 }
 
 /* ================= 起動 ================= */
-$("views").innerHTML=homeView()+calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+gdtView()+notesView()+settingsView()+
+$("views").innerHTML=calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+gdtView()+notesView()+settingsView()+
   `<p class="foot">${ICON.info}<span>推奨切削速度・速度比などは一般的な目安です。実際の条件は工具・砥石メーカーのカタログ値と、機械の剛性・クーラント条件に合わせて調整してください。砥石は表示された最高使用周速度を超えて使わないでください。</span></p>`;
 buildNav();
 Object.keys(TOOLS).forEach(id=>{ buildPanel(id); bindTool(id); });
-bindCalc(); bindNotes(); bindUnits(); renderUnits(); bindHome(); bindSettings(); bindGdt();
-Store.listeners.push(()=>{ if(S.route==="home") renderHome(); if(S.route==="settings") renderSettings(); });
+bindCalc(); bindNotes(); bindUnits(); renderUnits(); bindSettings(); bindGdt();
+Store.listeners.push(()=>{ if(S.route==="settings") renderSettings(); });
 expr=""; showCalc(); renderHist();
 renderAll(); refreshChrome();
 go(ROUTES.includes(location.hash.slice(1))?location.hash.slice(1):S.route);
