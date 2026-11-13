@@ -959,6 +959,29 @@ table.detail td{font-size:16px}
 .field:focus-within .lab b{color:var(--accent-ink)}
 .field.locked{cursor:default}
 @media (max-width:959px){body.kb .bnav,body.kb .dock{display:none!important}body.kb .main{padding-bottom:24px}}
+/* 文字の大きさ・推奨値ボタン */
+:root[data-size="l"] .lab b{font-size:15px}
+:root[data-size="l"] .ctl input{font-size:19px}
+:root[data-size="l"] .dro-v{font-size:27px}
+:root[data-size="l"] .dro-cell.lead .dro-v{font-size:38px}
+:root[data-size="l"] table.detail td{font-size:18px}
+:root[data-size="l"] .dock-in b{font-size:19px}
+:root[data-size="l"] .keys button{font-size:27px}
+:root[data-size="xl"] .lab b{font-size:15.5px}
+:root[data-size="xl"] .ctl input{font-size:21px}
+:root[data-size="xl"] .ctl .u{font-size:11.5px}
+:root[data-size="xl"] .dro-v{font-size:30px}
+:root[data-size="xl"] .dro-cell.lead .dro-v{font-size:42px}
+:root[data-size="xl"] .dro-k{font-size:13.5px}
+:root[data-size="xl"] table.detail th{font-size:15px}
+:root[data-size="xl"] table.detail td{font-size:20px}
+:root[data-size="xl"] .dock-in b{font-size:21px}
+:root[data-size="xl"] .dock-in span{font-size:12px}
+:root[data-size="xl"] .keys button{font-size:30px}
+:root[data-size="xl"] .screen .res{font-size:64px}
+@media (max-width:700px){:root[data-size="l"] .dro-v{font-size:23px}:root[data-size="l"] .dro-cell.lead .dro-v{font-size:31px}:root[data-size="xl"] .dro-v{font-size:25px}:root[data-size="xl"] .dro-cell.lead .dro-v{font-size:34px}}
+.applyvc{margin-top:12px;width:100%}
+.dock-in>div{cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1113,7 +1136,7 @@ function cutGauge(key,s){
   if(key==="tap"){ [lo,hi]=m.tap; } else { const f=PROCF[key][S.tool], r=m[S.tool]; lo=Math.round(r[0]*f/5)*5||1; hi=Math.round(r[1]*f/5)*5||2; }
   const v=s.vc, st=v<lo?"lo":v>hi?"hi":"ok";
   const nlo=1000*lo/(PI*s.D), nhi=1000*hi/(PI*s.D);
-  return {title:"切削速度の目安",sub:m.name+" ・ "+(key==="tap"?"ハイスタップ":S.tool==="carb"?"超硬工具":"ハイス工具"),
+  return {tool:key,title:"切削速度の目安",sub:m.name+" ・ "+(key==="tap"?"ハイスタップ":S.tool==="carb"?"超硬工具":"ハイス工具"),
     v,lo,hi,max:Math.max(hi*1.6,v*1.1),unit:"m/min",st,label:{ok:"推奨範囲内",lo:"推奨より低い",hi:"推奨より高い"}[st],
     note:["この径での推奨回転数",isFinite(nlo)?fmt(nlo,0)+" 〜 "+fmt(nhi,0)+" min⁻¹":"—"]};
 }
@@ -1477,7 +1500,9 @@ function gaugeHTML(g){
   const pos=x=>Math.min(100,Math.max(0,x/g.max*100));
   if(!(g.v>0)){ g=Object.assign({},g,{st:"none",label:"未入力",v:0}); }
   const icon=g.st==="ok"?ICON.check:g.st==="none"?ICON.info:ICON.alert;
-  if(g.st==="none") return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill none">${icon}${g.label}</span></div><p class="gauge-sub" style="margin-bottom:0">${esc(g.sub)}</p>`;
+  const mid=g.tool?(g.tool==="tap"?Math.round((g.lo+g.hi)/2):Math.round((g.lo+g.hi)/10)*5):0;
+  const apply=g.tool?`<button type="button" class="btn small applyvc" data-applyvc="${g.tool}" data-v="${mid}">推奨の中央値 ${mid} m/min を入れる</button>`:"";
+  if(g.st==="none") return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill none">${icon}${g.label}</span></div><p class="gauge-sub" style="margin-bottom:${apply?"12px":"0"}">${esc(g.sub)}</p>${apply}`;
   return `<div class="gauge-head">${H2("gauge",g.title)}<span class="pill ${g.st}">${icon}${g.label}</span></div>
     <p class="gauge-sub">${esc(g.sub)}</p>
     <div class="bar" role="img" aria-label="目安 ${g.lo}〜${g.hi} ${g.unit}、現在 ${fmt(g.v,1)} ${g.unit}">
@@ -1487,7 +1512,7 @@ function gaugeHTML(g){
       <div class="knob" style="left:${pos(g.v)}%"></div>
     </div>
     <div class="scale"><span style="left:0;transform:none">0</span><span class="ok" style="left:${pos(g.lo)}%">${g.lo}</span><span class="${g.limit?"dg":"ok"}" style="left:${pos(g.hi)}%">${g.hi}</span><span style="left:auto;right:0;transform:none">${fmt(g.max,0)} ${g.unit}</span></div>
-    <div class="gnote"><span>${g.note[0]}</span><b>${g.note[1]}</b></div>`;
+    <div class="gnote"><span>${g.note[0]}</span><b>${g.note[1]}</b></div>${g.st!=="ok"?apply:""}`;
 }
 function renderTool(id){
   const T=TOOLS[id], s=S.t[id];
@@ -1524,7 +1549,7 @@ function bindTool(id){
     else if(role==="tool"){ S.tool=t.value; ["turn","mill","drill"].forEach(renderTool); }
     else if(role==="wheel"){ renderTool("grind"); }
     else if(role==="msize"&&t.value){ const [d,p]=t.value.split("|").map(Number); S.t.tap.D=d; S.t.tap.P=p; renderTool("tap"); }
-    else if(t.dataset.fid) renderTool(id);
+    else if(t.dataset.fid) syncPanel(id,(RES[id]&&RES[id].auto)||[]);
   });
   v.addEventListener("click",e=>{
     const sb=e.target.closest("button[data-step]");
@@ -1536,7 +1561,9 @@ function bindTool(id){
     const sg=e.target.closest("button[data-seg]");
     if(sg){ S.t[id][T.segKey||"mode"]=sg.dataset.seg; buildPanel(id); renderTool(id); return; }
     const rs=e.target.closest("[data-reset]");
-    if(rs){ S.t[id]=clone(DEF.t[id]); buildPanel(id); renderTool(id); toast("初期値に戻しました"); return; }
+    if(rs){ const prev=clone(S.t[id]); S.t[id]=clone(DEF.t[id]); buildPanel(id); renderTool(id); toast("初期値に戻しました",{label:"元に戻す",fn:()=>{ S.t[id]=prev; buildPanel(id); renderTool(id); }}); return; }
+    const av=e.target.closest("[data-applyvc]");
+    if(av){ const s0=S.t[id]; s0.vc=+av.dataset.v; if(s0.mode!=="n"){ s0.mode="n"; buildPanel(id); } renderTool(id); toast("切削速度を "+av.dataset.v+" m/min にしました"); return; }
     const sv=e.target.closest("[data-save]"); if(sv){ openSave(recordFromTool(id)); return; }
     const tr=e.target.closest("#tap-table tr[data-d]"); if(tr){ S.t.tap.D=+tr.dataset.d; S.t.tap.P=+tr.dataset.p; renderTool("tap"); }
   });
@@ -1553,7 +1580,7 @@ function renderDock(){
   const c=r.cells.slice(0,3), st=r.gauge?r.gauge.st:null;
   el.innerHTML=c.map((x,i)=>`<div><span>${i===0&&st?`<i class="dot ${st}"></i>`:""}${x.k}</span><b>${x.v}<small>${x.u||""}</small></b></div>`).join("")+`<button class="dock-save" data-save="${S.route}" aria-label="この計算を記録">${ICON.save}</button>`;
 }
-$("dock").addEventListener("click",e=>{ const b=e.target.closest("[data-save]"); if(b) openSave(recordFromTool(b.dataset.save)); });
+$("dock").addEventListener("click",e=>{ const b=e.target.closest("[data-save]"); if(b){ openSave(recordFromTool(b.dataset.save)); return; } const d=$("dro-"+S.route); if(d){ const y=d.getBoundingClientRect().top+window.scrollY-70; window.scrollTo({top:y,behavior:"smooth"}); } });
 
 /* ================= 電卓 ================= */
 function calcView(){
@@ -2064,12 +2091,13 @@ function bindUnits(){
 }
 
 /* ================= 設定・テーマ ================= */
-const PREF=Object.assign({theme:"light",haptic:true},lsGet("kirico-pref",{}));
+const PREF=Object.assign({theme:"light",haptic:true,size:"m"},lsGet("kirico-pref",{}));
 const savePref=()=>lsSet("kirico-pref",PREF);
 const mqDark=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
 function applyTheme(){
   const dark=PREF.theme==="dark"||(PREF.theme==="auto"&&mqDark&&mqDark.matches);
   document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+  document.documentElement.setAttribute("data-size",PREF.size||"m");
   const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content",dark?"#131314":"#f8fafd");
 }
 if(mqDark&&mqDark.addEventListener) mqDark.addEventListener("change",()=>{ if(PREF.theme==="auto") applyTheme(); });
@@ -2086,6 +2114,9 @@ function settingsView(){
       <div class="stack">
         <div><h3 class="glabel">外観</h3><div class="card">
           <div class="seg" id="st-theme" role="group" aria-label="外観" style="margin:0"><button type="button" data-theme="light">ライト</button><button type="button" data-theme="dark">ダーク</button><button type="button" data-theme="auto">端末に合わせる</button></div>
+        </div></div>
+        <div><h3 class="glabel">文字の大きさ</h3><div class="card">
+          <div class="seg" id="st-size" role="group" aria-label="文字の大きさ" style="margin:0"><button type="button" data-size="m">標準</button><button type="button" data-size="l">大きい</button><button type="button" data-size="xl">特大</button></div>
         </div></div>
         <div><h3 class="glabel">操作</h3><div class="card list">
           <label class="srow"><span><b>触覚フィードバック</b><small>ボタンを押したときに軽く振動します（対応端末のみ）</small></span><span class="switch"><input type="checkbox" id="st-haptic"><i></i></span></label>
@@ -2110,6 +2141,7 @@ function settingsView(){
   </section>`;
 }
 function renderSettings(){
+  document.querySelectorAll("#st-size [data-size]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.size===(PREF.size||"m"))));
   document.querySelectorAll("#st-theme [data-theme]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===PREF.theme)));
   $("st-haptic").checked=!!PREF.haptic;
   $("st-count").textContent=Store.items.length+" 件";
@@ -2121,6 +2153,7 @@ function downloadFile(name,text,type){
 function bindSettings(){
   const v=$("view-settings");
   v.addEventListener("click",e=>{
+    const z=e.target.closest("#st-size [data-size]"); if(z){ PREF.size=z.dataset.size; savePref(); applyTheme(); renderSettings(); haptic(); return; }
     const t=e.target.closest("[data-theme]"); if(t){ PREF.theme=t.dataset.theme; savePref(); applyTheme(); renderSettings(); haptic(); return; }
     if(e.target.closest("#st-backup")){
       const d=new Date(), data={app:"kirico",version:1,exportedAt:d.toISOString(),records:Store.items,state:S,hist,pref:PREF};
