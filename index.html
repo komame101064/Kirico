@@ -953,6 +953,12 @@ table.detail td{font-size:16px}
 .lab b{overflow:hidden;text-overflow:ellipsis;min-width:0}
 .lab>span{flex:none}
 @media (max-width:400px){.ctl{grid-template-columns:30px 104px 30px}.ctl input{width:56px}}
+/* 入力の見やすさ */
+.ctl input::placeholder,.inbox input::placeholder{color:var(--faint);opacity:.55;font-weight:500}
+.field{cursor:text}
+.field:focus-within .lab b{color:var(--accent-ink)}
+.field.locked{cursor:default}
+@media (max-width:959px){body.kb .bnav,body.kb .dock{display:none!important}body.kb .main{padding-bottom:24px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1435,7 +1441,7 @@ function buildPanel(id){
       <div class="lab"><b>${lab}</b><span><em class="sym">${sym}</em><em class="auto">自動計算</em></span></div>
       <div class="ctl">
         <button type="button" data-step="-${st}" aria-label="${lab}を${st}減らす">${ICON.minus}</button>
-        <div class="mid"><input data-fid="${fid}" type="number" inputmode="decimal" step="any" aria-label="${lab}（${u}）"><span class="u">${u}</span></div>
+        <div class="mid"><input data-fid="${fid}" type="number" inputmode="decimal" step="any" enterkeyhint="next" placeholder="0" aria-label="${lab}（${u}）"><span class="u">${u}</span></div>
         <button type="button" data-step="${st}" aria-label="${lab}を${st}増やす">${ICON.plus}</button>
       </div></div>`).join("");
   const phead=`<div class="phead"><span>条件</span><button type="button" class="iconbtn" data-reset="${id}" aria-label="初期値に戻す" title="初期値に戻す">${ICON.reset}</button></div>`;
@@ -1451,7 +1457,7 @@ function syncPanel(id,auto){
     const el=p.querySelector(`input[data-fid="${fid}"]`); if(!el) return;
     const d=(o&&o.int)?0:Math.max(dec(st),fid==="n"||fid==="Ns"?0:3);
     const v=+(+s[fid]).toFixed(d);
-    if(document.activeElement!==el) el.value=isFinite(v)?v:"";
+    if(document.activeElement!==el) el.value=isFinite(v)&&v!==0?v:"";
     const comp=auto.includes(fid), f=el.closest(".field");
     f.classList.toggle("computed",comp);
     f.classList.toggle("locked",comp&&!T.editableAuto);
@@ -1507,7 +1513,7 @@ function bindTool(id){
     const t=e.target;
     if(t.dataset.role==="wheel"){ const x=parseFloat(t.value); S.wheel=isFinite(x)&&x>0?x:0; renderTool("grind"); return; }
     if(t.tagName!=="INPUT"||!t.dataset.fid) return;
-    const fid=t.dataset.fid, def=fieldDef(id,fid), o=(def&&def[5])||{}; let x=parseFloat(t.value);
+    const fid=t.dataset.fid, def=fieldDef(id,fid), o=(def&&def[5])||{}; let x=t.value===""?0:parseFloat(t.value);
     if(!isFinite(x)) return; if(x<0&&!o.neg) return;
     if(o.int) x=Math.round(x);
     S.t[id][fid]=x; T.onInput&&T.onInput(S.t[id],fid); renderTool(id);
@@ -2256,6 +2262,26 @@ function bindGdt(){
   $("g-q").addEventListener("input",e=>{ GF.q=e.target.value; renderGdt(); });
   $("g-cats").addEventListener("click",e=>{ const b=e.target.closest("[data-gcat]"); if(b){ GF.cat=b.dataset.gcat; renderGdt(); } });
 }
+
+
+/* ================= 入力の使い勝手 ================= */
+const isField=el=>el&&el.matches&&el.matches(".ctl input,.inbox input");
+document.addEventListener("focusin",e=>{
+  if(isField(e.target)&&!e.target.readOnly){ const t=e.target; setTimeout(()=>{ try{ t.select(); }catch(x){} },0); }
+  if(e.target.matches&&e.target.matches("input:not([type=checkbox]):not([type=file]),textarea")) document.body.classList.add("kb");
+});
+document.addEventListener("focusout",()=>setTimeout(()=>{ const a=document.activeElement; if(!(a&&a.matches&&a.matches("input:not([type=checkbox]):not([type=file]),textarea"))) document.body.classList.remove("kb"); },60));
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"||!isField(e.target)) return;
+  const panel=e.target.closest(".card,.ugrid,section"); if(!panel) return;
+  const list=[...panel.querySelectorAll(".ctl input,.inbox input")].filter(i=>!i.readOnly&&i.offsetParent);
+  const i=list.indexOf(e.target); e.preventDefault();
+  if(i>=0&&i<list.length-1) list[i+1].focus(); else e.target.blur();
+});
+document.addEventListener("click",e=>{
+  const f=e.target.closest(".field"); if(!f||e.target.closest("button,input,select")) return;
+  const inp=f.querySelector("input"); if(inp&&!inp.readOnly) inp.focus();
+});
 
 /* ================= 起動 ================= */
 $("views").innerHTML=calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+gdtView()+notesView()+settingsView()+
