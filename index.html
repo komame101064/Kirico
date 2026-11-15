@@ -982,6 +982,10 @@ table.detail td{font-size:16px}
 @media (max-width:700px){:root[data-size="l"] .dro-v{font-size:23px}:root[data-size="l"] .dro-cell.lead .dro-v{font-size:31px}:root[data-size="xl"] .dro-v{font-size:25px}:root[data-size="xl"] .dro-cell.lead .dro-v{font-size:34px}}
 .applyvc{margin-top:12px;width:100%}
 .dock-in>div{cursor:pointer}
+.cmgrid{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) auto;gap:6px 8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.cmgrid .tin{min-height:36px;padding:6px 10px}
+.cmform>summary{list-style:none;display:inline-flex}
+.cmform>summary::-webkit-details-marker{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1098,8 +1102,16 @@ const MATS={
   fc:  {name:"鋳鉄 FC250",        carb:[150,250],hss:[20,35], tap:[10,20],kc:1200},
   al:  {name:"アルミ A5052",      carb:[300,800],hss:[60,150],tap:[15,30],kc:700},
   bs:  {name:"真鍮 C3604",        carb:[200,400],hss:[40,80], tap:[15,25],kc:800},
-  ti:  {name:"チタン合金",        carb:[40,80],  hss:[8,15],  tap:[3,6],  kc:1600}
+  ti:  {name:"チタン合金",        carb:[40,80],  hss:[8,15],  tap:[3,6],  kc:1600},
+  sus3:{name:"快削ステンレス SUS303",carb:[120,200],hss:[12,24],tap:[6,10],kc:2200},
+  skd11:{name:"冷間金型鋼 SKD11",  carb:[80,150], hss:[10,18], tap:[3,6],  kc:2600},
+  skd61:{name:"熱間金型鋼 SKD61",  carb:[100,180],hss:[12,22], tap:[4,8],  kc:2400},
+  fcd: {name:"ダクタイル鋳鉄 FCD450",carb:[120,200],hss:[18,30],tap:[8,15],kc:1600},
+  a7075:{name:"超々ジュラルミン A7075",carb:[250,600],hss:[50,120],tap:[12,25],kc:800},
+  cu:  {name:"銅 C1100",          carb:[150,300],hss:[30,60], tap:[10,20],kc:1100}
 };
+const CUSTOM_MATS=lsGet("kirico-mats",{});
+Object.assign(MATS,CUSTOM_MATS);
 const PROCF={turn:{carb:1,hss:1},mill:{carb:.85,hss:.9},drill:{carb:.55,hss:.8}};
 const MSIZES=[[3,.5],[4,.7],[5,.8],[6,1],[8,1.25],[10,1.5],[12,1.75],[14,2],[16,2],[18,2.5],[20,2.5],[22,2.5],[24,3]];
 const TAGS=[["試し加工","tg-try"],["量産","tg-mass"],["要確認","tg-check"],["不具合","tg-bad"],["良好","tg-good"]];
@@ -1130,6 +1142,13 @@ const NV=[["n","回転数を求める","rpm"],["vc","切削速度を求める","
 const mainNV=(s)=> s.mode==="n"
   ? {k:"主軸回転数",sym:"n",v:fmt(s.n,0),u:"min⁻¹",s:"切削速度 <b>"+fmt(s.vc,1)+"</b> m/min",lead:1}
   : {k:"切削速度",sym:"Vc",v:fmt(s.vc,1),u:"m/min",s:"回転数 <b>"+fmt(s.n,0)+"</b> min⁻¹",lead:1};
+function chipThin(s){
+  if(!(s.D>0&&s.ae>0&&s.fz>0)) return [];
+  const r=s.ae/s.D;
+  if(r>=.5) return [["最大切りくず厚さ","hex",fmt(s.fz,3),"mm","径方向切込みが工具径の半分以上のため薄化なし"]];
+  const k=2*Math.sqrt(r-r*r);
+  return [["最大切りくず厚さ","hex",fmt(s.fz*k,3),"mm","径方向切込みが小さく、1刃送りより薄くなる"],["薄化を補正した1刃送り","fz′",fmt(s.fz/k,3),"mm/刃","この送りにすると切りくず厚さが fz と同じになる"]];
+}
 function nvCompute(s){ if(s.mode==="n") s.n=s.D>0?1000*s.vc/(PI*s.D):0; else s.vc=PI*s.D*s.n/1000; return [s.mode]; }
 function cutGauge(key,s){
   const m=MATS[S.mat]; let lo,hi;
@@ -1162,7 +1181,7 @@ const TOOLS={
       const auto=nvCompute(s), m=MATS[S.mat];
       const vf=s.fz*s.z*s.n, T=s.L/vf, Q=s.ap*s.ae*vf/1000, Pc=s.ap*s.ae*vf*m.kc/6e7, t=fmtTime(T);
       return {auto,cells:[mainNV(s),{k:"テーブル送り",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転あたり <b>"+fmt(s.fz*s.z,3)+"</b> mm"},{k:"加工時間",sym:"T",v:t[0],u:t[1],s:"1パスあたり"}],
-        rows:[["径方向の噛み合い","ae/D",fmt(s.ae/s.D*100,0),"%"],["切りくず排出量","Q",fmt(Q,1),"cm³/min"],["正味切削動力","Pc",fmt(Pc,2),"kW","機械効率80%なら "+fmt(Pc/.8,2)+" kW 必要"]],
+        rows:[["径方向の噛み合い","ae/D",fmt(s.ae/s.D*100,0),"%"],...chipThin(s),["切りくず排出量","Q",fmt(Q,1),"cm³/min"],["正味切削動力","Pc",fmt(Pc,2),"kW","機械効率80%なら "+fmt(Pc/.8,2)+" kW 必要"]],
         gauge:cutGauge("mill",s),
         labels:{n:"n "+fmt(s.n,0),vf:"Vf "+fmt(vf,0)+" mm/min",D:"Ø"+fmt(s.D,1),ap:"ap "+fmt(s.ap,1),ae:"ae "+fmt(s.ae,1)+" mm",z:"刃数 "+s.z}};
     },
@@ -1420,7 +1439,7 @@ window.addEventListener("resize",()=>{ if(S.route==="calc") fitRes(); });
 
 /* ================= ツール画面 ================= */
 const selbox=inner=>`<div class="selbox">${inner}${ICON.chevron}</div>`;
-const matOptions=()=>Object.entries(MATS).map(([k,m])=>`<option value="${k}">${esc(m.name)}</option>`).join("");
+const matOptions=()=>{ const all=Object.entries(MATS), own=all.filter(([k])=>k.startsWith("u_")), std=all.filter(([k])=>!k.startsWith("u_")); return (own.length?`<optgroup label="自分の材料（実績値）">${own.map(([k,m])=>`<option value="${k}">${esc(m.name)}</option>`).join("")}</optgroup><optgroup label="一般的な目安">`:"")+std.map(([k,m])=>`<option value="${k}">${esc(m.name)}</option>`).join("")+(own.length?"</optgroup>":""); };
 const H2=(icon,text)=>`<h2 class="h">${ICON[icon]}${text}</h2>`;
 const VSUB={turn:"外径",mill:"エンドミル・正面フライス",drill:"穴あけ",tap:"メートルねじ",grind:"円筒・平面",pcd:"ピッチ円上の穴位置"};
 function viewHead(r,title,desc){
@@ -2118,6 +2137,20 @@ function settingsView(){
         <div><h3 class="glabel">文字の大きさ</h3><div class="card">
           <div class="seg" id="st-size" role="group" aria-label="文字の大きさ" style="margin:0"><button type="button" data-size="m">標準</button><button type="button" data-size="l">大きい</button><button type="button" data-size="xl">特大</button></div>
         </div></div>
+        <div><h3 class="glabel">自分の材料（実績値）</h3><div class="card">
+          <p class="hint" style="margin:0 0 10px">現場でうまくいった切削速度を登録すると、被削材の一覧の先頭に出て、目安ゲージがその値で判定します。</p>
+          <div id="cm-list"></div>
+          <details class="cmform"><summary class="btn small">＋ 材料を追加</summary>
+            <div class="stack" style="gap:8px;margin-top:10px">
+              <input class="tin" id="cm-name" placeholder="名前（例：S45C 調質・3号機）" aria-label="材料の名前">
+              <div class="cmgrid"><span>超硬 Vc</span><input class="tin" id="cm-c1" type="number" inputmode="decimal" placeholder="下限"><input class="tin" id="cm-c2" type="number" inputmode="decimal" placeholder="上限"><span>m/min</span>
+                <span>ハイス Vc</span><input class="tin" id="cm-h1" type="number" inputmode="decimal" placeholder="下限"><input class="tin" id="cm-h2" type="number" inputmode="decimal" placeholder="上限"><span>m/min</span>
+                <span>タップ Vc</span><input class="tin" id="cm-t1" type="number" inputmode="decimal" placeholder="下限"><input class="tin" id="cm-t2" type="number" inputmode="decimal" placeholder="上限"><span>m/min</span>
+                <span>比切削抵抗</span><input class="tin" id="cm-kc" type="number" inputmode="decimal" placeholder="例 2000" style="grid-column:span 2"><span>N/mm²</span></div>
+              <button class="btn primary" id="cm-add">登録する</button>
+            </div>
+          </details>
+        </div></div>
         <div><h3 class="glabel">操作</h3><div class="card list">
           <label class="srow"><span><b>触覚フィードバック</b><small>ボタンを押したときに軽く振動します（対応端末のみ）</small></span><span class="switch"><input type="checkbox" id="st-haptic"><i></i></span></label>
           <div class="srow"><span><b>長押しで連続入力</b><small>入力欄の − ＋ を押し続けると、値が連続で変わります</small></span><span class="chip">常にオン</span></div>
@@ -2140,7 +2173,13 @@ function settingsView(){
     </div>
   </section>`;
 }
+function renderCustomMats(){
+  const own=Object.entries(MATS).filter(([k])=>k.startsWith("u_"));
+  $("cm-list").innerHTML=own.length?`<div class="card list" style="border:0;padding:0;margin-bottom:10px">${own.map(([k,m])=>`<div class="srow"><span><b>${esc(m.name)}</b><small>超硬 ${m.carb.join("〜")}・ハイス ${m.hss.join("〜")}・タップ ${m.tap.join("〜")} m/min・kc ${m.kc}</small></span><button class="iconbtn" data-cmdel="${k}" aria-label="削除">${ICON.trash}</button></div>`).join("")}</div>`:"";
+}
+function refreshMatSelects(){ ["turn","mill","drill","tap"].forEach(id=>{ buildPanel(id); renderTool(id); }); }
 function renderSettings(){
+  renderCustomMats();
   document.querySelectorAll("#st-size [data-size]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.size===(PREF.size||"m"))));
   document.querySelectorAll("#st-theme [data-theme]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===PREF.theme)));
   $("st-haptic").checked=!!PREF.haptic;
@@ -2153,10 +2192,22 @@ function downloadFile(name,text,type){
 function bindSettings(){
   const v=$("view-settings");
   v.addEventListener("click",e=>{
+    if(e.target.closest("#cm-add")){
+      const num=id=>parseFloat($(id).value), pair=(a,b)=>{ const x=num(a), y=num(b); return isFinite(x)&&isFinite(y)&&x>0&&y>=x?[x,y]:null; };
+      const name=$("cm-name").value.trim(), c=pair("cm-c1","cm-c2"), h=pair("cm-h1","cm-h2"), t=pair("cm-t1","cm-t2"), kc=num("cm-kc");
+      if(!name){ toast("名前を入れてください"); return; }
+      if(!c&&!h&&!t){ toast("切削速度を少なくとも1組（下限と上限）入れてください"); return; }
+      const base=MATS[S.mat]&&!S.mat.startsWith("u_")?MATS[S.mat]:MATS.s45c;
+      const key="u_"+Date.now().toString(36), m={name,carb:c||base.carb,hss:h||base.hss,tap:t||base.tap,kc:isFinite(kc)&&kc>0?kc:base.kc};
+      MATS[key]=m; CUSTOM_MATS[key]=m; lsSet("kirico-mats",CUSTOM_MATS);
+      ["cm-name","cm-c1","cm-c2","cm-h1","cm-h2","cm-t1","cm-t2","cm-kc"].forEach(i=>$(i).value="");
+      v.querySelector(".cmform").open=false; S.mat=key; refreshMatSelects(); renderSettings(); toast("「"+name+"」を登録しました"); return; }
+    const cd=e.target.closest("[data-cmdel]");
+    if(cd){ const k=cd.dataset.cmdel, nm=MATS[k]&&MATS[k].name; delete MATS[k]; delete CUSTOM_MATS[k]; lsSet("kirico-mats",CUSTOM_MATS); if(S.mat===k) S.mat="s45c"; refreshMatSelects(); renderSettings(); toast("「"+nm+"」を削除しました"); return; }
     const z=e.target.closest("#st-size [data-size]"); if(z){ PREF.size=z.dataset.size; savePref(); applyTheme(); renderSettings(); haptic(); return; }
     const t=e.target.closest("[data-theme]"); if(t){ PREF.theme=t.dataset.theme; savePref(); applyTheme(); renderSettings(); haptic(); return; }
     if(e.target.closest("#st-backup")){
-      const d=new Date(), data={app:"kirico",version:1,exportedAt:d.toISOString(),records:Store.items,state:S,hist,pref:PREF};
+      const d=new Date(), data={app:"kirico",version:1,exportedAt:d.toISOString(),records:Store.items,state:S,hist,pref:PREF,mats:CUSTOM_MATS};
       downloadFile(`Kirico_バックアップ_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`,JSON.stringify(data,null,1),"application/json");
       toast("バックアップを書き出しました"); return; }
     if(e.target.closest("#st-wipe")){ $("st-wipe-confirm").innerHTML=`<div class="confirm" style="margin:8px 16px 14px">${ICON.alert}本当に削除しますか？元に戻せません。<button class="btn small danger" id="st-wipe-ok">削除する</button><button class="btn small ghost" id="st-wipe-no">やめる</button></div>`; return; }
@@ -2171,6 +2222,7 @@ function bindSettings(){
       if(!data||data.app!=="kirico"||!Array.isArray(data.records)) throw 0;
       const have=new Set(Store.items.map(x=>x.id)); let n=0;
       for(const r of data.records){ if(r&&typeof r==="object"&&r.at&&!have.has(r.id)){ await storeAdd(Object.assign({},r)); n++; } }
+      if(data.mats&&typeof data.mats==="object"){ for(const [k,m] of Object.entries(data.mats)){ if(k.startsWith("u_")&&m&&m.name&&Array.isArray(m.carb)){ MATS[k]=m; CUSTOM_MATS[k]=m; } } lsSet("kirico-mats",CUSTOM_MATS); refreshMatSelects(); }
       if(Array.isArray(data.hist)&&!hist.length){ hist=data.hist.slice(0,50); lsSet("cutcalc-hist",hist); renderHist(); }
       toast(n+"件の記録を復元しました"); renderSettings();
     }catch(x){ toast("このファイルは読み込めません。Kirico のバックアップを選んでください"); }
@@ -2320,6 +2372,7 @@ document.addEventListener("click",e=>{
 $("views").innerHTML=calcView()+unitsView()+Object.keys(TOOLS).map(toolView).join("")+gdtView()+notesView()+settingsView()+
   `<p class="foot">${ICON.info}<span>推奨切削速度・速度比などは一般的な目安です。実際の条件は工具・砥石メーカーのカタログ値と、機械の剛性・クーラント条件に合わせて調整してください。砥石は表示された最高使用周速度を超えて使わないでください。</span></p>`;
 buildNav();
+if(!MATS[S.mat]) S.mat="s45c";
 Object.keys(TOOLS).forEach(id=>{ buildPanel(id); bindTool(id); });
 bindCalc(); bindNotes(); bindUnits(); renderUnits(); bindSettings(); bindGdt();
 Store.listeners.push(()=>{ if(S.route==="settings") renderSettings(); });
