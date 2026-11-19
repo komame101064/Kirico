@@ -1035,6 +1035,18 @@ td.tri{letter-spacing:-.05em;font-family:var(--f-body)}
 .hq .seg{min-width:170px}
 #hrd-t{font-variant-numeric:tabular-nums}
 .tablewrap:has(#hrd-t){max-height:420px;overflow:auto}
+/* 現場向けの追加 */
+.nwarn{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,#dc2626 10%,var(--card,#fff));color:var(--ink);border:1px solid color-mix(in srgb,#dc2626 40%,transparent)}
+.nwarn>span{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.nwarn svg{width:18px;height:18px;color:#dc2626;flex:none}
+.nwarn small{color:var(--muted);font-variant-numeric:tabular-nums}
+.nwarn[hidden]{display:none}
+.nmaxbox{width:150px;flex:none}
+.srow .chip{white-space:nowrap;flex:none}
+.nmaxbox input{text-align:right}
+.vhead .actions{display:flex;gap:8px}
+.phead .pbtns{display:flex;gap:4px;align-items:center}
+@media (min-width:960px){.phead .mcopy{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1223,7 +1235,7 @@ const DEF={
     drill:{mode:"n",D:0,vc:0,n:0,f:0,L:0},
     tap:{mode:"n",D:0,P:0,vc:0,n:0,L:0},
     grind:{variant:"cyl",ctlm:"thru",Ds:0,Ns:0,Dw:0,Vw:0,B:0,k:0,a:0,Z:0,L:0,Vt:0,cf:0,W:0,Ls:0,ov:0,as:0,Zs:0,Dr:0,Nr:0,dw:0,h:0,al:0,eta:0,Bw:0,Lw:0,bl:0,fm:0,Zc:0,vi:0,sp:0,tl:0},
-    tri:{known:["a","A"],a:0,b:0,c:0,A:0},
+    tri:{known:["a","A"],hist:[],a:0,b:0,c:0,A:0},
     taper:{mode:"angle",D:0,d:0,L:0,ang:0},
     pcd:{P:0,N:0,s0:0,x0:0,y0:0},
     sine:{mode:"H",L:0,ang:0,H:0},
@@ -1328,7 +1340,7 @@ const TOOLS={
     },
     formulas:["n = 1000 × Vc ÷ (π × D)","Vf = f × n（半径方向）","T = (D − d) ÷ 2 ÷ Vf","Q = Vc × f × W","Pc = Vc × f × W × kc ÷ 60000"]},
   thread:{group:"mach",name:"ねじ切り",title:"ねじ切り（旋削）",desc:"メートル外ねじの切込み深さとパスごとの切込みを求めます",
-    selects:"matTool",seg:NV,
+    selects:"matTool",seg:NV,msize:"D",
     fields:()=>[["D","呼び径","D","mm",1],["P","ピッチ","P","mm",.25],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["L","ねじ長さ","L","mm",1],["N","パス数","N","回",1,{int:1,min:1,max:30}]],
     compute(s){
       const auto=nvCompute(s), h=.6134*s.P, vf=s.P*s.n, N=Math.max(0,Math.round(s.N)||0), T=N*s.L/vf, t=fmtTime(T);
@@ -1367,7 +1379,7 @@ const TOOLS={
     },
     formulas:["De = 2 × √(ap × (D − ap))（ap が半径より小さいとき）","n = 1000 × Vc ÷ (π × De)","Vf = fz × z × n","h = R − √(R² − (pf ÷ 2)²)（カスプ高さ）"]},
   tmill:{group:"mach",name:"ねじ切りフライス",title:"ねじ切りフライス（内ねじ）",desc:"ヘリカル補間で内ねじを加工するときの工具中心の送りを求めます",
-    selects:"matTool",seg:NV,
+    selects:"matTool",seg:NV,msize:"D",
     fields:()=>[["D","ねじ呼び径","D","mm",1],["P","ピッチ","P","mm",.25],["Dc","工具径","Dc","mm",.5],["z","刃数","z","枚",1,{int:1}],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["fz","1刃送り","fz","mm/刃",.01]],
     compute(s){
       if(s.mode==="n") s.n=s.Dc>0?1000*s.vc/(PI*s.Dc):0; else s.vc=PI*s.Dc*s.n/1000;
@@ -1462,8 +1474,8 @@ const TOOLS={
     },
     formulas:["丸棒 A = π × D² ÷ 4","パイプ A = π × (D² − (D − 2t)²) ÷ 4","角材 A = B × H　六角 A = √3 ÷ 2 × S²　板 A = W × t","重さ(kg) = A × L × ρ ÷ 10⁶"]},
   bolt:{group:"calc",name:"締付けトルク",title:"ボルトの締付けトルク",desc:"メートル並目ボルトの軸力と締付けトルクの目安を求めます",
-    seg:[["88","強度 8.8","speed"],["109","10.9","speed"],["129","12.9","speed"]],segKey:"variant",
-    fields:()=>[["d","呼び径","d","mm",1],["P","ピッチ","P","mm",.25],["K","トルク係数","K","",.01],["r","締付け率","降伏点に対し","%",5]],
+    msize:"d",seg:[["88","強度 8.8","speed"],["109","10.9","speed"],["129","12.9","speed"]],segKey:"variant",
+    fields:()=>[["d","呼び径","d","mm",1],["P","ピッチ","P","mm",.25],["K","トルク係数","K","",.01],["r","締付け率","","%",5]],
     compute(s){
       const coarse=(MSIZES.find(m=>m[0]===s.d)||[])[1], P=s.P>0?s.P:(coarse||0);
       const sy={"88":s.d>16?660:640,"109":940,"129":1100}[s.variant];
@@ -1473,7 +1485,7 @@ const TOOLS={
     },
     formulas:["As = π ÷ 4 × (d − 0.9382P)²","F = 締付け率 × σy × As","T = K × F × d","トルク係数 K は無潤滑の鋼で 0.2 前後、潤滑すると小さくなる"]},
   cost:{group:"calc",name:"原価計算",title:"サイクルタイム・原価",desc:"1個あたりの時間と原価、時間あたりの生産数を求めます",
-    fields:()=>[["ct","サイクルタイム","1個","秒",1],["set","段取り時間","ロットごと","分",5],["q","ロット数","個数","個",10,{int:1}],["rate","チャージ","機械+人","円/時",500],["mat","材料費","1個","円",10]],
+    fields:()=>[["ct","サイクルタイム","1個","秒",1],["set","段取り","ロットごと","分",5],["q","ロット数","個数","個",10,{int:1}],["rate","チャージ","機械+人","円/時",500],["mat","材料費","1個","円",10]],
     compute(s){
       const q=Math.max(0,Math.round(s.q)||0), per=q>0?s.ct+s.set*60/q:NaN, tot=(s.set*60+s.ct*q)/60, costp=per*s.rate/3600+s.mat, tp=fmtTime(per/60), tt=fmtTime(tot);
       return {auto:[],cells:[{k:"1個あたりの原価",sym:"",v:fmt(costp,1),u:"円",lead:1,s:"加工費 <b>"+fmt(per*s.rate/3600,1)+"</b> 円 + 材料費"},{k:"1個あたりの時間",sym:"",v:tp[0],u:tp[1],s:"段取りを含む"},{k:"ロット全体",sym:"",v:tt[0],u:tt[1]}],
@@ -1484,7 +1496,7 @@ const TOOLS={
     guide:"わかっている値を<b>2つ</b>入れてください。最後に入れた2つを基準に、残りを自動で計算します。",
     editableAuto:true,
     fields:()=>[["a","底辺","a","mm",1],["b","高さ","b","mm",1],["c","斜辺","c","mm",1],["A","角度","θ","°",.5]],
-    onInput(s,id){ if(!s.known.includes(id)) s.known=[s.known[s.known.length-1],id]; },
+    onInput(s,id){ const h=(s.hist||[]).filter(x=>x!==id); if(s[id]>0) h.push(id); s.hist=h; if(h.length>=2) s.known=h.slice(-2); else if(h.length===1&&!s.known.includes(h[0])) s.known=[s.known[s.known.length-1],h[0]]; },
     compute(s){
       const k=s.known.slice().sort().join(""), A=rad(s.A); let err="";
       const ok=x=>isFinite(x)&&x>0;
@@ -1703,7 +1715,7 @@ const VSUB={weight:"丸棒・パイプ・角材・六角・板",bolt:"メート�
 function viewHead(r,title,desc){
   const tool=!!TOOLS[r];
   return `<header class="vhead${tool?" tool":""}"><div class="vtitle"><h2>${title}</h2>${VSUB[r]?`<span class="vsub">${VSUB[r]}</span>`:""}</div>
-    ${tool?`<div class="actions"><button class="btn primary" data-save="${r}">${ICON.save}記録</button></div>`:""}</header>`;
+    ${tool?`<div class="actions"><button class="btn" data-copyall="${r}" aria-label="結果をまとめてコピー">${ICON.copy}コピー</button><button class="btn primary" data-save="${r}">${ICON.save}記録</button></div>`:""}</header>`;
 }
 function toolView(id){
   const T=TOOLS[id];
@@ -1735,6 +1747,7 @@ function buildPanel(id){
   if(T.selects==="matTap") sel=`<div class="row2"><label class="sel">被削材${selbox(`<select data-role="mat">${matOptions()}</select>`)}</label><label class="sel">ねじサイズ（並目）${selbox(`<select data-role="msize"><option value="">手入力</option>${MSIZES.map(([d,p])=>`<option value="${d}|${p}">M${d} × ${p}</option>`).join("")}</select>`)}</label></div>`;
   if(T.selects==="dens") sel=`<label class="sel">材質（比重）${selbox(`<select data-role="dens">${DENS.map((d,i)=>`<option value="${i}">${esc(d[0])}　${d[1]}</option>`).join("")}</select>`)}</label>`;
   if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度（砥石のラベルに表示）<div class="inbox"><input data-role="wheel" type="number" inputmode="decimal" step="any" min="0" aria-label="砥石の最高使用周速度（m/s）"><span class="u">m/s</span></div></label>`;
+  if(T.msize) sel+=`<label class="sel">ねじサイズ（並目）${selbox(`<select data-role="msize"><option value="">手入力</option>${MSIZES.map(([d,p])=>`<option value="${d}|${p}">M${d} × ${p}</option>`).join("")}</select>`)}</label>`;
   const segKey=T.segKey||"mode";
   const seg=T.seg?`<div class="seg" role="group" aria-label="計算の種類">${T.seg.map(([v,l,ic])=>`<button type="button" data-seg="${v}" aria-pressed="${s[segKey]===v}">${ICON[ic]}${l}</button>`).join("")}</div>`:"";
   const seg2=T.seg2&&T.seg2.when(s)?`<div class="seg" role="group" aria-label="送り方">${T.seg2.items.map(([v,l])=>`<button type="button" data-seg2="${v}" aria-pressed="${s[T.seg2.key]===v}">${l}</button>`).join("")}</div>`:"";
@@ -1746,7 +1759,7 @@ function buildPanel(id){
         <div class="mid"><input data-fid="${fid}" type="number" inputmode="decimal" step="any" enterkeyhint="next" placeholder="0" aria-label="${lab}（${u}）"><span class="u">${u}</span></div>
         <button type="button" data-step="${st}" aria-label="${lab}を${st}増やす">${ICON.plus}</button>
       </div></div>`).join("");
-  const phead=`<div class="phead"><span>条件</span><button type="button" class="iconbtn" data-reset="${id}" aria-label="初期値に戻す" title="初期値に戻す">${ICON.reset}</button></div>`;
+  const phead=`<div class="phead"><span>条件</span><span class="pbtns"><button type="button" class="iconbtn mcopy" data-copyall="${id}" aria-label="条件と結果をコピー" title="条件と結果をコピー">${ICON.copy}</button><button type="button" class="iconbtn" data-reset="${id}" aria-label="初期値に戻す" title="初期値に戻す">${ICON.reset}</button></span></div>`;
   $("panel-"+id).innerHTML=`${phead}${sel}${seg}${seg2}${guide}<div>${fields}</div>`;
   if(DIAG[id]) $("dg-"+id).innerHTML=DIAG[id];
   if(id==="grind") $("dg-"+id).innerHTML=DIAG["grind_"+s.variant];
@@ -1769,7 +1782,7 @@ function syncPanel(id,auto){
   const t=p.querySelector('[data-role="tool"]'); if(t) t.value=S.tool;
   const dsel=p.querySelector('[data-role="dens"]'); if(dsel) dsel.value=S.dens||0;
   const w=p.querySelector('[data-role="wheel"]'); if(w&&document.activeElement!==w) w.value=S.wheel;
-  const ms=p.querySelector('[data-role="msize"]'); if(ms){ const v=s.D+"|"+s.P; ms.value=[...ms.options].some(o=>o.value===v)?v:""; }
+  const ms=p.querySelector('[data-role="msize"]'); if(ms){ const v=s[T.msize||"D"]+"|"+s.P; ms.value=[...ms.options].some(o=>o.value===v)?v:""; }
 }
 function droHTML(r){
   if(r.blank) return {cls:"dro err blank",html:`<b>${ICON.info} 値を入れてください</b><br>入力欄に数値を入れると、ここに結果が表示されます。`};
@@ -1801,6 +1814,9 @@ function renderTool(id){
   syncPanel(id,r.auto||[]);
   const d=droHTML(r), dro=$("dro-"+id); dro.className=d.cls+((r.cols||r.cells.length)>=4?" c4":""); dro.innerHTML=d.html; dro.style.setProperty("--cols",r.cols||r.cells.length);
   if(r.gauge) $("gauge-"+id).innerHTML=gaugeHTML(r.gauge);
+  { let w=$("nw-"+id); const nOver=!r.err&&PREF.nmax>0&&T.fields(s).some(f=>f[0]==="n")&&isFinite(s.n)&&s.n>PREF.nmax;
+    if(nOver&&!w){ w=document.createElement("div"); w.id="nw-"+id; w.className="nwarn"; w.setAttribute("role","alert"); dro.after(w); }
+    if(w){ w.hidden=!nOver; if(nOver) w.innerHTML=`<span>${ICON.alert}<b>回転数が機械の上限を超えています</b><small>${fmt(s.n,0)} min⁻¹ ＞ 上限 ${fmt(PREF.nmax,0)} min⁻¹</small></span><button type="button" class="btn small" data-nmax="1">上限で計算</button>`; } }
   $("rowsc-"+id).hidden=!r.rows.length||!!r.err||r.blank;
   $("rows-"+id).innerHTML=r.rows.map(([k,sym,v,u,sub])=>`<tr><th>${k}${sym?`<span class="sym">${sym}</span>`:""}${sub?`<small>${sub}</small>`:""}</th><td>${v}<small>${u||""}</small></td></tr>`).join("");
   $("extra-"+id).innerHTML=r.extra||"";
@@ -1829,7 +1845,7 @@ function bindTool(id){
     else if(role==="tool"){ S.tool=t.value; ["turn","mill","drill"].forEach(renderTool); }
     else if(role==="wheel"){ renderTool("grind"); }
     else if(role==="dens"){ S.dens=+t.value; renderTool("weight"); }
-    else if(role==="msize"&&t.value){ const [d,p]=t.value.split("|").map(Number); S.t.tap.D=d; S.t.tap.P=p; renderTool("tap"); }
+    else if(role==="msize"&&t.value){ const [d,p]=t.value.split("|").map(Number); S.t[id][T.msize||"D"]=d; S.t[id].P=p; renderTool(id); }
     else if(t.dataset.fid) syncPanel(id,(RES[id]&&RES[id].auto)||[]);
   });
   v.addEventListener("click",e=>{
@@ -1848,6 +1864,8 @@ function bindTool(id){
     const av=e.target.closest("[data-applyvc]");
     if(av){ const s0=S.t[id]; s0.vc=+av.dataset.v; if(s0.mode!=="n"){ s0.mode="n"; buildPanel(id); } renderTool(id); toast("切削速度を "+av.dataset.v+" m/min にしました"); return; }
     const sv=e.target.closest("[data-save]"); if(sv){ openSave(recordFromTool(id)); return; }
+    const ca=e.target.closest("[data-copyall]"); if(ca){ copyText(resultText(id),"条件と結果をコピーしました"); return; }
+    const nm=e.target.closest("[data-nmax]"); if(nm){ const s0=S.t[id]; s0.n=PREF.nmax; if(s0.mode!=="vc"){ s0.mode="vc"; buildPanel(id); } renderTool(id); toast("回転数を機械の上限 "+fmt(PREF.nmax,0)+" min⁻¹ にしました"); return; }
     const tr=e.target.closest("#tap-table tr[data-d]"); if(tr){ S.t.tap.D=+tr.dataset.d; S.t.tap.P=+tr.dataset.p; renderTool("tap"); }
   });
   v.addEventListener("keydown",e=>{ const tr=e.target.closest("#tap-table tr[data-d]"); if(tr&&(e.key==="Enter"||e.key===" ")){ e.preventDefault(); tr.click(); } });
@@ -2047,6 +2065,19 @@ Store.listeners.push(refreshChrome);
 Store.listeners.push(()=>{ if(S.route==="notes") renderNotes(); });
 
 /* ================= 記録の作成 ================= */
+const plain=h=>{ const d=document.createElement("div"); d.innerHTML=String(h==null?"":h); return d.textContent.replace(/\s+/g," ").trim(); };
+function resultText(id){
+  const T=TOOLS[id], s=S.t[id], r=RES[id]||T.compute(s), auto=r.auto||[];
+  const L=["■ "+T.title];
+  if(T.selects==="matTool"||T.selects==="matTap") L.push("被削材："+MATS[S.mat].name+(T.selects==="matTool"?"（"+(S.tool==="carb"?"超硬":"ハイス")+"）":""));
+  if(T.seg){ const g=T.seg.find(x=>x[0]===s[T.segKey||"mode"]); if(g&&(T.segKey==="variant"||id==="grind")) L.push("種類："+g[1]); }
+  L.push("【条件】");
+  T.fields(s).forEach(([fid,lab,sym,u])=>{ if(auto.includes(fid)) return; const v=+s[fid]; if(!v) return; L.push("　"+lab+(sym?"（"+plain(sym)+"）":"")+" = "+(+v.toFixed(4))+" "+u); });
+  if(r.err) L.push("【結果】計算できません："+r.err);
+  else { L.push("【結果】"); r.cells.forEach(c=>{ const v=plain(c.v); if(v&&v!=="—") L.push("　"+c.k+(c.sym&&c.sym!=="—"?"（"+plain(c.sym)+"）":"")+" = "+v+" "+plain(c.u)); });
+    (r.rows||[]).forEach(([k,sym,v,u])=>{ const t=plain(v); if(t&&t!=="—") L.push("　"+k+" = "+t+" "+plain(u)); }); }
+  return L.join("\n").replace(/ +$/gm,"");
+}
 function recordFromTool(id){
   const T=TOOLS[id], s=S.t[id], r=RES[id];
   const plain=h=>String(h||"").replace(/<[^>]+>/g,"");
@@ -2374,7 +2405,7 @@ function bindUnits(){
 }
 
 /* ================= 設定・テーマ ================= */
-const PREF=Object.assign({theme:"light",haptic:true,size:"m"},lsGet("kirico-pref",{}));
+const PREF=Object.assign({theme:"light",haptic:true,size:"m",nmax:0,wake:false},lsGet("kirico-pref",{}));
 const savePref=()=>lsSet("kirico-pref",PREF);
 const mqDark=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
 function applyTheme(){
@@ -2417,6 +2448,8 @@ function settingsView(){
         </div></div>
         <div><h3 class="glabel">操作</h3><div class="card list">
           <label class="srow"><span><b>触覚フィードバック</b><small>ボタンを押したときに軽く振動します（対応端末のみ）</small></span><span class="switch"><input type="checkbox" id="st-haptic"><i></i></span></label>
+          <label class="srow"><span><b>画面を消さない</b><small>計算画面を開いている間、画面が暗くならないようにします（対応端末のみ）</small></span><span class="switch"><input type="checkbox" id="st-wake"><i></i></span></label>
+          <div class="srow"><span><b>機械の最高回転数</b><small>計算した回転数がこれを超えると警告します。0 で警告しません</small></span><span class="inbox nmaxbox"><input id="st-nmax" type="number" inputmode="numeric" step="any" min="0" placeholder="0" aria-label="機械の最高回転数（min⁻¹）"><span class="u">min⁻¹</span></span></div>
           <div class="srow"><span><b>長押しで連続入力</b><small>入力欄の − ＋ を押し続けると、値が連続で変わります</small></span><span class="chip">常にオン</span></div>
           <div class="srow"><span><b>結果をタップでコピー</b><small>大きく表示された結果の数字を押すと、コピーできます</small></span><span class="chip">常にオン</span></div>
         </div></div>
@@ -2447,6 +2480,8 @@ function renderSettings(){
   document.querySelectorAll("#st-size [data-size]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.size===(PREF.size||"m"))));
   document.querySelectorAll("#st-theme [data-theme]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===PREF.theme)));
   $("st-haptic").checked=!!PREF.haptic;
+  $("st-wake").checked=!!PREF.wake;
+  if(document.activeElement!==$("st-nmax")) $("st-nmax").value=PREF.nmax>0?PREF.nmax:"";
   $("st-count").textContent=Store.items.length+" 件";
   $("st-where").textContent=Store.mode==="cloud"?"アカウントに保存":"この端末のブラウザに保存";
 }
@@ -2479,6 +2514,8 @@ function bindSettings(){
     if(e.target.closest("#st-wipe-ok")){ ["cutcalc-v3","cutcalc-notes","cutcalc-hist","cutcalc-meta"].forEach(k=>{ try{ localStorage.removeItem(k); }catch(x){} }); toast("削除しました。再読み込みします"); setTimeout(()=>location.reload(),700); return; }
   });
   $("st-haptic").addEventListener("change",e=>{ PREF.haptic=e.target.checked; savePref(); haptic(12); });
+  $("st-wake").addEventListener("change",e=>{ PREF.wake=e.target.checked; savePref(); wakeSync(); if(PREF.wake&&!("wakeLock" in navigator)) toast("この端末では画面を消さない設定を使えません"); });
+  $("st-nmax").addEventListener("input",e=>{ const x=parseFloat(e.target.value); PREF.nmax=isFinite(x)&&x>0?x:0; savePref(); Object.keys(TOOLS).forEach(id=>{ if(RES[id]) renderTool(id); }); });
   $("st-restore").addEventListener("change",async e=>{
     const f=e.target.files&&e.target.files[0]; if(!f) return;
     try{
@@ -2619,6 +2656,17 @@ function bindGdt(){
     c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); });
 }
 
+
+/* ================= 画面を消さない ================= */
+let WL=null;
+async function wakeSync(){
+  try{
+    if(PREF.wake&&document.visibilityState==="visible"&&"wakeLock" in navigator){ if(!WL){ WL=await navigator.wakeLock.request("screen"); WL.addEventListener("release",()=>{ WL=null; }); } }
+    else if(WL){ const w=WL; WL=null; await w.release(); }
+  }catch(e){ WL=null; }
+}
+document.addEventListener("visibilitychange",wakeSync);
+wakeSync();
 
 /* ================= 入力の使い勝手 ================= */
 const isField=el=>el&&el.matches&&el.matches(".ctl input,.inbox input");
