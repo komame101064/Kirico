@@ -476,7 +476,7 @@ body.has-dock .toast{bottom:calc(var(--navh) + 90px + env(safe-area-inset-bottom
 .switch input:checked+i::after{transform:translateX(20px)}
 .switch input:focus-visible+i{outline:3px solid #0071e366;outline-offset:2px}
 .k-settings,.k-home{--kc:#8e8e93}
-.k-gdt{--kc:#0e7490}.k-groove{--kc:#0a84ff}.k-thread{--kc:#5e5ce6}.k-ball{--kc:#00a7a0}.k-ream{--kc:#bf5af2}
+.k-gdt{--kc:#0e7490}.k-groove{--kc:#0a84ff}.k-bore{--kc:#0071e3}.k-tmill{--kc:#30b0c7}.k-thread{--kc:#5e5ce6}.k-ball{--kc:#00a7a0}.k-ream{--kc:#bf5af2}
 /* ===== 幾何公差 ===== */
 .gsym{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .fcard .fwrap{overflow-x:auto;padding:4px 0}
@@ -986,6 +986,38 @@ table.detail td{font-size:16px}
 .cmgrid .tin{min-height:36px;padding:6px 10px}
 .cmform>summary{list-style:none;display:inline-flex}
 .cmform>summary::-webkit-details-marker{display:none}
+/* 幾何公差：一覧と詳細 */
+.gidxcard{padding:14px 16px 6px}
+.gidxrow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.gidxrow:first-of-type{border-top:0;padding-top:0}
+.gidxcat{display:flex;flex-direction:column;gap:1px;padding-left:9px;border-left:3px solid var(--gc);align-self:start;padding-top:6px}
+.gidxcat b{font-size:13.5px;font-weight:600}
+.gidxcat small{font-size:11px;color:var(--faint)}
+.gidx{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:4px}
+.gidxb{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:10px;padding:6px 8px;text-align:left;cursor:pointer;color:var(--ink);min-width:0}
+.gidxb:hover{background:var(--hover)}
+.gmini{width:34px;height:34px;flex:none;display:grid;place-items:center;font-size:22px;border:1.5px solid var(--ink);border-radius:5px;background:var(--surface);box-shadow:inset 0 -3px 0 var(--gc)}
+.gidxt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.gidxt b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gidxt small{font-size:11.5px;color:var(--accent-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gd{font-style:normal;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:99px;white-space:nowrap;flex:none}
+.gd.no{background:var(--fill);color:var(--faint)}
+.gd.yes{background:var(--accent-soft);color:var(--accent-ink)}
+.gd.opt{background:var(--warn-soft);color:var(--warn)}
+@media (max-width:640px){.gidxrow{grid-template-columns:minmax(0,1fr);gap:4px}.gidxcat{flex-direction:row;align-items:baseline;gap:6px;padding-top:0}.gidx{grid-template-columns:minmax(0,1fr)}}
+details.fcard{padding:14px 16px}
+.fsum{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.fsum::-webkit-details-marker{display:none}
+.fsum>svg{font-size:16px;color:var(--faint);transition:transform .2s}
+details.fcard[open] .fsum>svg{transform:rotate(180deg)}
+details.fcard[open] .fsum{margin-bottom:12px}
+.gcard{border-left:3px solid var(--gc)}
+.gcard .gbox{box-shadow:inset 0 -4px 0 var(--gc)}
+.gcard.flash{animation:gflash 1.4s ease}
+@keyframes gflash{0%,40%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.gwhat{font-weight:500}
+.gdl dt{color:var(--faint)}
+.gdl dd{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1063,6 +1095,8 @@ const ICON={
   home:I('<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>'),
   gear:I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   plus:I('<path d="M12 6v12M6 12h12"/>'),
+  bore:I('<rect x="2.5" y="5" width="13" height="14" rx="1"/><path d="M2.5 9.5h13M2.5 14.5h13"/><path d="M9 12h12.5"/>'),
+  tmill:I('<circle cx="12" cy="12" r="8.5"/><circle cx="14.5" cy="12" r="3.5"/><path d="M6 8.5a7 7 0 0 0 0 7"/>'),
   groove:I('<path d="M3 9h7v6h4V9h7"/><path d="M3 18h18"/><path d="M10.5 2.5h3v12h-3z"/>'),
   thread:I('<path d="M3 16h18"/><path d="M3 16l2-4 2 4 2-4 2 4 2-4 2 4"/><path d="M16 4h5l-2.5 6z"/>'),
   ball:I('<path d="M9.5 2.5h5V12a2.5 2.5 0 0 1-5 0z"/><path d="M3 20a3 3 0 0 0 6 0a3 3 0 0 0 6 0a3 3 0 0 0 6 0"/>'),
@@ -1129,12 +1163,21 @@ const MATS={
   pbz: {name:"りん青銅 C5191",       carb:[100,200],hss:[20,40], tap:[8,15], kc:1300},
   in718:{name:"インコネル 718",      carb:[20,50],  hss:[3,8],   tap:[1.5,3],kc:3400},
   hrd: {name:"焼入れ鋼（HRC50前後）",carb:[50,120], hss:[3,6],   tap:[1,3],  kc:3500},
-  pom: {name:"樹脂（POM・MCナイロン）",carb:[150,500],hss:[50,150],tap:[10,30],kc:200}
+  pom: {name:"樹脂（POM・MCナイロン）",carb:[150,500],hss:[50,150],tap:[10,30],kc:200},
+  s35c:{name:"炭素鋼 S35C",        carb:[150,260],hss:[20,34], tap:[8,15], kc:1950},
+  scm435:{name:"合金鋼 SCM435",    carb:[120,220],hss:[15,30], tap:[6,12], kc:2150},
+  sus410:{name:"ステンレス SUS410", carb:[110,190],hss:[12,22], tap:[5,9],  kc:2300},
+  ti2: {name:"純チタン（2種）",     carb:[60,120], hss:[12,24], tap:[4,8],  kc:1400},
+  hast:{name:"ハステロイ C276",     carb:[20,45],  hss:[3,7],   tap:[1.5,3],kc:3500},
+  a5056:{name:"アルミ A5056",       carb:[300,700],hss:[60,140],tap:[15,30],kc:750},
+  ac4c:{name:"アルミ鋳物 AC4C",     carb:[200,500],hss:[40,100],tap:[10,20],kc:650},
+  peek:{name:"エンプラ PEEK",       carb:[100,300],hss:[40,100],tap:[10,25],kc:300},
+  pmma:{name:"アクリル PMMA",       carb:[150,400],hss:[50,120],tap:[10,25],kc:200}
 };
-const MCAT=[["炭素鋼・合金鋼",["s45c","s50c","s15c","ss","scm","scm415","sncm","suj2"]],["工具鋼・金型鋼",["skd11","skd61"]],["ステンレス",["sus","sus3","sus316","sus420","sus630"]],["鋳鉄",["fc","fc200","fcd"]],["アルミ・銅合金",["al","a6061","a2017","a7075","adc12","bs","c2801","cu","pbz"]],["難削材・高硬度",["ti","in718","hrd"]],["樹脂",["pom"]]];
+const MCAT=[["炭素鋼・合金鋼",["s45c","s50c","s35c","s15c","ss","scm","scm435","scm415","sncm","suj2"]],["工具鋼・金型鋼",["skd11","skd61"]],["ステンレス",["sus","sus3","sus316","sus410","sus420","sus630"]],["鋳鉄",["fc","fc200","fcd"]],["アルミ・銅合金",["al","a5056","a6061","a2017","a7075","adc12","ac4c","bs","c2801","cu","pbz"]],["難削材・高硬度",["ti2","ti","in718","hast","hrd"]],["樹脂",["pom","peek","pmma"]]];
 const CUSTOM_MATS=lsGet("kirico-mats",{});
 Object.assign(MATS,CUSTOM_MATS);
-const PROCF={turn:{carb:1,hss:1},groove:{carb:.7,hss:.8},thread:{carb:.6,hss:.7},mill:{carb:.85,hss:.9},ball:{carb:.85,hss:.9},drill:{carb:.55,hss:.8},ream:{carb:.35,hss:.5}};
+const PROCF={turn:{carb:1,hss:1},groove:{carb:.7,hss:.8},thread:{carb:.6,hss:.7},mill:{carb:.85,hss:.9},ball:{carb:.85,hss:.9},bore:{carb:.8,hss:.8},tmill:{carb:.7,hss:.7},drill:{carb:.55,hss:.8},ream:{carb:.25,hss:.35}};
 const MSIZES=[[3,.5],[4,.7],[5,.8],[6,1],[8,1.25],[10,1.5],[12,1.75],[14,2],[16,2],[18,2.5],[20,2.5],[22,2.5],[24,3]];
 const TAGS=[["試し加工","tg-try"],["量産","tg-mass"],["要確認","tg-check"],["不具合","tg-bad"],["良好","tg-good"]];
 const tagClass=t=>(TAGS.find(x=>x[0]===t)||[0,"tg-x"])[1];
@@ -1144,7 +1187,9 @@ const DEF={
   route:"calc", mat:"s45c", tool:"carb", wheel:0, last:{calc:"calc",mach:"turn",geo:"tri"}, units:{cat:"length",from:"inch",to:"mm",v:0},
   t:{
     turn:{mode:"n",D:0,vc:0,n:0,f:0,ap:0,L:0,r:0},
+    bore:{mode:"n",D:0,vc:0,n:0,f:0,ap:0,L:0,r:0,Lo:0,d:0},
     groove:{mode:"n",D:0,vc:0,n:0,f:0,d:0,W:0},
+    tmill:{mode:"n",D:0,P:0,Dc:0,z:0,vc:0,n:0,fz:0},
     thread:{mode:"n",D:0,P:0,vc:0,n:0,L:0,N:0},
     ball:{mode:"n",D:0,z:0,vc:0,n:0,fz:0,ap:0,pf:0,L:0},
     ream:{mode:"n",D:0,vc:0,n:0,f:0,L:0},
@@ -1231,6 +1276,19 @@ const TOOLS={
         labels:{f:"送り f "+fmt(s.f,2),n:"n "+fmt(s.n,0)+" min⁻¹",D:"Ø"+fmt(s.D,1),ap:"ap "+fmt(s.ap,1),L:"L "+fmt(s.L,0)+" mm",vc:"Vc "+fmt(s.vc,0)+" m/min"}};
     },
     formulas:["n = 1000 × Vc ÷ (π × D)","Vf = f × n","T = L ÷ Vf","Rz = f² ÷ (8 × rε) × 1000","Q = Vc × ap × f","Pc = Vc × ap × f × kc ÷ 60000"]},
+  bore:{group:"mach",name:"中ぐり",title:"中ぐり（内径）",desc:"内径加工の回転数・加工時間とボーリングバーの突出しの目安を求めます",
+    selects:"matTool",seg:NV,
+    fields:()=>[["D","仕上げ穴径","D","mm",1],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["f","送り","f","mm/rev",.01],["ap","切込み深さ","ap","mm",.1],["L","加工長さ","L","mm",5],["r","ノーズ半径","rε","mm",.2],["Lo","バー突出し","Lo","mm",5],["d","バー径","d","mm",1]],
+    compute(s){
+      const auto=nvCompute(s), m=MATS[S.mat];
+      const vf=s.f*s.n, T=s.L/vf, Q=s.vc*s.ap*s.f, Pc=s.vc*s.ap*s.f*m.kc/60000, Rz=s.f*s.f/(8*s.r)*1000, t=fmtTime(T), ld=s.Lo/s.d;
+      const adv=!isFinite(ld)||ld<=0?"":ld<=4?"鋼製バーで加工できる範囲":ld<=6?"超硬バーを推奨":ld<=10?"防振バーを推奨":"突出しが長すぎます。短くしてください";
+      return {auto,cells:[mainNV(s),{k:"送り速度",sym:"Vf",v:fmt(vf,0),u:"mm/min"},{k:"加工時間",sym:"T",v:t[0],u:t[1],s:"1パスあたり"}],
+        rows:[["突出し比","Lo/d",fmt(ld,1),"倍",adv],["理論仕上げ面粗さ","Rz",fmt(Rz,2),"μm","Ra ≒ "+fmt(Rz/4,2)+" μm"],["切りくず排出量","Q",fmt(Q,1),"cm³/min"],["正味切削動力","Pc",fmt(Pc,2),"kW"]],
+        gauge:cutGauge("bore",s),
+        labels:{n:"n "+fmt(s.n,0),f:"f "+fmt(s.f,2),D:"Ø"+fmt(s.D,1),Lo:"突出し "+fmt(s.Lo,0),d:"バー Ø"+fmt(s.d,0)}};
+    },
+    formulas:["n = 1000 × Vc ÷ (π × D)","Vf = f × n","T = L ÷ Vf","Rz = f² ÷ (8 × rε) × 1000","突出し比の目安：鋼製バー 4倍まで、超硬バー 6倍まで、防振バー 10倍まで"]},
   groove:{group:"mach",name:"溝入れ",title:"溝入れ・突切り",desc:"外径の溝入れ・突切りの回転数と加工時間を求めます",
     selects:"matTool",seg:NV,
     fields:()=>[["D","加工径","D","mm",1],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["f","送り","f","mm/rev",.01],["d","溝底径","d","mm",1],["W","溝幅","W","mm",.5]],
@@ -1282,6 +1340,18 @@ const TOOLS={
         labels:{n:"n "+fmt(s.n,0),vf:"Vf "+fmt(vf,0),D:"Ø"+fmt(s.D,1),ap:"ap "+fmt(s.ap,2),pf:"pf "+fmt(s.pf,2),De:"De "+fmt(De,2)}};
     },
     formulas:["De = 2 × √(ap × (D − ap))（ap が半径より小さいとき）","n = 1000 × Vc ÷ (π × De)","Vf = fz × z × n","h = R − √(R² − (pf ÷ 2)²)（カスプ高さ）"]},
+  tmill:{group:"mach",name:"ねじ切りフライス",title:"ねじ切りフライス（内ねじ）",desc:"ヘリカル補間で内ねじを加工するときの工具中心の送りを求めます",
+    selects:"matTool",seg:NV,
+    fields:()=>[["D","ねじ呼び径","D","mm",1],["P","ピッチ","P","mm",.25],["Dc","工具径","Dc","mm",.5],["z","刃数","z","枚",1,{int:1}],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["fz","1刃送り","fz","mm/刃",.01]],
+    compute(s){
+      if(s.mode==="n") s.n=s.Dc>0?1000*s.vc/(PI*s.Dc):0; else s.vc=PI*s.Dc*s.n/1000;
+      const vfo=s.fz*s.z*s.n, ok=s.D>s.Dc&&s.Dc>0, vfc=ok?vfo*(s.D-s.Dc)/s.D:NaN, path=ok?PI*(s.D-s.Dc):NaN, T=path/vfc, t=fmtTime(T), ratio=s.Dc/s.D;
+      return {auto:[s.mode],cells:[mainNV(s),{k:"工具中心の送り",sym:"Vfc",v:fmt(vfc,0),u:"mm/min",s:"NCプログラムに入れる値"},{k:"1周の時間",sym:"T",v:t[0],u:t[1],s:"全歯形の工具で1周"}],
+        rows:[["刃先（外周）の送り","Vf",fmt(vfo,0),"mm/min","fz × z × n"],["下穴径","d",fmt(s.D-s.P,2),"mm","D − P"],["工具径 / ねじ径","Dc/D",fmt(ratio*100,0),"%",ratio>.7?"工具が太すぎます（70%以下を推奨）":"適正"],["1周で進む量","",fmt(s.P,2),"mm","ピッチと同じ"]],
+        gauge:cutGauge("tmill",s,s.Dc),
+        labels:{n:"n "+fmt(s.n,0),D:"M"+fmt(s.D,0)+"×"+fmt(s.P,2),Dc:"工具 Ø"+fmt(s.Dc,1),vfc:"Vfc "+fmt(vfc,0)}};
+    },
+    formulas:["n = 1000 × Vc ÷ (π × Dc)","刃先の送り Vf = fz × z × n","工具中心の送り Vfc = Vf × (D − Dc) ÷ D（内ねじ）","1周の時間 = π × (D − Dc) ÷ Vfc"]},
   drill:{group:"mach",name:"ドリル",title:"ドリル穴あけ",desc:"穴径と深さから回転数・送り速度・加工時間を求めます",
     selects:"matTool",seg:NV,
     fields:()=>[["D","ドリル径","D","mm",.5],["vc","切削速度","Vc","m/min",5],["n","主軸回転数","n","min⁻¹",50],["f","送り","f","mm/rev",.01],["L","穴深さ","L","mm",1]],
@@ -1326,7 +1396,7 @@ const TOOLS={
         : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dr","調整車径","Dr","mm",5],["Nr","調整車回転数","Nr","min⁻¹",1],["dw","工作物径","d","mm",1],["h","心高（中心線から上）","h","mm",.5],["al","調整車の傾斜角","α","°",.5],["eta","すべり係数","η","",.01],["Bw","砥石幅","B","mm",5],["Lw","工作物長さ","L","mm",1],["bl","ブレード角","θ","°",5],["fm","実測の送り速度","f実","mm/min",10]])
       : s.variant==="cyl"
       ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dw","工作物径","Dw","mm",1],["Vw","工作物周速","Vw","m/min",1],["B","砥石幅","B","mm",5],["k","トラバース比","k","×B",.05],["a","半径切込み","a","mm",.005],["Z","直径取り代","Z","mm",.05],["L","研削長さ","L","mm",5]]
-      : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","Sf","mm/往復",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン","片側","mm",5],["as","切込み","a","mm",.005],["Zs","取り代","Z","mm",.05]],
+      : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","片道ごと","mm",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン","片側","mm",5],["as","切込み","a","mm",.005],["Zs","取り代","Z","mm",.05]],
     compute(s){
       const Vs=PI*s.Ds*s.Ns/60000, R=S.wheel, nmax=R>0?R*60000/(PI*s.Ds):NaN, lim=R>0?"上限 <b>"+R+"</b> m/s":"上限は未入力";
       const st=!(R>0)?"none":Vs>R?"danger":Vs<R*.6?"lo":"ok";
@@ -1341,10 +1411,10 @@ const TOOLS={
       }
       const strokes=Math.ceil(s.W/s.cf-1e-9), tp=strokes*(s.Ls+2*s.ov)/(s.Vt*1000), passes=Math.ceil(s.Zs/s.as-1e-9), T=passes*tp, t=fmtTime(T), q=Vs*60/s.Vt;
       return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:lim,lead:1},{k:"パス数",sym:"—",v:isFinite(passes)?String(passes):"—",u:"回",s:"取り代 ÷ 切込み"},{k:"研削時間",sym:"T",v:t[0],u:t[1],s:"スパークアウト除く"}],
-        rows:[["1パスの時間","",...fmtTime(tp)],["1パスの往復数","",isFinite(strokes)?String(strokes):"—","往復","研削幅 ÷ クロス送り"],["速度比","q",fmt(q,0),"","Vs×60 ÷ テーブル速度"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
+        rows:[["1パスの時間","",...fmtTime(tp)],["1パスのストローク数","",isFinite(strokes)?String(strokes):"—","回","研削幅 ÷ クロス送り（テーブルの片道ごとに送る）"],["速度比","q",fmt(q,0),"","Vs×60 ÷ テーブル速度"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
         gauge,labels:{Ds:"砥石 Ø"+fmt(s.Ds,0),Ns:"Ns "+fmt(s.Ns,0),Vt:"Vt "+fmt(s.Vt,0)+" m/min",cf:"クロス "+fmt(s.cf,1),W:"W "+fmt(s.W,0),as:"a "+fmt(s.as,3)}};
     },
-    formulas:["Vs = π × Ds × Ns ÷ 60000（m/s）","nw = 1000 × Vw ÷ (π × Dw)","Vf = k × B × nw","パス数 = (Z ÷ 2) ÷ a（円筒）／ Z ÷ a（平面）","平面の1パス時間 = 往復数 × (L + 2ov) ÷ (Vt × 1000)","上限回転数 = 最高使用周速度 × 60000 ÷ (π × Ds)",
+    formulas:["Vs = π × Ds × Ns ÷ 60000（m/s）","nw = 1000 × Vw ÷ (π × Dw)","Vf = k × B × nw","パス数 = (Z ÷ 2) ÷ a（円筒）／ Z ÷ a（平面）","平面の1パス時間 = ストローク数 × (L + 2ov) ÷ (Vt × 1000)","上限回転数 = 最高使用周速度 × 60000 ÷ (π × Ds)",
       "【センタレス】α₁ = asin(2h ÷ (Ds + d))、α₂ = asin(2h ÷ (Dr + d))、心高角 β = α₁ + α₂（目安 6〜8°）",
       "【センタレス】ワーク回転数（理論）nw = Dr × Nr × cos α ÷ d",
       "【センタレス】通し送り f = π × Dr × Nr × sin α × η（η はすべり係数 0.9〜0.98、実測で補正）",
@@ -1512,6 +1582,8 @@ function emptyDiagram(){ return `<svg viewBox="0 0 520 120" role="img" aria-labe
 /* 固定図（加工） */
 const ARROW='<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mvt"/></marker><marker id="dh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1L10 5L0 9z" fill="var(--faint)"/></marker></defs>';
 const DIAG={
+  bore:`<svg viewBox="0 0 520 230" role="img" aria-label="中ぐりの図">${ARROW}<rect x="20" y="40" width="40" height="160" rx="6" class="w2"/><rect x="60" y="50" width="300" height="140" rx="2" class="w"/><rect x="200" y="88" width="160" height="64" fill="var(--paper)"/><rect x="230" y="108" width="270" height="22" rx="3" class="w3"/><path d="M230 108 L218 100 L218 118 L230 118 Z" class="t edge"/><path d="M400 96 H330" class="mv" marker-end="url(#ah)"/><text x="410" y="100" data-k="f">f</text><path d="M30 20 C45 10 60 10 70 20" class="mv" marker-end="url(#ah)"/><text x="80" y="24" data-k="n">n</text><text x="210" y="80" data-k="D">D</text><path d="M230 160 h270" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="300" y="182" data-k="Lo">Lo</text><text x="380" y="124" data-k="d">d</text></svg>`,
+  tmill:`<svg viewBox="0 0 520 250" role="img" aria-label="ねじ切りフライスの図">${ARROW}<rect x="70" y="20" width="380" height="210" rx="4" class="w"/><circle cx="260" cy="125" r="90" fill="var(--paper)" stroke="var(--steel-2)" stroke-width="2"/><circle cx="260" cy="125" r="55" fill="none" class="dim" stroke-dasharray="5 4"/><circle cx="295" cy="125" r="35" class="t edge"/><path d="M295 112 l0 26 M285 116 l20 0 M285 134 l20 0" class="ln"/><path d="M200 70 A80 80 0 0 0 190 170" class="mv" marker-end="url(#ah)"/><text x="92" y="50" data-k="D" class="onw">D</text><text x="320" y="190" data-k="Dc">Dc</text><text x="300" y="58" data-k="n">n</text><text x="92" y="215" data-k="vfc" class="onw">Vfc</text></svg>`,
   groove:`<svg viewBox="0 0 520 230" role="img" aria-label="溝入れの図">${ARROW}<rect x="20" y="58" width="40" height="124" rx="6" class="w2"/><rect x="60" y="70" width="380" height="100" rx="2" class="w"/><rect x="250" y="70" width="30" height="34" fill="var(--paper)"/><path d="M250 8 H280 V102 H250 Z" class="t edge"/><path d="M300 18 V60" class="mv" marker-end="url(#ah)"/><text x="310" y="44" data-k="f">f</text><path d="M460 90 C475 110 475 140 460 160" class="mv" marker-end="url(#ah)"/><text x="350" y="200" data-k="n">n</text><text x="16" y="50" data-k="D">D</text><text x="300" y="128" data-k="d" class="onw">d</text><path d="M250 120 h30" class="dim"/><text x="180" y="225" data-k="W">W</text></svg>`,
   thread:`<svg viewBox="0 0 520 230" role="img" aria-label="ねじ切りの図">${ARROW}<rect x="20" y="58" width="40" height="124" rx="6" class="w2"/><rect x="60" y="84" width="380" height="86" rx="2" class="w"/><path d="M60 84 L70 66 L80 84" class="w"/><path d="M80 84 L90 66 L100 84" class="w"/><path d="M100 84 L110 66 L120 84" class="w"/><path d="M120 84 L130 66 L140 84" class="w"/><path d="M140 84 L150 66 L160 84" class="w"/><path d="M160 84 L170 66 L180 84" class="w"/><path d="M180 84 L190 66 L200 84" class="w"/><path d="M200 84 L210 66 L220 84" class="w"/><path d="M220 84 L230 66 L240 84" class="w"/><path d="M240 84 L250 66 L260 84" class="w"/><path d="M260 84 L270 66 L280 84" class="w"/><path d="M280 84 L290 66 L300 84" class="w"/><rect x="300" y="66" width="140" height="18" class="w3"/><path d="M300 30 L330 30 L315 66 Z" class="t edge"/><path d="M290 22 H240" class="mv" marker-end="url(#ah)"/><text x="160" y="28" data-k="P">P</text><path d="M460 90 C475 110 475 140 460 160" class="mv" marker-end="url(#ah)"/><text x="350" y="200" data-k="n">n</text><text x="16" y="50" data-k="D">D</text><path d="M60 196 h240" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="120" y="222" data-k="L">L</text><text x="90" y="130" data-k="h" class="onw">h</text></svg>`,
   ball:`<svg viewBox="0 0 520 240" role="img" aria-label="ボールエンドミルの図">${ARROW}<path d="M40 150 A33 33 0 0 0 95 150 A33 33 0 0 0 150 150 A33 33 0 0 0 205 150 A33 33 0 0 0 260 150 A33 33 0 0 0 315 150 V220 H40 Z" class="w"/><rect x="315" y="150" width="165" height="70" class="w3"/><rect x="253" y="20" width="60" height="100" rx="2" class="t edge"/><path d="M253 118 A30 30 0 0 0 313 118" class="t edge"/><circle cx="283" cy="118" r="30" class="t"/><path d="M262 12 C275 2 291 2 304 12" class="mv" marker-end="url(#ah)"/><text x="312" y="16" data-k="n">n</text><path d="M330 80 H400" class="mv" marker-end="url(#ah)"/><text x="335" y="70" data-k="vf">Vf</text><path d="M205 172 h55" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="60" y="196" data-k="pf" class="onw">pf</text><text x="330" y="134" data-k="ap">ap</text><text x="330" y="112" data-k="De">De</text><text x="40" y="40" data-k="D">D</text></svg>`,
@@ -1568,7 +1640,7 @@ const selbox=inner=>`<div class="selbox">${inner}${ICON.chevron}</div>`;
 const matOptions=()=>{ const all=Object.entries(MATS), own=all.filter(([k])=>k.startsWith("u_")), std=all.filter(([k])=>!k.startsWith("u_")); const opt=k=>`<option value="${k}">${esc(MATS[k].name)}</option>`; const listed=new Set(MCAT.flatMap(g=>g[1])); const rest=std.map(([k])=>k).filter(k=>!listed.has(k));
   return (own.length?`<optgroup label="自分の材料（実績値）">${own.map(([k])=>opt(k)).join("")}</optgroup>`:"")+MCAT.map(([g,ks])=>`<optgroup label="${g}">${ks.filter(k=>MATS[k]).map(opt).join("")}</optgroup>`).join("")+(rest.length?`<optgroup label="その他">${rest.map(opt).join("")}</optgroup>`:""); };
 const H2=(icon,text)=>`<h2 class="h">${ICON[icon]}${text}</h2>`;
-const VSUB={groove:"外径・突切り",thread:"旋削・メートル外ねじ",ball:"曲面・金型",ream:"仕上げ穴",turn:"外径",mill:"エンドミル・正面フライス",drill:"穴あけ",tap:"メートルねじ",grind:"円筒・平面・センタレス",pcd:"ピッチ円上の穴位置"};
+const VSUB={bore:"内径",tmill:"内ねじ・ヘリカル補間",groove:"外径・突切り",thread:"旋削・メートル外ねじ",ball:"曲面・金型",ream:"仕上げ穴",turn:"外径",mill:"エンドミル・正面フライス",drill:"穴あけ",tap:"メートルねじ",grind:"円筒・平面・センタレス",pcd:"ピッチ円上の穴位置"};
 function viewHead(r,title,desc){
   const tool=!!TOOLS[r];
   return `<header class="vhead${tool?" tool":""}"><div class="vtitle"><h2>${title}</h2>${VSUB[r]?`<span class="vsub">${VSUB[r]}</span>`:""}</div>
@@ -2432,11 +2504,14 @@ function gdtView(){
   return `<section id="view-gdt" hidden>
     ${subnav("geo")}
     ${viewHead("gdt","幾何公差","記号の意味と英語名、データムの要否、公差域をすぐに確認できます")}
-    <div class="card fcard">${H2("table","公差記入枠の読み方 / Feature control frame")}
+    <div class="card gidxcard"><h2 class="h">記号の一覧（押すと詳しい説明へ）</h2>
+      ${Object.entries(GCAT).map(([c,C])=>`<div class="gidxrow"><div class="gidxcat" style="--gc:${C[2]}"><b>${C[0]}</b><small>${C[1]}</small></div><div class="gidx">${GDT.filter(g=>g.cat===c).map(g=>`<button type="button" class="gidxb" data-gjump="${g.id}"><span class="gmini" style="--gc:${C[2]}">${GSYM[g.id]}</span><span class="gidxt"><b>${g.jp}</b><small>${g.en.replace(/（.*）/,"")}</small></span><i class="gd ${g.datum==="不要"?"no":g.datum==="場合による"?"opt":"yes"}">${g.datum==="不要"?"データム不要":g.datum==="場合による"?"データム任意":"データム要"}</i></button>`).join("")}</div></div>`).join("")}
+    </div>
+    <details class="card fcard"><summary class="fsum"><h2 class="h" style="margin:0">公差記入枠の読み方 / Feature control frame</h2>${ICON.chevron}</summary>${H2("table","公差記入枠の読み方 / Feature control frame")}
       <div class="fwrap">${frame}</div>
       <ol class="flegend"><li><b>幾何特性の記号</b><span>何を規制するか（この例は位置度 / Position）</span></li><li><b>公差値と付加記号</b><span>Ø は円筒の公差域、Ⓜ は最大実体公差方式</span></li><li><b>データム</b><span>基準。左から第1・第2・第3データムの順</span></li></ol>
       <p class="hint">読み方の例：「データム A・B・C を基準に、理論的に正確な位置から直径 0.1 mm の円筒の中に軸線があること。最大実体公差方式を適用」</p>
-    </div>
+    </details>
     <div class="gtool">
       <div class="hsearch">${ICON.search}<input id="g-q" type="search" placeholder="名前・英語で探す（例：直角、runout、position）" aria-label="幾何公差を探す"></div>
       <div class="gchips" id="g-cats"><button type="button" data-gcat="">すべて</button>${Object.entries(GCAT).map(([k,c])=>`<button type="button" data-gcat="${k}"><i style="background:${c[2]}"></i>${c[0]}<small>${c[1]}</small></button>`).join("")}<button type="button" data-gcat="mod">付加記号<small>Modifiers</small></button></div>
@@ -2455,10 +2530,10 @@ function renderGdt(){
       if(!items.length) return "";
       const C=GCAT[c];
       return `<h3 class="hsec"><span class="gdot" style="background:${C[2]}"></span>${C[0]}公差 <small>${C[1]} tolerances</small></h3>
-        <div class="glist">${items.map(g=>`<article class="gcard">
-          <div class="ghead"><div class="gbox" style="--gc:${C[2]}">${GSYM[g.id]}</div>
+        <div class="glist">${items.map(g=>`<article class="gcard" id="g-${g.id}" style="--gc:${C[2]}">
+          <div class="ghead"><div class="gbox">${GSYM[g.id]}</div>
             <div class="gname"><b>${g.jp}</b><span>${g.en}</span></div>
-            <span class="gdat ${g.datum==="不要"?"no":"yes"}">データム ${g.datum}</span></div>
+            <span class="gdat ${g.datum==="不要"?"no":"yes"}">データム${g.datum==="不要"?"不要":g.datum==="必要"?"必要":"："+g.datum}</span></div>
           <p class="gwhat">${g.what}</p>
           <dl class="gdl"><dt>公差域</dt><dd>${g.zone}</dd><dt>測り方</dt><dd>${g.meas}</dd><dt>使う場所</dt><dd>${g.ex}</dd></dl>
         </article>`).join("")}</div>`;
@@ -2476,6 +2551,10 @@ function renderGdt(){
 function bindGdt(){
   $("g-q").addEventListener("input",e=>{ GF.q=e.target.value; renderGdt(); });
   $("g-cats").addEventListener("click",e=>{ const b=e.target.closest("[data-gcat]"); if(b){ GF.cat=b.dataset.gcat; renderGdt(); } });
+  $("view-gdt").addEventListener("click",e=>{ const j=e.target.closest("[data-gjump]"); if(!j) return;
+    if(GF.cat||GF.q){ GF.cat=""; GF.q=""; $("g-q").value=""; renderGdt(); }
+    const c=$("g-"+j.dataset.gjump); if(!c) return; const y=c.getBoundingClientRect().top+window.scrollY-80; window.scrollTo({top:y,behavior:"smooth"});
+    c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); });
 }
 
 
