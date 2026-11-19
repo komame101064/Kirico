@@ -1151,7 +1151,7 @@ const DEF={
     mill:{mode:"n",D:0,z:0,vc:0,n:0,fz:0,ap:0,ae:0,L:0},
     drill:{mode:"n",D:0,vc:0,n:0,f:0,L:0},
     tap:{mode:"n",D:0,P:0,vc:0,n:0,L:0},
-    grind:{variant:"cyl",Ds:0,Ns:0,Dw:0,Vw:0,B:0,k:0,a:0,Z:0,L:0,Vt:0,cf:0,W:0,Ls:0,ov:0,as:0,Zs:0},
+    grind:{variant:"cyl",ctlm:"thru",Ds:0,Ns:0,Dw:0,Vw:0,B:0,k:0,a:0,Z:0,L:0,Vt:0,cf:0,W:0,Ls:0,ov:0,as:0,Zs:0,Dr:0,Nr:0,dw:0,h:0,al:0,eta:0,Bw:0,Lw:0,bl:0,fm:0,Zc:0,vi:0,sp:0,tl:0},
     tri:{known:["a","A"],a:0,b:0,c:0,A:0},
     taper:{mode:"angle",D:0,d:0,L:0,ang:0},
     pcd:{P:0,N:0,s0:0,x0:0,y0:0},
@@ -1162,6 +1162,37 @@ const DEF={
 function merge(a,b){ if(Array.isArray(a)) return Array.isArray(b)?b:a; const o={}; for(const k in a){ o[k]=(a[k]&&typeof a[k]==="object")?merge(a[k],(b&&b[k])||{}):(b&&b[k]!==undefined?b[k]:a[k]); } return o; }
 let S=merge(DEF,lsGet("cutcalc-v3",null)||{});
 let saveT; function save(){ clearTimeout(saveT); saveT=setTimeout(()=>lsSet("cutcalc-v3",S),250); }
+
+/* ================= センタレス研削 ================= */
+function ctlCompute(s,Vs,nmax,lim,gauge){
+  const d=s.dw, h=s.h, Ds=s.Ds, Dr=s.Dr, al=rad(s.al);
+  let err="";
+  if(h>0&&d>0&&((Ds>0&&2*h>=Ds+d)||(Dr>0&&2*h>=Dr+d))) err="心高 h が大きすぎます（2h が 砥石径＋工作物径 を超えています）";
+  if(s.ctlm!=="in"&&s.al>=90) err="傾斜角は 90° 未満で入れてください";
+  const a1=Ds>0&&d>0&&h>0?deg(Math.asin(2*h/(Ds+d))):NaN, a2=Dr>0&&d>0&&h>0?deg(Math.asin(2*h/(Dr+d))):NaN, beta=a1+a2;
+  const bst=!isFinite(beta)?"":beta<5?"低め（丸くなりにくい）":beta>9?"高め（びびりに注意）":"目安の範囲（6〜8°前後）";
+  const Vr=PI*Dr*s.Nr/1000, nw=Dr*s.Nr*Math.cos(al)/d, q=Vs*60/Vr;
+  const yc=h-(d/2)*Math.cos(rad(s.bl)), hd=h*Dr/(Dr+d), ad=s.al*Dr/(Dr+d);
+  const common=[["砥石側の角度","α₁",fmt(a1,2),"°"],["調整車側の角度","α₂",fmt(a2,2),"°"],
+    ["ワーク回転数（理論）","nw",fmt(nw,0),"min⁻¹","すべりを含まない値"],["調整車の周速","Vr",fmt(Vr,1),"m/min"],["速度比","q",fmt(q,0),"","Vs×60 ÷ Vr"],
+    ["心高の目安","d/2",fmt(d/2,1),"mm","一般的な目安。大径品は機械の上限を確認"],
+    ["ブレード接点の高さ","",s.bl>0?fmt(yc,2):"—","mm","中心線基準。目盛りの基準は機械ごとに違います"],
+    ["調整車ドレッサのオフセット","hd",fmt(hd,2),"mm","近似。取扱説明書を優先"],["調整車ドレッサの旋回角","αd",fmt(ad,2),"°","近似。取扱説明書を優先"],
+    ["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]];
+  const labels={Ds:"砥石 Ø"+fmt(Ds,0),Dr:"調整車 Ø"+fmt(Dr,0),dw:"Ø"+fmt(d,1),h:"h "+fmt(h,1),be:"β "+fmt(beta,1)+"°",Ns:"Ns "+fmt(s.Ns,0),Nr:"Nr "+fmt(s.Nr,0),al:"α "+fmt(s.al,1)+"°"};
+  const bcell={k:"心高角",sym:"β",v:fmt(beta,2),u:"°",s:bst};
+  if(s.ctlm==="in"){
+    const tg=s.Zc/s.vi, cyc=tg*60+s.sp+s.tl, per=s.vi/nw, sprev=nw*s.sp/60;
+    return {auto:[],err,cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:lim,lead:1},bcell,{k:"サイクルタイム",sym:"",v:fmt(cyc,1),u:"s",s:"研削＋スパークアウト＋出し入れ"}],
+      rows:[["研削時間（スパークアウト除く）","",fmt(tg*60,1),"s","取り代 ÷ 切込み速度"],["1回転あたりの切込み（直径）","",fmt(per*1000,2),"µm/rev"],["スパークアウト中の回転数","",fmt(sprev,0),"回転","ワークを丸くするのに必要な回転が足りているか確認"],["生産数","",fmt(3600/cyc,0),"個/時"]].concat(common),
+      gauge,labels};
+  }
+  const eta=s.eta>0?s.eta:.95, fth=PI*Dr*s.Nr*Math.sin(al), f=fth*eta, tB=s.Bw/f, etaA=s.fm>0?s.fm/fth:NaN;
+  return {auto:[],err,cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:lim,lead:1},bcell,{k:"通し送り速度",sym:"f",v:fmt(f,0),u:"mm/min",s:"η "+fmt(eta,2)+(s.eta>0?"":"（未入力のため初期値）")}],
+    rows:[["生産数","",fmt(f/s.Lw,1),"個/min","送り速度 ÷ 工作物長さ（すき間なしで流した場合）"],["砥石を通過する時間","",fmt(tB*60,1),"s","砥石幅 ÷ 送り速度"],["通過中のワーク回転数","",fmt(nw*tB,0),"回転"],
+      ["η の実績値","η実",fmt(etaA,3),"","実測の送り速度から逆算。記録しておくと次の条件出しに使えます"]].concat(common),
+    gauge,labels};
+}
 
 /* ================= ツール定義 ================= */
 const NV=[["n","回転数を求める","rpm"],["vc","切削速度を求める","speed"]];
@@ -1286,9 +1317,14 @@ const TOOLS={
         labels:{n:"n "+fmt(s.n,0),vf:"Vf "+fmt(vf,0),P:"P "+fmt(s.P,2),D:"M"+fmt(s.D,0)+"×"+fmt(s.P,2),d:"下穴 Ø"+fmt(s.D-s.P,2)}};
     },
     formulas:["n = 1000 × Vc ÷ (π × D)","Vf = n × P","下穴 = D − P（切削タップ）","T = 2 × L ÷ Vf（逆転戻りを含む）"]},
-  grind:{group:"mach",name:"研削",title:"研削（円筒・平面）",desc:"砥石周速・工作物回転数・トラバース送り・研削時間を求めます",
-    selects:"wheel",seg:[["cyl","円筒研削","grind"],["surf","平面研削","ruler"]],segKey:"variant",
-    fields:(s)=> s.variant==="cyl"
+  grind:{group:"mach",name:"研削",title:"研削（円筒・平面・センタレス）",desc:"砥石周速・工作物回転数・送り・研削時間、センタレスの心高角や通し送りを求めます",
+    selects:"wheel",seg:[["cyl","円筒研削","grind"],["surf","平面研削","ruler"],["ctl","センタレス","grind"]],segKey:"variant",
+    seg2:{when:s=>s.variant==="ctl",key:"ctlm",items:[["thru","通し送り"],["in","インフィード"]]},
+    fields:(s)=> s.variant==="ctl"
+      ? (s.ctlm==="in"
+        ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dr","調整車径","Dr","mm",5],["Nr","調整車回転数","Nr","min⁻¹",1],["dw","工作物径","d","mm",1],["h","心高（中心線から上）","h","mm",.5],["al","調整車の傾斜角","α","°",.1],["Zc","直径取り代","Z","mm",.01],["vi","切込み速度（直径）","vi","mm/min",.05],["sp","スパークアウト時間","ts","s",1],["tl","出し入れ時間","tl","s",1],["bl","ブレード角","θ","°",5]]
+        : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dr","調整車径","Dr","mm",5],["Nr","調整車回転数","Nr","min⁻¹",1],["dw","工作物径","d","mm",1],["h","心高（中心線から上）","h","mm",.5],["al","調整車の傾斜角","α","°",.5],["eta","すべり係数","η","",.01],["Bw","砥石幅","B","mm",5],["Lw","工作物長さ","L","mm",1],["bl","ブレード角","θ","°",5],["fm","実測の送り速度","f実","mm/min",10]])
+      : s.variant==="cyl"
       ? [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Dw","工作物径","Dw","mm",1],["Vw","工作物周速","Vw","m/min",1],["B","砥石幅","B","mm",5],["k","トラバース比","k","×B",.05],["a","半径切込み","a","mm",.005],["Z","直径取り代","Z","mm",.05],["L","研削長さ","L","mm",5]]
       : [["Ds","砥石径","Ds","mm",5],["Ns","砥石回転数","Ns","min⁻¹",50],["Vt","テーブル速度","Vt","m/min",1],["cf","クロス送り","Sf","mm/往復",.5],["W","研削幅","W","mm",5],["Ls","研削長さ","L","mm",5],["ov","オーバーラン","片側","mm",5],["as","切込み","a","mm",.005],["Zs","取り代","Z","mm",.05]],
     compute(s){
@@ -1296,6 +1332,7 @@ const TOOLS={
       const st=!(R>0)?"none":Vs>R?"danger":Vs<R*.6?"lo":"ok";
       const gauge={title:"砥石周速度の確認",sub:R>0?"最高使用周速度 "+R+" m/s の砥石":"砥石の最高使用周速度を入れると、周速を確認できます",v:Vs,lo:Math.round(R*.7),hi:R,max:Math.max(R*1.35,Vs*1.08),unit:"m/s",limit:R,st,
         label:{none:"最高使用周速度が未入力",ok:"使用範囲内",lo:"周速が低め",danger:"最高使用周速度を超えています"}[st],note:["この砥石径での上限回転数",fmt(nmax,0)+" min⁻¹"]};
+      if(s.variant==="ctl") return ctlCompute(s,Vs,nmax,lim,gauge);
       if(s.variant==="cyl"){
         const nw=1000*s.Vw/(PI*s.Dw), fa=s.k*s.B, vf=fa*nw, q=Vs*60/s.Vw, passes=Math.ceil((s.Z/2)/s.a-1e-9), T=passes*s.L/vf, t=fmtTime(T);
         return {auto:[],cells:[{k:"砥石周速度",sym:"Vs",v:fmt(Vs,1),u:"m/s",s:lim,lead:1},{k:"工作物回転数",sym:"nw",v:fmt(nw,0),u:"min⁻¹"},{k:"トラバース速度",sym:"Vf",v:fmt(vf,0),u:"mm/min",s:"1回転あたり <b>"+fmt(fa,1)+"</b> mm"}],
@@ -1307,7 +1344,14 @@ const TOOLS={
         rows:[["1パスの時間","",...fmtTime(tp)],["1パスの往復数","",isFinite(strokes)?String(strokes):"—","往復","研削幅 ÷ クロス送り"],["速度比","q",fmt(q,0),"","Vs×60 ÷ テーブル速度"],["砥石の上限回転数","Nmax",fmt(nmax,0),"min⁻¹"]],
         gauge,labels:{Ds:"砥石 Ø"+fmt(s.Ds,0),Ns:"Ns "+fmt(s.Ns,0),Vt:"Vt "+fmt(s.Vt,0)+" m/min",cf:"クロス "+fmt(s.cf,1),W:"W "+fmt(s.W,0),as:"a "+fmt(s.as,3)}};
     },
-    formulas:["Vs = π × Ds × Ns ÷ 60000（m/s）","nw = 1000 × Vw ÷ (π × Dw)","Vf = k × B × nw","パス数 = (Z ÷ 2) ÷ a（円筒）／ Z ÷ a（平面）","平面の1パス時間 = 往復数 × (L + 2ov) ÷ (Vt × 1000)","上限回転数 = 最高使用周速度 × 60000 ÷ (π × Ds)"]},
+    formulas:["Vs = π × Ds × Ns ÷ 60000（m/s）","nw = 1000 × Vw ÷ (π × Dw)","Vf = k × B × nw","パス数 = (Z ÷ 2) ÷ a（円筒）／ Z ÷ a（平面）","平面の1パス時間 = 往復数 × (L + 2ov) ÷ (Vt × 1000)","上限回転数 = 最高使用周速度 × 60000 ÷ (π × Ds)",
+      "【センタレス】α₁ = asin(2h ÷ (Ds + d))、α₂ = asin(2h ÷ (Dr + d))、心高角 β = α₁ + α₂（目安 6〜8°）",
+      "【センタレス】ワーク回転数（理論）nw = Dr × Nr × cos α ÷ d",
+      "【センタレス】通し送り f = π × Dr × Nr × sin α × η（η はすべり係数 0.9〜0.98、実測で補正）",
+      "【センタレス】η の実績 = 実測の送り速度 ÷ (π × Dr × Nr × sin α)",
+      "【センタレス】ブレード接点の高さ ≈ h − (d ÷ 2) × cos θ（中心線基準）",
+      "【センタレス】ドレッサのオフセット ≈ h × Dr ÷ (Dr + d)、旋回角 ≈ α × Dr ÷ (Dr + d)（近似。機械の取扱説明書を優先）",
+      "【インフィード】研削時間 = Z ÷ vi、サイクル = 研削時間 + スパークアウト + 出し入れ"]},
 
   tri:{group:"geo",name:"直角三角形",title:"直角三角形",desc:"わかっている2つの値から、残りの辺と角度を求めます",
     guide:"わかっている値を<b>2つ</b>入れてください。最後に入れた2つを基準に、残りを自動で計算します。",
@@ -1477,6 +1521,7 @@ const DIAG={
   drill:`<svg viewBox="0 0 520 250" role="img" aria-label="ドリルの図">${ARROW}<rect x="60" y="110" width="400" height="120" rx="2" class="w"/><path d="M225 110 V190 L260 210 L295 190 V110 Z" class="w2"/><path d="M230 20 H290 V180 L260 198 L230 180 Z" class="t edge"/><path d="M230 50 L290 80 M230 90 L290 120 M230 130 L290 160" class="ln"/><path d="M232 12 C250 2 270 2 288 12" class="mv" marker-end="url(#ah)"/><text x="298" y="18" data-k="n">n</text><path d="M320 40 V100" class="mv" marker-end="url(#ah)"/><text x="332" y="76" data-k="f">f</text><path d="M230 240 H290" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="304" y="246" data-k="D">D</text><path d="M205 110 V190" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="76" y="156" data-k="L" class="onw">L</text></svg>`,
   tap:`<svg viewBox="0 0 520 250" role="img" aria-label="タップの図">${ARROW}<rect x="60" y="110" width="400" height="120" rx="2" class="w"/><rect x="228" y="110" width="64" height="100" class="w2"/><path d="M236 18 H284 V196 L274 206 H246 L236 196 Z" class="t edge"/><path d="M228 120 L292 132 M228 138 L292 150 M228 156 L292 168 M228 174 L292 186 M228 192 L292 204" class="ln"/><path d="M238 10 C252 0 268 0 282 10" class="mv" marker-end="url(#ah)"/><text x="292" y="16" data-k="n">n</text><path d="M320 40 V100" class="mv" marker-end="url(#ah)"/><text x="332" y="76" data-k="vf">Vf</text><path d="M302 120 V138" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="310" y="136" data-k="P" class="onw">P</text><path d="M228 240 H292" class="dim" marker-start="url(#dh)" marker-end="url(#dh)"/><text x="304" y="246" data-k="D">D</text><text x="76" y="156" data-k="d" class="onw">d</text></svg>`,
   grind_cyl:`<svg viewBox="0 0 520 250" role="img" aria-label="円筒研削の図">${ARROW}<rect x="20" y="150" width="30" height="80" rx="5" class="w2"/><rect x="50" y="160" width="380" height="60" rx="2" class="w"/><circle cx="260" cy="80" r="70" class="t edge"/><circle cx="260" cy="80" r="16" class="w2"/><path d="M226 150 h68" stroke="var(--navy)" stroke-width="2" opacity=".4"/><path d="M180 30 C190 10 210 2 230 2" class="mv" marker-end="url(#ah)"/><text x="40" y="24" data-k="Ns">Ns</text><text x="345" y="44" data-k="Ds">Ds</text><path d="M450 170 C462 182 462 198 450 210" class="mv" marker-end="url(#ah)"/><text x="360" y="244" data-k="Vw">nw</text><path d="M340 120 H410" class="mv" marker-end="url(#ah)"/><text x="345" y="112" data-k="vf">Vf</text><text x="70" y="196" data-k="Dw" class="onw">Dw</text><text x="150" y="150" data-k="B" class="small">B</text></svg>`,
+  grind_ctl:`<svg viewBox="0 0 520 250" role="img" aria-label="センタレス研削の図">${ARROW}<path d="M10 150 H510" class="axis"/><circle cx="130" cy="150" r="105" class="t edge"/><circle cx="130" cy="150" r="14" class="w2"/><circle cx="346" cy="150" r="75" class="w3 edge"/><circle cx="346" cy="150" r="12" class="w2"/><path d="M237 140 L268 150 V236 H237 Z" class="w2 edge"/><circle cx="253" cy="120" r="22" class="w edge"/><path d="M253 120 V150" class="dim"/><text x="58" y="205" data-k="Ds" class="onw">Ds</text><text x="310" y="190" data-k="Dr">Dr</text><text x="236" y="90" data-k="dw">d</text><text x="275" y="112" data-k="h" class="small">h</text><text x="292" y="62" data-k="be" class="small">β</text><text x="40" y="24" data-k="Ns">Ns</text><path d="M60 70 C72 52 92 44 112 42" class="mv" marker-end="url(#ah)"/><text x="380" y="24" data-k="Nr">Nr</text><path d="M384 84 C372 74 360 72 346 72" class="mv" marker-end="url(#ah)"/><text x="420" y="236" data-k="al" class="small">α</text><text x="244" y="246" class="small">ブレード</text></svg>`,
   grind_surf:`<svg viewBox="0 0 520 250" role="img" aria-label="平面研削の図">${ARROW}<rect x="40" y="170" width="440" height="40" rx="2" class="w3"/><rect x="90" y="140" width="340" height="30" rx="2" class="w"/><circle cx="260" cy="70" r="66" class="t edge"/><circle cx="260" cy="70" r="15" class="w2"/><path d="M180 26 C190 8 210 2 228 2" class="mv" marker-end="url(#ah)"/><text x="30" y="24" data-k="Ns">Ns</text><text x="342" y="34" data-k="Ds">Ds</text><path d="M120 228 H240" class="mv" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="250" y="234" data-k="Vt">Vt</text><text x="100" y="161" data-k="W" class="onw">W</text><text x="340" y="161" data-k="as" class="onw">a</text><text x="345" y="112" data-k="cf">クロス</text></svg>`
 };
 
@@ -1523,7 +1568,7 @@ const selbox=inner=>`<div class="selbox">${inner}${ICON.chevron}</div>`;
 const matOptions=()=>{ const all=Object.entries(MATS), own=all.filter(([k])=>k.startsWith("u_")), std=all.filter(([k])=>!k.startsWith("u_")); const opt=k=>`<option value="${k}">${esc(MATS[k].name)}</option>`; const listed=new Set(MCAT.flatMap(g=>g[1])); const rest=std.map(([k])=>k).filter(k=>!listed.has(k));
   return (own.length?`<optgroup label="自分の材料（実績値）">${own.map(([k])=>opt(k)).join("")}</optgroup>`:"")+MCAT.map(([g,ks])=>`<optgroup label="${g}">${ks.filter(k=>MATS[k]).map(opt).join("")}</optgroup>`).join("")+(rest.length?`<optgroup label="その他">${rest.map(opt).join("")}</optgroup>`:""); };
 const H2=(icon,text)=>`<h2 class="h">${ICON[icon]}${text}</h2>`;
-const VSUB={groove:"外径・突切り",thread:"旋削・メートル外ねじ",ball:"曲面・金型",ream:"仕上げ穴",turn:"外径",mill:"エンドミル・正面フライス",drill:"穴あけ",tap:"メートルねじ",grind:"円筒・平面",pcd:"ピッチ円上の穴位置"};
+const VSUB={groove:"外径・突切り",thread:"旋削・メートル外ねじ",ball:"曲面・金型",ream:"仕上げ穴",turn:"外径",mill:"エンドミル・正面フライス",drill:"穴あけ",tap:"メートルねじ",grind:"円筒・平面・センタレス",pcd:"ピッチ円上の穴位置"};
 function viewHead(r,title,desc){
   const tool=!!TOOLS[r];
   return `<header class="vhead${tool?" tool":""}"><div class="vtitle"><h2>${title}</h2>${VSUB[r]?`<span class="vsub">${VSUB[r]}</span>`:""}</div>
@@ -1560,6 +1605,7 @@ function buildPanel(id){
   if(T.selects==="wheel") sel=`<label class="sel">砥石の最高使用周速度（砥石のラベルに表示）<div class="inbox"><input data-role="wheel" type="number" inputmode="decimal" step="any" min="0" aria-label="砥石の最高使用周速度（m/s）"><span class="u">m/s</span></div></label>`;
   const segKey=T.segKey||"mode";
   const seg=T.seg?`<div class="seg" role="group" aria-label="計算の種類">${T.seg.map(([v,l,ic])=>`<button type="button" data-seg="${v}" aria-pressed="${s[segKey]===v}">${ICON[ic]}${l}</button>`).join("")}</div>`:"";
+  const seg2=T.seg2&&T.seg2.when(s)?`<div class="seg" role="group" aria-label="送り方">${T.seg2.items.map(([v,l])=>`<button type="button" data-seg2="${v}" aria-pressed="${s[T.seg2.key]===v}">${l}</button>`).join("")}</div>`:"";
   const guide=T.guide?`<div class="guide">${ICON.info}<span>${T.guide}</span></div>`:"";
   const fields=T.fields(s).map(([fid,lab,sym,u,st])=>`<div class="field" data-f="${fid}">
       <div class="lab"><b>${lab}</b><span><em class="sym">${sym}</em><em class="auto">自動計算</em></span></div>
@@ -1569,7 +1615,7 @@ function buildPanel(id){
         <button type="button" data-step="${st}" aria-label="${lab}を${st}増やす">${ICON.plus}</button>
       </div></div>`).join("");
   const phead=`<div class="phead"><span>条件</span><button type="button" class="iconbtn" data-reset="${id}" aria-label="初期値に戻す" title="初期値に戻す">${ICON.reset}</button></div>`;
-  $("panel-"+id).innerHTML=`${phead}${sel}${seg}${guide}<div>${fields}</div>`;
+  $("panel-"+id).innerHTML=`${phead}${sel}${seg}${seg2}${guide}<div>${fields}</div>`;
   if(DIAG[id]) $("dg-"+id).innerHTML=DIAG[id];
   if(id==="grind") $("dg-"+id).innerHTML=DIAG["grind_"+s.variant];
 }
@@ -1661,6 +1707,8 @@ function bindTool(id){
       S.t[id][fid]=x; T.onInput&&T.onInput(S.t[id],fid); renderTool(id); return; }
     const sg=e.target.closest("button[data-seg]");
     if(sg){ S.t[id][T.segKey||"mode"]=sg.dataset.seg; buildPanel(id); renderTool(id); return; }
+    const sg2=e.target.closest("button[data-seg2]");
+    if(sg2&&T.seg2){ S.t[id][T.seg2.key]=sg2.dataset.seg2; buildPanel(id); renderTool(id); return; }
     const rs=e.target.closest("[data-reset]");
     if(rs){ const prev=clone(S.t[id]); S.t[id]=clone(DEF.t[id]); buildPanel(id); renderTool(id); toast("初期値に戻しました",{label:"元に戻す",fn:()=>{ S.t[id]=prev; buildPanel(id); renderTool(id); }}); return; }
     const av=e.target.closest("[data-applyvc]");
@@ -1869,7 +1917,7 @@ function recordFromTool(id){
   const T=TOOLS[id], s=S.t[id], r=RES[id];
   const plain=h=>String(h||"").replace(/<[^>]+>/g,"");
   const ctx={}; if(T.selects==="matTool"){ ctx.mat=S.mat; ctx.tool=S.tool; } if(T.selects==="matTap") ctx.mat=S.mat; if(T.selects==="wheel") ctx.wheel=S.wheel;
-  let title=T.name; const segv=T.seg?(T.seg.find(x=>x[0]===s[T.segKey||"mode"])||[])[1]:""; if(id==="grind") title=segv;
+  let title=T.name; const segv=T.seg?(T.seg.find(x=>x[0]===s[T.segKey||"mode"])||[])[1]:""; if(id==="grind") title=segv+(s.variant==="ctl"?"（"+(s.ctlm==="in"?"インフィード":"通し送り")+"）":"");
   const cond=[]; if(ctx.mat) cond.push(MATS[ctx.mat].name); if(ctx.tool) cond.push(ctx.tool==="carb"?"超硬":"ハイス"); if(T.selects==="wheel") cond.push(ctx.wheel>0?"砥石 最高 "+ctx.wheel+" m/s":"砥石 最高周速 未入力");
   const fieldsText=T.fields(s).map(([fid,lab,sym,u])=>[lab,fmt(+s[fid],Math.abs(s[fid])>=100?1:3).replace(/\.?0+$/,""),u]);
   return {kind:id,title,cond:cond.join("・"),
